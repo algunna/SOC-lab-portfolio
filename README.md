@@ -23,8 +23,10 @@ Security-driven professional with hands-on experience in threat detection, SIEM 
 
 ## 🔐 TryHackMe Walkthroughs
 
-- 📧 [Phishing Emails Room](./Labs/Alen_Guner_TryHackMe_Phishing_Emails_Walkthrough.pdf)  
-- 🛡️ [Blue Team Fundamentals](./Labs/Alen_Guner_TryHackMe_Blue_Team_Fundamentals_Walkthrough.pdf)
+Explore hands-on analysis and threat detection exercises based on real-world scenarios from TryHackMe labs:
+
+- 📧 [Phishing Emails Room Walkthrough (PDF)](./Labs/Alen_Guner_TryHackMe_Phishing_Emails_Walkthrough.pdf)  
+- 🛡️ [Blue Team Fundamentals Walkthrough (PDF)](./Labs/Alen_Guner_TryHackMe_Blue_Team_Fundamentals_Walkthrough.pdf)
 
 ---
 
