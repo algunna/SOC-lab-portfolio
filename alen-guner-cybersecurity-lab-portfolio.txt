@@ -1,0 +1,63 @@
+# 🔐 Alen Guner - Cybersecurity Lab Portfolio
+
+Hi! I’m Alen, an aspiring SOC Analyst and cybersecurity professional with a passion for real-world security operations. I built this portfolio to demonstrate hands-on skills in detection engineering, incident response, and system hardening.
+
+Each lab in this portfolio is designed to reflect real threats, practical tools, and SOC-level workflows.
+
+---
+
+## 🧪 Projects Overview
+
+### 🚨 Brute Force Detection with Wazuh SIEM
+- Simulated SSH brute-force attacks using Hydra
+- Configured Wazuh alerts based on log analysis  
+📄 [View PDF](./Alen_Guner_Cybersecurity_Lab_Portfolio_MultiLab.pdf)
+
+### 📨 Phishing Investigation using Splunk + VirusTotal
+- Investigated malicious email patterns
+- Extracted and enriched IOCs  
+📄 [View PDF](./Alen_Guner_Lab_Phishing_Investigation.pdf)
+
+### ☁️ Cloud IAM Misconfiguration (AWS)
+- Audited over-permissive IAM roles
+- Identified privilege escalation risks  
+📄 [View PDF](./Alen_Guner_Cybersecurity_Lab_Portfolio_MultiLab.pdf)
+
+### 🧬 Malware Analysis with Any.Run & Wireshark
+- Executed malware in sandbox
+- Captured traffic and extracted hashes  
+📄 [View PDF](./Alen_Guner_Lab_Malware_Analysis.pdf)
+
+### 🛠️ SQL Injection Detection via Logs
+- Attacked DVWA using SQLMap
+- Parsed Apache + Zeek logs for injection attempts  
+📄 [View PDF](./Alen_Guner_Lab_SQL_Injection_Log_Analysis.pdf)
+
+### 💣 Ransomware Simulation + IR Reporting
+- Simulated encryption attack in a VM
+- Wrote full IR timeline and recommendations  
+📄 [View PDF](./Alen_Guner_Lab_Ransomware_IR_Report.pdf)
+
+### 🧱 Network Segmentation Lab
+- Designed 3-zone segmented network
+- Used pfSense to prevent lateral movement  
+📄 [View PDF](./Alen_Guner_Lab_Network_Segmentation.pdf)
+
+---
+
+## 🔎 Skills Demonstrated
+
+- Log analysis (Wazuh, Zeek, Splunk)
+- Alert creation and tuning
+- Incident response and reporting
+- Cloud auditing (AWS IAM)
+- Malware behavior analysis
+- Network isolation and segmentation
+
+---
+
+## 📬 Let’s Connect
+
+🔗 [LinkedIn](https://www.linkedin.com/in/alen-guner)  
+📧 alenguner@proton.me  
+🧰 Currently building and open to cybersecurity opportunities
