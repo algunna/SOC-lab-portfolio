@@ -9,14 +9,19 @@ Welcome to my cybersecurity lab portfolio. This is a curated collection of pract
 Security-driven professional with hands-on experience in threat detection, SIEM analysis, cloud IAM, and Blue Team operations. My goal is to create scalable, effective security solutions that protect users and infrastructure.
 
 ---
+## 🛠️ Tools & Technologies  
+<img src="https://img.shields.io/badge/Linux-333.svg?logo=linux&logoColor=white" />  
+<img src="https://img.shields.io/badge/Splunk-000000.svg?logo=splunk&logoColor=white" />  
+<img src="https://img.shields.io/badge/Elasticsearch-005571.svg?logo=elasticsearch&logoColor=white" />  
+<img src="https://img.shields.io/badge/AWS-232F3E.svg?logo=amazon-aws&logoColor=white" />  
+<img src="https://img.shields.io/badge/Wazuh-005571.svg?logo=wazuh&logoColor=white" />  
+<img src="https://img.shields.io/badge/GitHub-181717.svg?logo=github&logoColor=white" />  
+<img src="https://img.shields.io/badge/Markdown-000000.svg?logo=markdown&logoColor=white" />
 
-## 🧪 Featured Labs
+---
 
-- [Cloud IAM Lab](./Labs/Cloud_IAM_Lab.pdf)
-- [Brute Force Detection with SIEM](./Labs/Brute_Force_SIEM_Lab.pdf)
-- [Malware Analysis Lab](./Labs/Alen_Guner_Lab_Malware_Analysis.pdf)
-- [SQL Log Injection Detection](./Labs/Alen_Guner_Lab_SQLi_Log_Detection.pdf)
-
+## 📊 GitHub Stats  
+![Alen's GitHub Stats](https://github-readme-stats.vercel.app/api?username=algunna&show_icons=true&theme=github_dark)
 ---
 
 ## 🧭 Lab Roadmap
