@@ -6,7 +6,7 @@
 Welcome to my cybersecurity lab portfolio. This is a curated collection of practical projects demonstrating my ability to detect, investigate, and respond to real-world threats using modern tools and techniques.
 
 ## 🧠 About Me
-Security-driven professional with hands-on experience in threat detection, SIEM analysis, cloud IAM, and Blue Team operations. My goal is to create scalable, effective security solutions that protect users and infrastructure.
+I focus on security operations work including alert monitoring, log review, incident investigation, and escalation. My background includes SIEM analysis, endpoint and authentication log review, and documenting incidents with clear timelines and actions taken. This portfolio reflects how I approach SOC workflows and incident handling.
 
 ---
 ## 🛠️ Tools & Technologies  
