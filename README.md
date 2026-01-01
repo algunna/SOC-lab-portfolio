@@ -28,7 +28,23 @@ Other:
 - Markdown
 
 ---
+### SOC Labs & Projects
 
+- **Brute Force Detection**  
+  Simulated authentication attacks and analyzed SIEM alerts to identify brute-force activity, document findings, and define escalation criteria.
+
+- **Malware Analysis**  
+  Reviewed suspicious file behavior and endpoint logs to determine indicators of compromise and response actions.
+
+- **Phishing Investigation**  
+  Analyzed email artifacts, headers, and links to identify phishing indicators and document incident timelines.
+
+- **Ransomware Incident Response**  
+  Simulated ransomware activity, reviewed alerts, and documented containment and response steps.
+
+- **Network Segmentation Review**  
+  Evaluated network segmentation controls and identified potential lateral movement paths.
+  
 ##  GitHub Stats  
 ![Alen's GitHub Stats](https://github-readme-stats.vercel.app/api?username=algunna&show_icons=true&theme=github_dark)
 ---
