@@ -1,4 +1,4 @@
-# 🔐 Alen Guner – Cybersecurity Portfolio
+# 🔐 # SOC Lab Portfolio – Alen Guner
 
 ![Last Commit](https://img.shields.io/github/last-commit/algunna/Labs?style=flat-square)
 ![Repo Size](https://img.shields.io/github/repo-size/algunna/Labs?style=flat-square)
