@@ -1,4 +1,11 @@
-# # SOC Lab Portfolio – Alen Guner
+# 🛡️ SOC Lab Portfolio – Alen Guner
+> Hands-on Security Operations • Detection Engineering • Log Analysis • Threat Hunting
+
+![GitHub last commit](https://img.shields.io/github/last-commit/algunna/SOC-lab-portfolio)
+![Repo size](https://img.shields.io/github/repo-size/algunna/SOC-lab-portfolio)
+![Stars](https://img.shields.io/github/stars/algunna/SOC-lab-portfolio?style=social)
+![SOC Analyst](https://img.shields.io/badge/Role-SOC%20Analyst-blue)
+
 
 ![Last Commit](https://img.shields.io/github/last-commit/algunna/Labs?style=flat-square)
 ![Repo Size](https://img.shields.io/github/repo-size/algunna/Labs?style=flat-square)
