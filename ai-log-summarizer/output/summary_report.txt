@@ -1,0 +1,31 @@
+### Log Analysis
+
+#### Key Events:
+1. **Failed Login Attempts**:
+   - Jan 18 03:00:01: Failed password for invalid user *admin* from IP *185.12.10.9*.
+   - Jan 18 03:00:03: Failed password for invalid user *root* from IP *185.12.10.9*.
+
+2. **Successful Login**:
+   - Jan 18 03:00:05: Accepted password for user from IP *192.168.1.5*.
+
+#### Suspicious Activity:
+- **Multiple Failed Login Attempts**: The IP address *185.12.10.9* attempted to log in using invalid user accounts multiple times, which is indicative of a potential brute-force attack or unauthorized access attempt.
+- **Login from Invalid Users**: Both *admin* and *root* are known high-privilege accounts, and their login failures could signal a greater intent to compromise the system.
+
+#### Severity:
+- **High**: The multiple failed login attempts from an external IP with attempts to access common administrative accounts represent a significant security risk.
+
+#### Suggested Actions:
+1. **Block the IP Address**: Immediately block the IP *185.12.10.9* to prevent further access attempts.
+   
+2. **Investigate the Source**: Look up the IP address using threat intelligence sources to check if it's known for malicious activity.
+
+3. **Review Security Logs**: Conduct a deeper analysis of other logs (e.g., authentication, access logs) around the same timeframe for any additional unusual activities.
+
+4. **Enhance Security Measures**:
+   - Consider implementing rate limiting on SSH attempts.
+   - Ensure fail2ban or similar mechanisms are in place to automatically ban IPs after a set number of failed login attempts.
+
+5. **Monitor Internal Traffic**: Continue monitoring the activity from the internal IP *192.168.1.5* for unusual behavior, ensuring it is a known and authorized device/user.
+
+6. **Update Security Protocols**: Make sure SSH access is secured by using public/private key pairs instead of passwords, and consider utilizing two-factor authentication.
