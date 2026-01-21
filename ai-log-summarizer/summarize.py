@@ -10,7 +10,6 @@ load_dotenv()
 # Initialize OpenAI client (uses key from .env automatically)
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
-    project=os.getenv("OPENAI_PROJECT_ID")
 )
 LOG_FOLDER = "logs"
 OUTPUT_FILE = "output/summary_report.txt"
