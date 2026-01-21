@@ -1,6 +1,8 @@
 import os
+import re
 from dotenv import load_dotenv
 from openai import OpenAI
+
 
 # Load environment variables
 load_dotenv()
@@ -8,10 +10,33 @@ load_dotenv()
 # Initialize OpenAI client (uses key from .env automatically)
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
-    project=os.getenv("OPENAI_PROJECT_ID")
 )
 LOG_FOLDER = "logs"
 OUTPUT_FILE = "output/summary_report.txt"
+def redact_sensitive_data(log_text: str) -> str:
+    # Redact IPv4 addresses
+    log_text = re.sub(
+        r'\b(?:\d{1,3}\.){3}\d{1,3}\b',
+        '[REDACTED_IP]',
+        log_text
+    )
+
+    # Redact email addresses
+    log_text = re.sub(
+        r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b',
+        '[REDACTED_EMAIL]',
+        log_text
+    )
+
+    # Redact usernames (common patterns)
+    log_text = re.sub(
+        r'(user(name)?=)[^\s]+',
+        r'\1[REDACTED_USER]',
+        log_text,
+        flags=re.IGNORECASE
+    )
+
+    return log_text
 
 def read_logs(folder):
     logs = ""
@@ -49,6 +74,7 @@ Logs:
 def main():
     print("🔍 Reading logs...")
     logs = read_logs(LOG_FOLDER)
+    logs = redact_sensitive_data(logs)
 
     if not logs.strip():
         print("⚠️ No logs found.")
