@@ -1,0 +1,14 @@
+# Output files
+output/
+*.txt
+
+# Sample logs
+sample-logs/
+
+# Environment files
+.env
+.env.example
+
+# Python cache
+__pycache__/
+*.pyc
