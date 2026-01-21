@@ -42,3 +42,7 @@ Escalate critical findings and document response actions.
 Key Takeaway
 
 This lab emphasizes analyst thinking over tool dependency. It demonstrates how raw cloud logs can be transformed into actionable security incidents using structured logic, context, and prioritization.
+
+How a SOC Analyst Would Use This Output
+
+An analyst would review the incident summaries to understand the sequence and severity of account activity. Root usage and IAM changes would be validated against approved actions, while role assumptions would be checked for expected service behavior. Critical findings would be escalated immediately, with follow-up actions documented to ensure containment and audit readiness.
