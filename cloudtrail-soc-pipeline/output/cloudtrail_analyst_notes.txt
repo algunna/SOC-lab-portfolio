@@ -1,0 +1,23 @@
+SOC Analyst Investigation Notes – AWS CloudTrail
+
+Summary
+Multiple high-risk management events were detected in AWS CloudTrail logs involving the root account and service-linked role activity. These events were identified through log parsing and rule-based detection logic.
+
+Observed Activity
+The AWS root account performed several management actions, including enabling MFA, listing S3 buckets, and querying account plan state. Root account usage is considered high risk due to its unrestricted permissions.
+
+A service-linked IAM role was created for AWS Resource Explorer. This action was followed by multiple AssumeRole events performed by AWS services, indicating automated service onboarding behavior.
+
+Source IP Analysis
+Some root actions originated from public IP addresses, while others were recorded as AWS internal sources. Public IP root activity warrants additional review to ensure the actions were authorized.
+
+Risk Assessment
+Root account usage presents elevated risk and should be minimized according to AWS security best practices. IAM role creation and role assumption activity were expected in this context but are still logged as medium-risk for visibility.
+
+MITRE ATT&CK Mapping
+- T1078 Valid Accounts – Root account usage
+- T1078.004 Cloud Accounts – Role assumption activity
+- T1098 Account Manipulation – IAM role configuration changes
+
+Conclusion
+No evidence of malicious activity was identified. The events align with account setup and service configuration. Continued monitoring and enforcement of least privilege and root account restrictions are recommended.
