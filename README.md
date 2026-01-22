@@ -1,5 +1,6 @@
-# 🛡️ SOC Lab Portfolio – Alen Guner
-> Hands-on Security Operations • Detection Engineering • Log Analysis • Threat Hunting
+# SOC Lab Portfolio – Alen Guner
+Hands on Security Operations, Detection Engineering, Log Analysis, Threat Hunting
+
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/algunna/SOC-lab-portfolio)
 ![Repo size](https://img.shields.io/github/repo-size/algunna/SOC-lab-portfolio)
@@ -8,10 +9,10 @@
 
 ---
 
-Welcome to my cybersecurity lab portfolio. This is a curated collection of practical projects demonstrating my ability to detect, investigate, and respond to real-world threats using modern tools and techniques.
+This repository contains hands on security labs that reflect how I approach SOC analysis, alert triage, and incident investigation using real logs and realistic workflows.
 
 ## About Me
-I focus on security operations work including alert monitoring, log review, incident investigation, and escalation. My background includes SIEM analysis, endpoint and authentication log review, and documenting incidents with clear timelines and actions taken. This portfolio reflects how I approach SOC workflows and incident handling.
+I work in security operations with a focus on alert review, log analysis, and incident investigation. I analyze authentication, endpoint, and cloud activity to understand what happened, assess risk, and determine the correct response. I build clear timelines, identify abnormal behavior, and document findings in a way that supports escalation and decision making. This portfolio shows how I approach real security events using raw data, context, and disciplined analysis rather than relying on tools alone.
 
 --- 
 ### Tools & Technologies
@@ -31,7 +32,7 @@ Cloud:
 Other:
 - GitHub
 - Markdown
-
+- Python
 ---
 ### SOC Labs & Projects
 
@@ -68,8 +69,8 @@ Explore hands-on analysis and threat detection exercises based on real-world sce
 
 ---
 
-## 📄 Resume + Contact
-- 📄 [My Resume](./Alen_Guner_Resume.pdf)
-- 📫 guneralen@gmail.com
-- 💼 [LinkedIn](https://www.linkedin.com/in/alen-guner)
-- 🐙 [GitHub](https://github.com/algunna)
+##  Resume + Contact
+-  [My Resume](./Alen_Guner_Resume.pdf)
+-  guneralen@gmail.com
+-  [LinkedIn](https://www.linkedin.com/in/alen-guner)
+-  [GitHub](https://github.com/algunna)
