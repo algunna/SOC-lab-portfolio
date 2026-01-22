@@ -46,3 +46,21 @@ This lab emphasizes analyst thinking over tool dependency. It demonstrates how r
 How a SOC Analyst Would Use This Output
 
 An analyst would review the incident summaries to understand the sequence and severity of account activity. Root usage and IAM changes would be validated against approved actions, while role assumptions would be checked for expected service behavior. Critical findings would be escalated immediately, with follow-up actions documented to ensure containment and audit readiness.
+
+How to Run This Lab
+
+1. Export CloudTrail logs from AWS and place the JSON files in the sample-logs directory.
+
+2. Parse CloudTrail logs into a readable timeline:
+   python scripts/parse_cloudtrail.py
+
+3. Generate detections with severity, MITRE ATT&CK mapping, and analyst actions:
+   python scripts/detect_cloudtrail_risks.py
+
+4. Correlate related alerts into incidents:
+   python scripts/correlate_cloudtrail_incidents.py
+
+5. Review output files in the output directory:
+   - cloudtrail_timeline.txt
+   - cloudtrail_alerts.txt
+   - cloudtrail_incidents.txt
