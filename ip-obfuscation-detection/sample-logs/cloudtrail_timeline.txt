@@ -1,0 +1,4 @@
+Time: 2026-01-21T21:42:15Z | Event: ConsoleLogin | UserType: Root | SourceIP: 172.59.212.128 | Region: us-east-1
+Time: 2026-01-21T21:46:00Z | Event: ListBuckets | UserType: Root | SourceIP: 8.34.117.92 | Region: us-east-1
+Time: 2026-01-21T21:47:10Z | Event: DescribeInstances | UserType: IAMUser | SourceIP: AWS Internal | Region: us-east-1
+Time: 2026-01-21T21:48:33Z | Event: AssumeRole | UserType: AWSService | SourceIP: ec2.amazonaws.com | Region: us-east-1
