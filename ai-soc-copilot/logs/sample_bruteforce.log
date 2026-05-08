@@ -1,0 +1,5 @@
+May 08 10:14:21 ubuntu sshd[1123]: Failed password for invalid user admin from 192.168.1.45 port 51234 ssh2
+May 08 10:14:28 ubuntu sshd[1127]: Failed password for invalid user test from 192.168.1.45 port 51238 ssh2
+May 08 10:14:35 ubuntu sshd[1131]: Failed password for root from 192.168.1.45 port 51242 ssh2
+May 08 10:14:41 ubuntu sshd[1135]: Failed password for invalid user oracle from 192.168.1.45 port 51246 ssh2
+May 08 10:14:59 ubuntu sshd[1140]: Accepted password for alen from 192.168.1.20 port 50122 ssh2
