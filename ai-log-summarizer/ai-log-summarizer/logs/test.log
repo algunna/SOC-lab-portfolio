@@ -1,0 +1,3 @@
+Jan 18 03:00:01 server sshd[2034]: Failed password for invalid user admin from 185.12.10.9 port 44512 ssh2
+Jan 18 03:00:03 server sshd[2034]: Failed password for invalid user root from 185.12.10.9 port 44512 ssh2
+Jan 18 03:00:05 server sshd[2034]: Accepted password for user from 192.168.1.5 port 2222 ssh2

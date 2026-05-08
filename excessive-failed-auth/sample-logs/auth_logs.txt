@@ -1,0 +1,7 @@
+2026-01-21T21:40:01 FAILED_LOGIN user=admin source_ip=172.16.5.4
+2026-01-21T21:40:05 FAILED_LOGIN user=admin source_ip=172.16.5.4
+2026-01-21T21:40:09 FAILED_LOGIN user=admin source_ip=172.16.5.4
+2026-01-21T21:40:13 FAILED_LOGIN user=admin source_ip=172.16.5.4
+2026-01-21T21:40:18 FAILED_LOGIN user=admin source_ip=172.16.5.4
+2026-01-21T21:40:25 FAILED_LOGIN user=admin source_ip=172.16.5.4
+2026-01-21T21:41:10 FAILED_LOGIN user=test source_ip=10.0.0.9
