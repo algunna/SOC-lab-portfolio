@@ -1,8 +1,12 @@
+import os
 from pathlib import Path
 from datetime import datetime
+from openai import OpenAI
 
 LOG_FILE = Path("../logs/sample_bruteforce.log")
 REPORT_FILE = Path("../reports/incident_report.md")
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 def read_log(file_path):
@@ -37,14 +41,47 @@ def analyze_log(log_data):
     }
 
 
-def write_report(results, log_data):
+def generate_ai_analysis(results, log_data):
+    prompt = f"""
+You are acting as a SOC analyst. Analyze the following SSH authentication log and create a concise incident response analysis.
+
+Findings:
+Failed login attempts: {results["failed_attempts"]}
+Successful logins: {results["successful_logins"]}
+Source IPs: {", ".join(results["unique_ips"])}
+Severity: {results["severity"]}
+
+Raw log:
+{log_data}
+
+Return the response in this format:
+
+Executive Summary:
+Analyst Notes:
+Recommended Response:
+"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a cybersecurity SOC analyst. Keep the response clear, professional, and practical.",
+            },
+            {
+                "role": "user",
+                "content": prompt,
+            },
+        ],
+    )
+
+    return response.choices[0].message.content
+
+
+def write_report(results, log_data, ai_analysis):
     report = f"""# AI SOC Copilot Incident Report
 
 Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-
-## Summary
-
-Possible SSH brute-force activity was detected based on repeated failed login attempts.
 
 ## Key Findings
 
@@ -59,17 +96,9 @@ Possible SSH brute-force activity was detected based on repeated failed login at
 - Technique: Brute Force
 - Technique ID: T1110
 
-## Analyst Notes
+## AI-Generated SOC Analysis
 
-The log shows multiple failed SSH login attempts against different usernames. A successful login was also observed from a separate internal IP address.
-
-## Recommended Response
-
-1. Review SSH access logs for additional activity.
-2. Confirm whether the successful login was expected.
-3. Block or investigate suspicious source IPs.
-4. Enforce strong passwords and consider disabling root SSH login.
-5. Enable MFA where possible.
+{ai_analysis}
 
 ## Raw Log Sample
 
@@ -78,13 +107,14 @@ The log shows multiple failed SSH login attempts against different usernames. A 
 
     REPORT_FILE.parent.mkdir(parents=True, exist_ok=True)
     REPORT_FILE.write_text(report, encoding="utf-8")
-    print(f"Report created: {REPORT_FILE}")
+    print(f"AI-powered report created: {REPORT_FILE}")
 
 
 def main():
     log_data = read_log(LOG_FILE)
     results = analyze_log(log_data)
-    write_report(results, log_data)
+    ai_analysis = generate_ai_analysis(results, log_data)
+    write_report(results, log_data, ai_analysis)
 
 
 if __name__ == "__main__":
