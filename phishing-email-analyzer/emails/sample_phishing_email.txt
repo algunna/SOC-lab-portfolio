@@ -1,0 +1,15 @@
+From: security-alert@paypaI-support.com
+To: user@example.com
+Subject: Urgent: Your account has been limited
+
+Dear customer,
+
+We detected unusual activity on your account. To avoid account suspension, please verify your information immediately.
+
+Verification link:
+http://paypaI-support-login.com/verify
+
+Failure to complete this verification within 24 hours will result in permanent account restrictions.
+
+Regards,
+PayPal Security Team
