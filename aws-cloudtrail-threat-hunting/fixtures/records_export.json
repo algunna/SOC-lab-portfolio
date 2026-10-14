@@ -1,0 +1,22 @@
+{
+  "Records": [
+    {
+      "eventTime": "2026-10-14T12:00:00Z",
+      "eventName": "AttachRolePolicy",
+      "sourceIPAddress": "192.0.2.4",
+      "userIdentity": {
+        "type": "IAMUser",
+        "arn": "arn:aws:iam::123456789012:user/demo"
+      }
+    },
+    {
+      "eventTime": "2026-10-14T12:07:00Z",
+      "eventName": "StopLogging",
+      "sourceIPAddress": "192.0.2.4",
+      "userIdentity": {
+        "type": "IAMUser",
+        "arn": "arn:aws:iam::123456789012:user/demo"
+      }
+    }
+  ]
+}
