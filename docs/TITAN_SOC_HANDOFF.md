@@ -16,6 +16,12 @@
 - Reviewer priorities: validate provenance of correlation reports, analyst authentication requirements, transaction safety, concurrency, case ID mapping, and evidentiary integrity before production use.
 - The pipeline does not automatically create cases or ingest Titan detector output.
 
+## ATLAS update — Read-only SOC dashboard (PR pending)
+
+- Added `soc-command-center/` as a standalone Python loopback HTTP demo with synthetic JSON only.
+- No detector or case database reads, no write endpoints, no live alert indicators. HTML escapes all display fields.
+- Please review UI data contracts, display semantics, evidence provenance, and potential risks of connecting live data in future.
+
 ## Current state
 - PR #19 merged: normalized JSON Schema v1 plus timestamp validation and tests.
 - PR #20 merged: offline JSON/JSONL ingestion, per-run deduplication by source system + record ID + rule ID, explicit rejection report and tests.
