@@ -1,0 +1,30 @@
+name: SOC incident case management tests
+on:
+  pull_request:
+    paths:
+      - 'soc-incident-case-lab/**'
+      - '.github/workflows/soc-case-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'soc-incident-case-lab/**'
+      - '.github/workflows/soc-case-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run unit tests
+        run: python -m unittest discover -s soc-incident-case-lab/tests -v
+      - name: End-to-end case creation and audit
+        run: |
+          python soc-incident-case-lab/src/cases.py --db /tmp/soc-case.db new "Synthetic alert" --severity high
+          python soc-incident-case-lab/src/cases.py --db /tmp/soc-case.db note 1 "Reviewed fixture"
+          python soc-incident-case-lab/src/cases.py --db /tmp/soc-case.db status 1 investigating
+          python soc-incident-case-lab/src/cases.py --db /tmp/soc-case.db show 1 > /tmp/soc-case.json
+          python -c "import json; x=json.load(open('/tmp/soc-case.json')); assert x['case']['status']=='investigating'; assert len(x['history'])==3"
