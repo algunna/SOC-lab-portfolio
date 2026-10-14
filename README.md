@@ -7,17 +7,20 @@ Hands-on cybersecurity labs focused on SOC monitoring, detection, investigation 
 | Project | Focus |
 | --- | --- |
 | [AI SOC Copilot](./ai-soc-copilot) | SSH log analysis, brute force detection, MITRE ATT&CK T1110, incident reports |
-| [Windows Sysmon AI Detection](./windows-sysmon-ai-detection) | Endpoint telemetry and suspicious PowerShell investigation |
+| [Windows Sysmon Detection](./windows-sysmon-ai-detection) | Endpoint telemetry and suspicious PowerShell investigation |
 | [CloudTrail SOC Pipeline](./cloudtrail-soc-pipeline) | Cloud security events, IAM risks, incident correlation |
 | [Threat Intelligence Enrichment](./threat-intel-enrichment-lab) | IOC triage and analyst reporting |
 | [Phishing Email Analyzer](./phishing-email-analyzer) | Phishing indicator analysis |
-| [Brute Force Detection](./brute-force-detection) | Linux authentication event detection |
-| [Excessive Failed Authentication](./excessive-failed-auth) | Failed-login alert triage |
+| [Brute Force Detection](./brute-force-detection) | Investigation write-up of a brute-force scenario (no code) |
+| [Excessive Failed Authentication](./excessive-failed-auth) | Repeated failed logins and success-after-failure alerts |
+| [IP Obfuscation Detection](./ip-obfuscation-detection) | External source IP review in CloudTrail activity (early-stage) |
 | [Windows Threat Hunting](./windows-threat-hunting-lab) | Windows event correlation and threat hunting |
 | [AWS CloudTrail Threat Hunting](./aws-cloudtrail-threat-hunting) | Cloud identity monitoring and event correlation |
 | [Sigma Detection Engineering](./sigma-detection-lab) | Portable detection rules and synthetic test fixtures |
 | [Splunk SOC Hunting](./splunk-soc-hunting) | SPL searches and practical investigation playbooks |
 | [SOC Incident Case Management](./soc-incident-case-lab) | Offline investigation cases, audit history and analyst notes |
+
+[AI Log Summarizer](./ai-log-summarizer) is an earlier prototype that sends redacted logs to an external AI API; it is kept for reference and is not part of the offline labs above.
 
 ## Planned Shared SOC Infrastructure
 

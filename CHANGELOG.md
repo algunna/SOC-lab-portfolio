@@ -8,6 +8,7 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## 2026-10-14
 
+- Fixed findings from a five-part review (detection, red team, security, SOC operations, QA) (PR pending): PowerShell `-e`/`-ec` and other switch abbreviations were missed by the Windows, Sysmon, Sigma and Splunk detections; an attacker-chosen SSH username could spoof the source IP; AWS correlators reported only the first episode per actor and missed common privilege-escalation events; mixed timezone offsets crashed or misordered CloudTrail correlation; reports could be forged by log content; stale AI-era sample reports and a personal EVTX file were removed. Added tests and CI for the threat-intel and two legacy labs. Validated on synthetic data only. An OpenAI API key remains in Git history and must be revoked by the owner.
 - Fixed CloudTrail SOC Pipeline detections (PR pending): private IPs were labelled public, public IPv6 root activity was not escalated, IAM privilege and credential changes and CloudTrail logging changes were not detected, and root alerts were split across two incidents. Added a synthetic fixture, tests, CI and a rewritten README. Validated on synthetic data only.
 - AI SOC Copilot cleanup (PR pending): replaced the stale AI-generated sample report with current script output, removed the unused `openai` requirement and added CI for the existing tests.
 - Added offline SOC incident case management lab with SQLite cases, evidence references, audit history and tests (PR pending).
