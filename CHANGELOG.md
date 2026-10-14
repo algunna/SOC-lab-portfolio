@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## 2026-10-14
 
+- Added offline SOC incident case management lab with SQLite cases, evidence references, audit history and tests (PR pending).
+
 - Added Splunk SOC Hunting examples with three read-only SPL searches, analyst playbooks and structural CI checks (PR pending). Search syntax has not been validated in a live Splunk instance.
 
 - Added tested Windows Threat Hunting lab (PR #10), including normalized event detections and synthetic fixtures.
