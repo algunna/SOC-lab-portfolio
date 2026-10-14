@@ -1,23 +1,39 @@
 {
   "alerts": [
     {
+      "schema_version": "1.0",
       "event_id": "demo-win-001",
+      "occurred_at": "2026-10-14T12:00:00Z",
+      "source": {"system": "windows", "record_id": "synthetic-4688-001"},
+      "rule_id": "windows.powershell.encoded",
       "severity": "medium",
       "title": "Encoded PowerShell flag",
-      "source": "windows"
+      "actor": "LAB\\analyst",
+      "asset": "LAB-WS01",
+      "attack_techniques": ["T1059.001"],
+      "evidence": [{"reference": "fixtures/windows-event-001", "description": "Synthetic 4688 event with -EncodedCommand"}]
     },
     {
+      "schema_version": "1.0",
       "event_id": "demo-aws-002",
+      "occurred_at": "2026-10-14T12:04:00Z",
+      "source": {"system": "aws_cloudtrail", "record_id": "synthetic-cloudtrail-002"},
+      "rule_id": "aws.logging.change",
       "severity": "high",
       "title": "CloudTrail logging configuration change",
-      "source": "aws_cloudtrail"
+      "actor": "arn:aws:iam::123456789012:user/lab-analyst",
+      "asset": "123456789012",
+      "attack_techniques": ["T1562.008"],
+      "evidence": [{"reference": "fixtures/cloudtrail-002", "description": "Synthetic StopLogging record"}]
     }
   ],
   "candidates": [
     {
       "candidate_id": "candidate-demo-001",
       "classification": "unverified",
-      "event_count": 1
+      "event_count": 1,
+      "alert_ids": ["demo-win-001"],
+      "evidence_references": ["fixtures/windows-event-001"]
     }
   ],
   "cases": [

@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- SOC Command Center review fixes (PR pending): the fixture and columns now follow SOC Event Contract v1 (real alerts rendered a Python dict), requests for other Host names are refused (DNS rebinding), every response carries the security headers, the phone layout shows every field, startup errors are one-line messages, and HTTP-level tests were added. Findings: docs/TITAN_DASHBOARD_REVIEW.md.
+
 - Added a local read-only SOC Command Center demonstration UI using synthetic fixtures (PR pending).
 
 - Added manual, analyst-approved promotion from unverified incident candidates into SQLite cases, with duplicate safeguards and CI (PR pending).
