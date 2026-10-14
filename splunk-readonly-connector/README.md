@@ -38,3 +38,26 @@ The command refuses to run without `SOC_SPLUNK_TOKEN`. An existing output file c
 ## Next milestones
 
 Only after controlled live connectivity is verified: implement a separately reviewed field mapping into SOC Event Contract v1 using strictly synthetic or authorized, sanitized events, then attach it to the existing validation/correlation pipeline. Keep case promotion manual and dashboard read-only.
+
+## Offline synthetic saved-search alerts to SOC pipeline
+
+This separate adapter demonstrates a bounded **synthetic alert** handoff. It does **not** connect the Splunk REST API to raw-event detection or assert that a saved search has been deployed. The count-only HTTPS probe remains separate.
+
+From repository root, install the validator dependency and run the synthetic fixture:
+
+```bash
+python -m pip install -r soc-event-contract/requirements.txt
+python splunk-readonly-connector/src/normalize.py splunk-readonly-connector/fixtures/synthetic_saved_search_alerts.jsonl --out /tmp/splunk-alerts.jsonl
+python soc-event-ingestion/src/ingest.py /tmp/splunk-alerts.jsonl --out /tmp/splunk-ingestion.json
+python soc-incident-correlation/src/correlate.py /tmp/splunk-ingestion.json --out /tmp/splunk-candidates.json
+python soc-command-center/src/adapter.py --ingestion /tmp/splunk-ingestion.json --correlation /tmp/splunk-candidates.json --out /tmp/splunk-dashboard.json
+python soc-command-center/src/dashboard.py --data /tmp/splunk-dashboard.json
+```
+
+On Windows, use a private temporary directory instead of `/tmp`.
+
+Input is UTF-8 JSONL, up to 200 alerts and 1 MB in total, with these exact fields: `search_name`, `record_id`, `occurred_at` (RFC3339 with timezone), and optional `actor`, `asset`. Unknown columns, including `_raw`, `password`, and `severity`, are rejected. Currently allowlisted search names are `windows_encoded_powershell`, `auth_failed_login_burst`, and `aws_cloudtrail_logging_change`. Rule IDs, severities, titles, and MITRE techniques are assigned by local reviewed mappings, never claimed by arbitrary source data.
+
+Each result is validated against SOC Event Contract v1 and assigned a stable namespaced ID and *synthetic* opaque evidence reference. This output is an **unverified investigation lead**, not a verified intrusion. Conversion fails closed on a duplicate ID, invalid identity, unknown detector, control character, malformed JSON, bad timestamp or oversized input. A failed batch never produces a new output file. Existing outputs are not overwritten.
+
+**Data minimization:** Do not feed raw logs, personal information, real patient data, API keys or production SIEM exports into this synthetic training adapter. Actor/asset values are copied after structural validation, **not anonymized**. It intentionally has no API request, network listener, secret access, privilege escalation or automatic case promotion. Real Splunk event mapping, authorization checks, deduplication across multiple live batches and provenance validation still require additional design and live-lab tests.
