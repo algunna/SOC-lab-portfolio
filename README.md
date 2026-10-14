@@ -24,7 +24,8 @@ Hands-on cybersecurity labs focused on SOC monitoring, detection, investigation 
 
 ## Planned Shared SOC Infrastructure
 
-- [SOC Event Contract v1](./soc-event-contract) — versioned normalized alert schema, synthetic example, validation and integration boundaries
+- [SOC Event Contract v1](./soc-event-contract)
+- [SOC Event Ingestion MVP](./soc-event-ingestion) — offline validation, in-run deduplication and quarantined rejection reports — versioned normalized alert schema, synthetic example, validation and integration boundaries
 
 ## Engineering Documentation
 
@@ -50,3 +51,8 @@ Open a project folder to review the available source code, sample logs, reports,
 ## Contact
 
 [LinkedIn](https://www.linkedin.com/in/alen-guner) | [GitHub](https://github.com/algunna)
+
+## SOC Incident Correlation (experimental)
+
+- [Offline incident candidate grouping](./soc-incident-correlation)
+- [Titan review and integration handoff](./docs/TITAN_SOC_HANDOFF.md)

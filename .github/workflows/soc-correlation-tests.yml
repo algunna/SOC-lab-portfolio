@@ -1,0 +1,29 @@
+name: Offline SOC correlation tests
+on:
+  pull_request:
+    paths:
+      - 'soc-incident-correlation/**'
+      - 'soc-event-contract/**'
+      - 'docs/TITAN_SOC_HANDOFF.md'
+      - '.github/workflows/soc-correlation-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'soc-incident-correlation/**'
+      - 'soc-event-contract/**'
+      - '.github/workflows/soc-correlation-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r soc-event-contract/requirements.txt
+      - run: python -m unittest discover -s soc-incident-correlation/tests -v
+      - run: python soc-event-ingestion/src/ingest.py soc-event-contract/examples/windows_alert.json --out /tmp/soc-ingested.json
+      - run: python soc-incident-correlation/src/correlate.py /tmp/soc-ingested.json --out /tmp/soc-candidates.json
+      - run: python -c "import json; x=json.load(open('/tmp/soc-candidates.json')); assert x['counts']=={'candidates':1,'alerts':1}; assert x['incident_candidates'][0]['classification']=='unverified'"
