@@ -1,0 +1,9 @@
+{"timestamp":"2026-10-14T12:00:00Z","event_id":4688,"host":"LAB-WS01","user":"labuser","image":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe","command_line":"powershell.exe -EncodedCommand AAAA"}
+{"timestamp":"2026-10-14T12:01:00Z","event_id":4732,"host":"LAB-WS01","user":"labadmin","group":"Administrators"}
+{"timestamp":"2026-10-14T12:02:00Z","event_id":4698,"host":"LAB-WS01","user":"labuser","task_name":"LabUpdateTask"}
+{"timestamp":"2026-10-14T12:03:00Z","event_id":4625,"host":"LAB-WS01","user":"labuser","source_ip":"192.0.2.10"}
+{"timestamp":"2026-10-14T12:03:01Z","event_id":4625,"host":"LAB-WS01","user":"labuser","source_ip":"192.0.2.10"}
+{"timestamp":"2026-10-14T12:03:02Z","event_id":4625,"host":"LAB-WS01","user":"labuser","source_ip":"192.0.2.10"}
+{"timestamp":"2026-10-14T12:03:03Z","event_id":4625,"host":"LAB-WS01","user":"labuser","source_ip":"192.0.2.10"}
+{"timestamp":"2026-10-14T12:03:04Z","event_id":4625,"host":"LAB-WS01","user":"labuser","source_ip":"192.0.2.10"}
+{"timestamp":"2026-10-14T12:03:10Z","event_id":4624,"host":"LAB-WS01","user":"labuser","source_ip":"192.0.2.10"}
