@@ -1,0 +1,23 @@
+# Changelog
+
+Notable portfolio changes are documented here. Entries describe **merged features**, not production deployments.
+
+## 2026-10-14
+
+- Added tested Windows Threat Hunting lab (PR #10), including normalized event detections and synthetic fixtures.
+- Added AWS CloudTrail Threat Hunting lab (PR #11), CloudTrail 2.0 correlation (PR #12), and account-aware triage scoring (PR #13), with GitHub Actions checks.
+- Added experimental Sigma Detection Engineering lab (PR #14), synthetic positive/negative test cases and a limited validation tool.
+- Replaced hard-coded Sysmon and phishing findings with evidence-based offline workflows (PR #8).
+- Updated IOC classification to avoid unsupported reputation claims, with documented code audit (PR #7).
+
+## Earlier maintenance
+
+- Refreshed main project descriptions and repository navigation (PR #4).
+- Clarified Windows Sysmon and AI log summarizer documentation (PR #5).
+- Reworked AI SOC Copilot for offline authentication analysis and regression testing (PR #6).
+
+## Conventions
+
+- Add an entry for each significant merged change.
+- Link PRs, document changed behavior, and distinguish tests from real deployment evidence.
+- Do not claim security fixes removed credentials from Git history without verification.

@@ -13,6 +13,18 @@ Hands-on cybersecurity labs focused on SOC monitoring, detection, investigation 
 | [Phishing Email Analyzer](./phishing-email-analyzer) | Phishing indicator analysis |
 | [Brute Force Detection](./brute-force-detection) | Linux authentication event detection |
 | [Excessive Failed Authentication](./excessive-failed-auth) | Failed-login alert triage |
+| [Windows Threat Hunting](./windows-threat-hunting-lab) | Windows event correlation and threat hunting |
+| [AWS CloudTrail Threat Hunting](./aws-cloudtrail-threat-hunting) | Cloud identity monitoring and event correlation |
+| [Sigma Detection Engineering](./sigma-detection-lab) | Portable detection rules and synthetic test fixtures |
+
+## Engineering Documentation
+
+- [Documentation hub](./docs/README.md) — architecture, testing practices and standards
+- [Project template](./docs/PROJECT_TEMPLATE.md) — consistent setup and investigation walkthroughs
+- [Testing evidence guide](./docs/TESTING_AND_EVIDENCE.md) — what the automated checks verify
+- [Changelog](./CHANGELOG.md) — merged project improvements
+
+New labs follow a common documentation checklist. All detections and MITRE ATT&CK mappings are training-oriented investigation hypotheses and require analyst validation.
 
 ## Skills
 
