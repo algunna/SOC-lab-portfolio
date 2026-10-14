@@ -25,3 +25,11 @@ jobs:
       - run: python soc-incident-correlation/src/correlate.py /tmp/ingest.json --out /tmp/correlate.json
       - run: python soc-command-center/src/adapter.py --ingestion /tmp/ingest.json --correlation /tmp/correlate.json --out /tmp/dashboard.json
       - run: python -c "import json; x=json.load(open('/tmp/dashboard.json')); assert len(x['alerts'])==1 and len(x['candidates'])==1"
+      - name: Build synthetic SQLite case and confirm read-only snapshot
+        run: |
+          python soc-incident-case-lab/src/cases.py --db /tmp/soc-case-snapshot.db new "Synthetic investigation" --severity high
+          python soc-incident-case-lab/src/cases.py --db /tmp/soc-case-snapshot.db status 1 investigating
+          sha256sum /tmp/soc-case-snapshot.db > /tmp/soc-case-snapshot.sha256
+          python soc-command-center/src/adapter.py --ingestion /tmp/ingest.json --correlation /tmp/correlate.json --cases-db /tmp/soc-case-snapshot.db --out /tmp/dashboard-with-cases.json
+          sha256sum -c /tmp/soc-case-snapshot.sha256
+          python -c "import json; d=json.load(open('/tmp/dashboard-with-cases.json')); assert len(d['alerts'])==1; assert len(d['candidates'])==1; assert len(d['cases'])==1; assert d['cases'][0]['status']=='investigating'; assert set(d['cases'][0])=={'id','title','severity','status'}"
