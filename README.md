@@ -21,7 +21,8 @@ Hands-on cybersecurity labs focused on SOC monitoring, detection, investigation 
 
 ## Planned Shared SOC Infrastructure
 
-- [SOC Event Contract v1](./soc-event-contract) — versioned normalized alert schema, synthetic example, validation and integration boundaries
+- [SOC Event Contract v1](./soc-event-contract)
+- [SOC Event Ingestion MVP](./soc-event-ingestion) — offline validation, in-run deduplication and quarantined rejection reports — versioned normalized alert schema, synthetic example, validation and integration boundaries
 
 ## Engineering Documentation
 

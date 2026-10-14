@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added offline SOC Event Ingestion MVP with schema validation, in-run deduplication, synthetic tests and GitHub CI (PR pending).
+
 - Proposed SOC Event Contract v1: normalized alert JSON Schema, validator, six tests and CI (ATLAS PR pending). No live detector integrations yet.
 
 ## 2026-10-14
