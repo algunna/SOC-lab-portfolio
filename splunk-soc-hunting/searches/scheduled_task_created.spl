@@ -1,0 +1,2 @@
+index=windows sourcetype="WinEventLog:Security" EventCode=4698
+| table _time host SubjectUserName TaskName TaskContent
