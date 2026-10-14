@@ -32,6 +32,20 @@ class CorrelationTests(unittest.TestCase):
         a=m.group_alerts(report(SAMPLE,e))["incident_candidates"][0]["candidate_id"]
         b=m.group_alerts(report(e,SAMPLE))["incident_candidates"][0]["candidate_id"]
         self.assertEqual(a,b)
+    def test_candidate_triage_fields(self):
+        e=copy.deepcopy(SAMPLE);e["event_id"]="win-lab-002";e["occurred_at"]="2026-10-14T12:10:00Z";e["severity"]="high";e["rule_id"]="windows.other"
+        c=m.group_alerts(report(SAMPLE,e))["incident_candidates"][0]
+        self.assertEqual((c["source_system"],c["actor"],c["asset"]),("windows","LAB\\analyst","LAB-WS01"))
+        self.assertEqual((c["first_seen"],c["last_seen"]),("2026-10-14T12:00:00+00:00","2026-10-14T12:10:00+00:00"))
+        self.assertEqual(c["highest_severity"],"high")
+        self.assertEqual(c["rule_ids"],["windows.other","windows.powershell.encoded"])
+    def test_cli_reports_bad_input_without_traceback(self):
+        import subprocess,sys,tempfile
+        with tempfile.TemporaryDirectory() as d:
+            bad=Path(d)/"bad.json";bad.write_text("{",encoding="utf-8")
+            r=subprocess.run([sys.executable,str(ROOT/"src"/"correlate.py"),str(bad),"--out",str(Path(d)/"o.json")],capture_output=True,text=True)
+        self.assertEqual(r.returncode,2)
+        self.assertNotIn("Traceback",r.stderr)
     def test_refuse_rejected(self):
         with self.assertRaises(ValueError):m.group_alerts({"accepted":[SAMPLE],"rejected":[{"errors":["bad"]}]})
     def test_outside_window_separate(self):
