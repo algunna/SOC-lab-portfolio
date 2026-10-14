@@ -1,0 +1,26 @@
+name: Splunk read-only connectivity probe tests
+on:
+  pull_request:
+    paths:
+      - 'splunk-readonly-connector/**'
+      - '.github/workflows/splunk-readonly-probe.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'splunk-readonly-connector/**'
+      - '.github/workflows/splunk-readonly-probe.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s splunk-readonly-connector/tests -v
+      - name: Fail safely when token missing
+        run: |
+          if python splunk-readonly-connector/src/probe.py --endpoint https://127.0.0.1:8089 --index soc_lab --out /tmp/should-not-exist.json; then exit 1; fi
+          test ! -e /tmp/should-not-exist.json
