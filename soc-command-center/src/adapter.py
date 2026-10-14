@@ -47,5 +47,5 @@ def main():
         p.error(f"Invalid input: {type(exc).__name__}")
     args.out.parent.mkdir(parents=True,exist_ok=True)
     with args.out.open("x",encoding="utf-8") as f:json.dump(data,f,indent=2)
-    print(f"Generated offline dashboard snapshot with {len(data[\'cases\'])} local cases; no live telemetry")
+    print("Generated offline dashboard snapshot with {} local cases; no live telemetry".format(len(data["cases"])))
 if __name__=="__main__":main()
