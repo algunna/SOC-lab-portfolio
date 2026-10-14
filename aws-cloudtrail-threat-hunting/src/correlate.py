@@ -1,13 +1,18 @@
 """Offline CloudTrail correlation from JSONL or AWS Records JSON."""
 import argparse
+import importlib.util
 import json
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-IAM = {"AttachUserPolicy", "AttachRolePolicy", "PutUserPolicy", "PutRolePolicy", "CreateAccessKey", "UpdateAssumeRolePolicy", "AddUserToGroup"}
-LOGGING = {"StopLogging", "DeleteTrail", "UpdateTrail", "PutEventSelectors"}
+# One definition of the watched event names, shared with hunt.py
+_spec = importlib.util.spec_from_file_location("cloudtrail_hunt", ROOT / "src" / "hunt.py")
+_hunt = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_hunt)
+IAM = _hunt.IAM_CHANGES
+LOGGING = _hunt.LOGGING_CHANGES
 
 def load(path):
     data = path.read_text(encoding="utf-8").strip()
@@ -32,8 +37,12 @@ def load(path):
         raise ValueError("Every event must be a JSON object")
     return events
 
+def identity(event):
+    ident = event.get("userIdentity")
+    return ident if isinstance(ident, dict) else {}
+
 def actor(event):
-    ident = event.get("userIdentity") or {}
+    ident = identity(event)
     return str(ident.get("arn") or ident.get("principalId") or ident.get("userName") or "unknown")
 
 def timestamp(event):
@@ -47,19 +56,18 @@ def analyze(events, window_minutes=30):
     findings = []
     event_rows = []
     for event in events:
-        if event.get("errorCode"):
-            continue
         name = str(event.get("eventName", ""))
-        ident = event.get("userIdentity") or {}
         rules = []
-        if ident.get("type") == "Root":
+        if identity(event).get("type") == "Root":
+            # Any use of root credentials matters, even when the call was denied
             rules.append(("root_account_activity", "high", "T1078.004"))
-        if name in IAM:
-            rules.append(("iam_change", "medium", "T1098"))
-        if name in LOGGING:
-            rules.append(("logging_change", "high", "T1562.008"))
-        if name == "AssumeRole":
-            rules.append(("role_assumption", "low", "T1078.004"))
+        if not event.get("errorCode"):  # denied calls are not completed changes
+            if name in IAM:
+                rules.append(("iam_change", "medium", "T1098"))
+            if name in LOGGING:
+                rules.append(("logging_change", "high", "T1562.008"))
+            if name == "AssumeRole":
+                rules.append(("role_assumption", "low", "T1078.004"))
         time = timestamp(event)
         for rule, severity, attack in rules:
             finding = {"rule": rule, "severity": severity, "attack_hypothesis": attack,
@@ -73,15 +81,21 @@ def analyze(events, window_minutes=30):
     for t, finding in sorted(event_rows, key=lambda row: row[0]):
         grouped[finding["actor"]].append((t, finding))
     incidents = []
-    for identity, rows in grouped.items():
-        for index, (start, _) in enumerate(rows):
+    for who, rows in grouped.items():
+        if who == "unknown":
+            continue  # unattributed events from different services are not one actor
+        index = 0
+        while index < len(rows):
+            start = rows[index][0]
             relevant = [(time, record) for time, record in rows[index:] if timedelta(0) <= time-start <= timedelta(minutes=window_minutes)]
             rules = {record["rule"] for _, record in relevant}
             if "iam_change" in rules and "logging_change" in rules:
-                incidents.append({"actor": identity, "start": start.isoformat(),
+                incidents.append({"actor": who, "start": start.isoformat(),
                                   "severity": "high", "related_events": [record for _, record in relevant],
                                   "reason": "IAM changes and CloudTrail logging changes within correlation window"})
-                break
+                index += len(relevant)  # look for later episodes after this one
+            else:
+                index += 1
     return {"count": len(findings), "findings": findings, "incidents": incidents}
 
 def markdown(result):

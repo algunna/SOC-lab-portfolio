@@ -1,7 +1,7 @@
 title: Windows Privileged Group Member Added
 id: f60b123b-24ec-4a16-b3ba-bd19d9132104
 status: experimental
-description: Detects additions to local Administrators or domain Admins groups
+description: Detects additions to Administrators, Domain Admins, Enterprise Admins or Schema Admins
 logsource:
   product: windows
   service: security
@@ -10,10 +10,13 @@ detection:
     EventID:
       - 4728
       - 4732
+      - 4756
   selection_group:
     TargetUserName:
       - 'Administrators'
       - 'Domain Admins'
+      - 'Enterprise Admins'
+      - 'Schema Admins'
   condition: selection_event and selection_group
 fields:
   - SubjectUserName

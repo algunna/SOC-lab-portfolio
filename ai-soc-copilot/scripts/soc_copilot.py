@@ -9,7 +9,13 @@ from pathlib import Path
 BASE = Path(__file__).resolve().parents[1]
 LOG_FILE = BASE / "logs" / "sample_bruteforce.log"
 REPORT_FILE = BASE / "reports" / "incident_report.md"
-EVENT = re.compile(r"(?P<outcome>Failed|Accepted) password for (?:invalid user )?\S+ from (?P<ip>\S+) port \d+ ssh2")
+# The username is attacker-controlled and may contain " from <ip> port N ssh2", so the
+# source is taken from the end of the line. rsyslog folds identical lines into
+# "message repeated N times: [ ... ]", which stands for N events.
+EVENT = re.compile(
+    r"(?:message repeated (?P<repeat>\d+) times: \[\s*)?"
+    r"(?P<outcome>Failed|Accepted) password for .+ from (?P<ip>\S+) port \d+ ssh2\]?\s*$"
+)
 
 
 def analyze_log(log_data):
@@ -22,10 +28,11 @@ def analyze_log(log_data):
             ip = str(ipaddress.ip_address(match.group("ip")))
         except ValueError:
             continue
+        count = int(match.group("repeat") or 1)
         if match.group("outcome") == "Failed":
-            failures[ip] += 1
+            failures[ip] += count
         else:
-            successes[ip] += 1
+            successes[ip] += count
     maximum = max(failures.values(), default=0)
     return {
         "failed_attempts": sum(failures.values()),
@@ -54,7 +61,10 @@ def main():
     parser.add_argument("--input", type=Path, default=LOG_FILE)
     parser.add_argument("--output", type=Path, default=REPORT_FILE)
     args = parser.parse_args()
-    results = analyze_log(args.input.read_text(encoding="utf-8"))
+    try:
+        results = analyze_log(args.input.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError) as exc:
+        parser.error(f"{args.input}: {exc}")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(build_report(results), encoding="utf-8")
     print(f"Report saved to {args.output}")

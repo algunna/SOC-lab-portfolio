@@ -1,30 +1,32 @@
-IP Obfuscation Detection Lab
-Purpose
+# IP Obfuscation Detection Lab
 
-This lab demonstrates how a SOC analyst identifies attempts to hide or disguise source IP addresses during authentication or access activity. The focus is on detecting behavior that suggests the use of VPNs, proxies, or anonymization services rather than relying on threat intelligence feeds or automated tools.
+## Purpose
 
-What This Lab Demonstrates
+This lab is a first step towards spotting attempts to hide where activity comes from (VPNs, proxies, anonymization services). Today it does one thing: it flags events in a CloudTrail timeline whose source is an **external (public) IP address**, so an analyst can review them in context. It is an educational lab, not a production detection system.
 
-This project simulates analyst driven detection using raw log data.
+## Detection
 
-Access events are reviewed to identify indicators of IP obfuscation such as rotating IPs, inconsistent geolocation, and known proxy patterns.
+Every timeline line whose `SourceIP` is a public IPv4 or IPv6 address produces a `[MEDIUM] Suspicious public IP source` alert. Private, loopback, link-local and other reserved addresses, and non-IP sources such as `AWS Internal` or AWS service hostnames, are ignored.
 
-Detection logic is applied to flag suspicious source behavior while minimizing false positives.
+A public source IP on its own is not evidence of obfuscation or of anything malicious: most legitimate console and API use comes from public addresses.
 
-Findings are documented with analyst context and recommended follow up actions.
+## Not implemented
 
-Why This Matters
+The detections this lab is meant to grow into are not built yet: rapid IP changes for one user or session, inconsistent geolocation, and known VPN, proxy or Tor ranges. Each needs either more events per identity or external enrichment data.
 
-IP obfuscation is commonly used to evade monitoring and attribution. While not always malicious, its presence alongside sensitive actions can indicate credential misuse, account takeover attempts, or reconnaissance activity.
+## Run
 
-Analyst Workflow
+From the repository root:
 
-A SOC analyst reviewing this output would:
-Review access logs for unusual IP patterns
-Identify rapid IP changes tied to the same user or session
-Correlate activity with authentication success or failure
-Escalate findings when behavior deviates from normal usage patterns
+```bash
+python ip-obfuscation-detection/scripts/detect_ip_obfuscation.py
+python -m unittest discover -s ip-obfuscation-detection/tests -v
+```
 
-Key Takeaway
+The input is `sample-logs/cloudtrail_timeline.txt` (the timeline format produced by the [CloudTrail SOC Pipeline](../cloudtrail-soc-pipeline)) and alerts are written to [output/ip_obfuscation_alerts.txt](output/ip_obfuscation_alerts.txt). Use `--input` and `--output` for other files. CI runs the tests in [legacy-lab-tests.yml](../.github/workflows/legacy-lab-tests.yml).
 
-This lab emphasizes behavioral detection and analyst judgment. It shows how source IP analysis can reveal risk even when credentials appear valid.
+## Analyst workflow
+
+1. Review what each flagged event did and which identity performed it; root activity from an external address deserves the closest look.
+2. Compare the source with the addresses that identity normally uses.
+3. Correlate with authentication success or failure, and escalate when the behavior departs from normal use.

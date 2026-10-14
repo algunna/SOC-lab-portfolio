@@ -24,7 +24,7 @@
 
 ## Titan review status
 
-- **Items 2 and 3 below** (CloudTrail and Copilot correctness) and fixes to ingestion, correlation and promotion are in PR #18 (open, not merged).
+- **Items 2 and 3 below** (CloudTrail and Copilot correctness) and fixes to ingestion, correlation and promotion are in PR #18 (merged).
 - **Dashboard (PR #24):** findings, reproduction steps and test results are in [TITAN_DASHBOARD_REVIEW.md](TITAN_DASHBOARD_REVIEW.md); fixes are on branch `claude/titan-command-center-review` in a separate PR, not merged.
 
 ## Current state

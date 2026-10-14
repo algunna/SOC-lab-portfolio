@@ -26,6 +26,13 @@ class AccountTriageTests(unittest.TestCase):
         self.assertEqual(result["risk_score"],60)
         self.assertEqual(result["severity"],"high")
         self.assertTrue(result["reasons"])
+    def test_every_episode_scored(self):
+        later=[dict(event(n,m),eventTime=f"2026-10-16T12:{m:02d}:00Z") for n,m in (("CreateAccessKey",0),("StopLogging",2),("DeleteTrail",4))]
+        cases=mod.correlate([event("AttachRolePolicy"),event("UpdateTrail",5)]+later)
+        self.assertEqual([c["risk_score"] for c in cases],[40,60])
+    def test_non_object_identity_ignored(self):
+        a=event("AttachRolePolicy");a["userIdentity"]="x"
+        self.assertEqual(mod.correlate([a,event("StopLogging",5)]),[])
     def test_missing_identity_not_correlated(self):
         a=event("AttachRolePolicy");b=event("StopLogging",5)
         a["userIdentity"]={};b["userIdentity"]={}

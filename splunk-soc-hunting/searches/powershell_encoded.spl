@@ -1,5 +1,5 @@
 index=windows sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1
 | eval process=lower(coalesce(Image, image, ""))
 | eval command=lower(coalesce(CommandLine, command_line, ""))
-| where match(process, "(powershell|pwsh)\\.exe$") AND (like(command, "%-encodedcommand%") OR like(command, "%-enc %"))
-| table _time host User Image CommandLine ParentImage
+| where match(process, "(powershell|pwsh)\\.exe$") AND match(command, "(^|\\s)[-/\\x{2013}\\x{2014}\\x{2015}](ec|e|en|enc|enco|encod|encode|encoded|encodedc|encodedco|encodedcom|encodedcomm|encodedcomma|encodedcomman|encodedcommand)(\\s|$)")
+| table _time host User Image CommandLine ParentImage ProcessGuid ProcessId

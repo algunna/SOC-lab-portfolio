@@ -6,10 +6,10 @@ A self-contained **offline** blue-team training lab for investigating normalized
 
 | Event ID | Detection | MITRE ATT&CK investigation hypothesis |
 | --- | --- | --- |
-| 4688 | PowerShell command line contains encoded command, execution-policy bypass, or hidden-window indicators | T1059.001 |
-| 4728 / 4732 | Added member to privileged group in the lab sample | T1098 |
+| 4688 | PowerShell command line contains encoded command (`-EncodedCommand` or any abbreviation such as `-e`, `-ec`, `-enc`), execution-policy bypass (`-ExecutionPolicy`/`-ep Bypass`), or hidden-window (`-WindowStyle`/`-w Hidden`) switches. `/` and en/em dashes are accepted as switch prefixes, as PowerShell does | T1059.001 |
+| 4728 / 4732 / 4756 | Member added to Administrators, Domain Admins, Enterprise Admins or Schema Admins | T1098 |
 | 4698 | Scheduled task created | T1053.005 |
-| 4625 followed by 4624 | Five failed logins followed by a success within five minutes from the same host, user and source IP | T1110 |
+| 4625 followed by 4624 | Five failed logins followed by a success within five minutes from the same host, user (case-insensitive) and source IP; timestamps are compared in UTC | T1110 |
 
 ## Run
 

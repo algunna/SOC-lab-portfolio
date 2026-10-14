@@ -1,4 +1,4 @@
-index=windows sourcetype="WinEventLog:Security" (EventCode=4728 OR EventCode=4732)
-| eval group_name=coalesce(TargetUserName, GroupName, "")
-| where group_name="Administrators" OR group_name="Domain Admins"
+index=windows sourcetype="WinEventLog:Security" (EventCode=4728 OR EventCode=4732 OR EventCode=4756)
+| eval group_name=coalesce(TargetUserName, Group_Name, GroupName, "")
+| where lower(group_name) IN ("administrators", "domain admins", "enterprise admins", "schema admins")
 | table _time host EventCode SubjectUserName MemberName group_name

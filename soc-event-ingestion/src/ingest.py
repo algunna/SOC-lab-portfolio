@@ -11,7 +11,7 @@ validator = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(validator)
 
 def ingest(paths):
-    accepted, rejected, seen = [], [], set()
+    accepted, rejected, duplicates, seen, event_ids = [], [], [], set(), set()
     for path in paths:
         path = Path(path)
         try:
@@ -33,11 +33,21 @@ def ingest(paths):
                 continue
             key = validator.deduplication_key(event)
             if key in seen:
+                # Same observation and rule seen before: skip, but say so in the report
+                duplicates.append({"file": str(path), "line": line_number, "event_id": event["event_id"]})
+                continue
+            event_id = (event["source"]["system"], event["event_id"])
+            if event_id in event_ids:
+                # A reused event ID for a different observation would make downstream
+                # correlation refuse the whole batch, so quarantine it here
+                rejected.append({"file": str(path), "line": line_number,
+                                 "errors": ["event_id: already used by a different alert from this source system"]})
                 continue
             seen.add(key)
+            event_ids.add(event_id)
             accepted.append(event)
-    return {"schema_version": "1.0", "accepted": accepted, "rejected": rejected,
-            "counts": {"accepted": len(accepted), "rejected": len(rejected)}}
+    return {"schema_version": "1.0", "accepted": accepted, "rejected": rejected, "duplicates": duplicates,
+            "counts": {"accepted": len(accepted), "rejected": len(rejected), "duplicates": len(duplicates)}}
 
 def main():
     p = argparse.ArgumentParser(description="Offline normalized SOC event ingestion")
@@ -50,7 +60,8 @@ def main():
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("x", encoding="utf-8") as handle:
         json.dump(report, handle, indent=2)
-    print(f"Accepted {report['counts']['accepted']}; rejected {report['counts']['rejected']}")
+    print(f"Accepted {report['counts']['accepted']}; rejected {report['counts']['rejected']}; "
+          f"duplicates skipped {report['counts']['duplicates']}")
     if report["counts"]["rejected"]:
         raise SystemExit(2)
 

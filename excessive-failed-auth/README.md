@@ -1,62 +1,34 @@
-Excessive Failed Authentication Detection
-Purpose
+# Excessive Failed Authentication Detection
 
-This lab simulates how a SOC analyst detects excessive failed authentication attempts using raw log data. The goal is to identify potential brute-force or credential abuse activity based on repeated failures from the same source, without relying on automated detection platforms.
+## Purpose
 
-The focus is on recognizing patterns in authentication behavior and escalating based on risk and frequency.
+This lab shows how a SOC analyst spots possible brute-force or password-guessing activity in raw authentication logs: repeated failed logins from one source, and above all a successful login that follows them. It is an educational lab, not a production detection system.
 
-What This Lab Demonstrates
+## Detection
 
-This project follows a simple SOC detection workflow.
+| Alert | Condition | Severity |
+| --- | --- | --- |
+| Excessive failed authentication attempts | 5 failed logins (`Result: Failure`) from the same `SourceIP` | HIGH |
+| Successful login after failures | A `Result: Success` from a source that has already reached 5 failures | CRITICAL |
 
-Authentication events are reviewed from a timeline-style log file.
+Each alert includes the source IP, failure count, first and last failure time and the usernames tried. Lines without a `SourceIP` or `Result` are skipped. Failures are counted over the whole file, not within a time window, and per source only, so a password spray spread across many IPs is not detected.
 
-Repeated failed login attempts are counted per source IP.
+ATT&CK T1110 (Brute Force) is an investigation hypothesis. A successful login after failures may be a user who finally remembered their password; confirm with the account owner and other telemetry before escalating.
 
-Sources exceeding a defined threshold are flagged as high-risk.
+## Run
 
-Alerts are generated to highlight potential brute-force or password-guessing activity.
+From the repository root:
 
-Why This Detection Matters
+```bash
+python excessive-failed-auth/scripts/detect_failed_auth.py
+python -m unittest discover -s excessive-failed-auth/tests -v
+```
 
-Excessive failed authentication attempts are a common early indicator of account compromise attempts.
+The input is `sample-logs/auth_timeline.txt` (one `Time | Event | Result | User | SourceIP` line per event) and alerts are written to [output/failed_auth_alerts.txt](output/failed_auth_alerts.txt). Use `--input` and `--output` for other files. CI runs the tests in [legacy-lab-tests.yml](../.github/workflows/legacy-lab-tests.yml).
 
-Attackers often test credentials at scale before succeeding.
+## Analyst workflow
 
-Identifying these patterns early allows SOC teams to block sources, protect accounts, and prevent further access.
-
-Even when no successful login occurs, repeated failures still represent active threat behavior.
-
-Analyst Workflow
-
-A SOC analyst reviewing this output would:
-
-Review the source IPs generating repeated failures.
-
-Determine whether the activity aligns with known users, systems, or expected behavior.
-
-Check for successful logins following the failed attempts.
-
-Escalate high-risk sources for blocking, monitoring, or further investigation.
-
-Document findings and response actions.
-
-How to Run This Lab
-
-Place authentication log data in the sample-logs directory:
-
-sample-logs/auth_timeline.txt
-
-
-Run the detection script:
-
-python scripts/detect_failed_auth.py
-
-
-Review generated alerts in:
-
-output/failed_auth_alerts.txt
-
-Key Takeaway
-
-This lab demonstrates how simple logic applied to authentication logs can uncover meaningful security risks. It reflects how SOC analysts identify brute-force behavior through repetition, context, and thresholds rather than complex tooling.
+1. Start with any CRITICAL alert: a success after repeated failures.
+2. Check whether the source IP and usernames match known users, systems or expected behavior.
+3. Review what the account did after the successful login.
+4. Escalate for blocking, password reset or further investigation, and document the outcome.

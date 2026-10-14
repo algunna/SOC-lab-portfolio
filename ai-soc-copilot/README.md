@@ -13,12 +13,14 @@ python -m unittest discover -s ai-soc-copilot/tests -v
 
 Optionally provide `--input path/to/authorized.log --output path/to/report.md`.
 
+No packages need to be installed; the script uses only the Python standard library. [reports/incident_report.md](reports/incident_report.md) is the output of the default command against the synthetic sample log. CI runs the tests and the sample workflow in [soc-copilot-tests.yml](../.github/workflows/soc-copilot-tests.yml).
+
 ## Detection
 
-Parses common OpenSSH failed/accepted password events with valid IPv4/IPv6 addresses. Counts failed passwords *per source IP*. Demo thresholds: 3-4 = Medium, 5+ = High, fewer = Low. This is not a time-windowed detection, nor evidence of compromise. Correlate account activity, timestamps and asset context before escalating.
+Parses common OpenSSH failed/accepted password events with valid IPv4/IPv6 addresses. Counts failed passwords *per source IP*, taking the source from the end of the line so a crafted username cannot change it, and counting an rsyslog `message repeated N times` line as N events. Demo thresholds: 3-4 = Medium, 5+ = High, fewer = Low. This is not a time-windowed detection, nor evidence of compromise. Correlate account activity, timestamps and asset context before escalating.
 
 ## Security and scope
 
 No API key, network connection or OpenAI dependency is required. Raw logs are not embedded in reports or transmitted outside the system by the script. Use only synthetic or authorized data. Analyst findings and ATT&CK T1110 mapping are hypotheses requiring human confirmation.
 
-The earlier prototype used AI summarization; this safe offline version emphasizes auditable rules and reproducible tests.
+The earlier prototype sent logs to an AI model for summarization; the folder keeps its original name so existing links still work. This offline version has no AI component and emphasizes auditable rules and reproducible tests.

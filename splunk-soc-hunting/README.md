@@ -7,7 +7,7 @@ Three example SPL searches aligned with the [Sigma Detection Lab](../sigma-detec
 | SPL | Windows source | Analyst playbook |
 | --- | --- | --- |
 | [Encoded PowerShell](searches/powershell_encoded.spl) | Sysmon Event ID 1 | [PowerShell triage](playbooks/POWERSHELL.md) |
-| [Privileged group change](searches/privileged_group_change.spl) | Security 4728/4732 | [Group membership](playbooks/PRIVILEGED_GROUP.md) |
+| [Privileged group change](searches/privileged_group_change.spl) | Security 4728/4732/4756 | [Group membership](playbooks/PRIVILEGED_GROUP.md) |
 | [Scheduled task creation](searches/scheduled_task_created.spl) | Security 4698 | [Scheduled tasks](playbooks/SCHEDULED_TASK.md) |
 
 ## Safe usage

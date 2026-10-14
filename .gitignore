@@ -12,3 +12,6 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
+
+# Local databases (e.g. the case lab's default cases.db)
+*.db

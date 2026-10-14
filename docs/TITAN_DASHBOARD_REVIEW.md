@@ -77,7 +77,7 @@ Severity was plain text. **Fix:** coloured badges for the five contract severiti
 
 ### 10. No loader from pipeline outputs — Medium (open)
 
-The dashboard only reads a hand-built JSON file. Before detectors are connected, it needs a read-only builder that takes an ingestion report, a correlation report and the case SQLite database (opened read-only, e.g. `file:cases.db?mode=ro`) and produces the dashboard model. Candidate triage fields (`highest_severity`, `actor`, `asset`) come from correlation changes in PR #18, so those columns show `—` until it merges. **Proposal:** a separate `build_view.py` with its own tests; not implemented here, to keep this PR to fixes.
+The dashboard only reads a hand-built JSON file. Before detectors are connected, it needs a read-only builder that takes an ingestion report, a correlation report and the case SQLite database (opened read-only, e.g. `file:cases.db?mode=ro`) and produces the dashboard model. Candidate triage fields (`highest_severity`, `actor`, `asset`) come from the correlation changes in PR #18, now merged; real correlation output fills those columns. **Proposal:** a separate `build_view.py` with its own tests; not implemented here, to keep this PR to fixes.
 
 ### 11. Handoff document out of date — Low
 

@@ -12,7 +12,7 @@ python sigma-detection-lab/scripts/validate_rules.py
 python -m unittest discover -s sigma-detection-lab/tests -v
 ```
 
-The eight synthetic fixture cases include expected matches and benign/non-matching examples. `validate_rules.py` is a **purpose-built fixture matcher for the three rules only**, not a complete Sigma specification validator, Sigma CLI replacement, or production SIEM backend. Actual SIEM deployment requires appropriate field mappings, source configuration, rule conversion, and environment-specific tuning.
+The 15 synthetic fixture cases include expected matches and benign/non-matching examples, including abbreviated PowerShell switches (`-e`, `/ec`), event IDs stored as text and lowercase group names. The matcher supports the `endswith`, `contains` and `re` modifiers, and compares plain values case-insensitively as Sigma does. `validate_rules.py` is a **purpose-built fixture matcher for the three rules only**, not a complete Sigma specification validator, Sigma CLI replacement, or production SIEM backend. Actual SIEM deployment requires appropriate field mappings, source configuration, rule conversion, and environment-specific tuning.
 
 ## Mapping and limitations
 

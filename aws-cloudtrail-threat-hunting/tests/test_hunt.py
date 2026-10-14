@@ -20,6 +20,19 @@ class CloudHuntTests(unittest.TestCase):
         self.assertEqual(module.hunt([{"eventName": "ConsoleLogin", "userIdentity": {"type": "Root"}}])[0]["severity"], "high")
     def test_assume_role_is_review_only(self):
         self.assertEqual(module.hunt([{"eventName": "AssumeRole"}])[0]["severity"], "low")
+    def test_denied_root_call_still_flagged(self):
+        findings = module.hunt([{"eventName": "CreateAccessKey", "errorCode": "AccessDenied", "userIdentity": {"type": "Root"}}])
+        self.assertEqual([f["rule"] for f in findings], ["root_account_activity"])
+    def test_privilege_escalation_and_lake_events(self):
+        for name, rule in (("CreatePolicyVersion", "iam_permission_or_identity_change"),
+                           ("SetDefaultPolicyVersion", "iam_permission_or_identity_change"),
+                           ("CreateLoginProfile", "iam_permission_or_identity_change"),
+                           ("DeleteRolePermissionsBoundary", "iam_permission_or_identity_change"),
+                           ("StopEventDataStoreIngestion", "logging_configuration_change")):
+            with self.subTest(name=name):
+                self.assertEqual([f["rule"] for f in module.hunt([{"eventName": name, "userIdentity": {"type": "IAMUser"}}])], [rule])
+    def test_non_object_identity(self):
+        self.assertEqual([f["rule"] for f in module.hunt([{"eventName": "StopLogging", "userIdentity": "root"}])], ["logging_configuration_change"])
     def test_nonobject_rejected(self):
         import tempfile
         with tempfile.TemporaryDirectory() as folder:
