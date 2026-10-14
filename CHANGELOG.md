@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added optional bounded, read-only SQLite case snapshot support to offline SOC dashboard adapter, with regression tests and a synthetic approval-to-dashboard CI workflow (PR pending).
+
+
 - Added offline pipeline-to-dashboard adapter and regression tests (PR pending).
 
 - SOC Command Center review fixes (PR pending): the fixture and columns now follow SOC Event Contract v1 (real alerts rendered a Python dict), requests for other Host names are refused (DNS rebinding), every response carries the security headers, the phone layout shows every field, startup errors are one-line messages, and HTTP-level tests were added. Findings: docs/TITAN_DASHBOARD_REVIEW.md.
