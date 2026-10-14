@@ -30,3 +30,14 @@ python -m unittest discover -s soc-command-center/tests -v
 ```
 
 The tests start a real server on a free port and need `jsonschema` (`python -m pip install -r soc-event-contract/requirements.txt`). Review findings: [docs/TITAN_DASHBOARD_REVIEW.md](../docs/TITAN_DASHBOARD_REVIEW.md).
+
+## Offline pipeline adapter
+
+Run ingestion and correlation on sanitized synthetic alerts, then:
+
+```bash
+python soc-command-center/src/adapter.py --ingestion /tmp/ingest.json --correlation /tmp/correlate.json --out /tmp/dashboard.json
+python soc-command-center/src/dashboard.py --data /tmp/dashboard.json
+```
+
+The adapter revalidates normalized alerts and verifies candidate alert references. It is read-only and does not query the SIEM, inspect live databases or perform actions. Case rows are optional to the Python adapter API; the CLI currently exports an empty cases list.
