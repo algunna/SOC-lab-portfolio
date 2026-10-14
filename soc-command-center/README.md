@@ -21,7 +21,7 @@ Then open http://127.0.0.1:8765/ in your browser. Stop with Ctrl+C.
 - GET or HEAD `/` (query strings ignored) renders the dashboard; other paths return 404; POST returns 405.
 - Counts show demonstration fixture values, **not actual incidents, telemetry or response performance**.
 - Do not expose this dev server to the Internet, use real sensitive data, or treat it as an authenticated production service.
-- Source detector and case-manager integrations remain intentionally disabled while the Titans review them.
+- Live source detector integrations remain disabled. An explicit offline adapter option can read existing local SQLite case metadata without modifying the database.
 
 ## Tests
 
@@ -40,4 +40,7 @@ python soc-command-center/src/adapter.py --ingestion /tmp/ingest.json --correlat
 python soc-command-center/src/dashboard.py --data /tmp/dashboard.json
 ```
 
-The adapter revalidates normalized alerts and verifies candidate alert references. It is read-only and does not query the SIEM, inspect live databases or perform actions. Case rows are optional to the Python adapter API; the CLI currently exports an empty cases list.
+The adapter revalidates normalized alerts and verifies candidate alert references. It is read-only and does not query the SIEM, inspect live databases or perform actions. Case rows remain optional. Add `--cases-db /path/to/existing/cases.db` to read an **existing** local case database in SQLite read-only mode. Without it, the adapter continues to export an empty cases list. Only `id`, `title`, `severity` and `status` are displayed; history, evidence and analyst notes are never loaded. Missing or malformed databases fail closed, and more than 200 cases will be rejected rather than silently truncated. The adapter makes a one-time snapshot at launch; it does not stream live changes. Do not use confidential or patient data.
+
+
+For a fully synthetic demonstration, run ingestion, correlation, explicit test-only case approval (`soc-case-promotion/src/promote.py --approve`), then run this adapter with the resulting database. The CI workflow verifies that sequence and checks that reading leaves the SQLite file unchanged.
