@@ -1,66 +1,71 @@
-CloudTrail SOC Detection Pipeline
-Purpose
+# CloudTrail SOC Detection Pipeline
 
-This lab simulates how a SOC analyst investigates AWS CloudTrail activity without relying on managed detection services. The goal is to work directly with raw CloudTrail logs, identify risky behavior, and escalate meaningful security incidents based on context rather than alert volume.
+## Purpose and scope
 
-The focus is on analyst reasoning and investigation flow, not automated tooling.
+This lab walks through how a SOC analyst turns raw AWS CloudTrail JSON into a timeline, rule-based alerts and grouped incidents without a managed detection service. It is an educational lab, not a production detection system.
 
-What This Lab Demonstrates
+It was the first CloudTrail lab in this portfolio. [AWS CloudTrail Threat Hunting](../aws-cloudtrail-threat-hunting) is the newer lab and goes further: correlation by actor and account, and triage scoring. This pipeline stays as the simpler three-step introduction.
 
-This project walks through a realistic SOC workflow using real CloudTrail logs.
+## Data inputs
 
-CloudTrail events are parsed into a readable timeline that shows who performed an action, when it occurred, and where it originated.
+- CloudTrail JSON exports in the standard `{"Records": [...]}` format.
+- Fields used: `eventTime`, `eventName`, `userIdentity.type`, `sourceIPAddress`, `awsRegion`.
+- [fixtures/sample_cloudtrail.json](fixtures/sample_cloudtrail.json) is **synthetic**. It uses the AWS documentation account ID `123456789012` and documentation IP ranges.
+- Files that are not valid JSON, files without a `Records` list and records that are not objects are skipped.
 
-Custom detection logic is applied to identify high risk behaviors such as root account usage, IAM configuration changes, and role assumption activity.
+## Detections
 
-Alerts are enriched with severity levels, MITRE ATT&CK technique mappings, and recommended analyst actions to reflect how findings are handled in an operational SOC.
+| Rule | Condition | Severity | ATT&CK hypothesis |
+| --- | --- | --- | --- |
+| Root from public IP | `userIdentity.type` is `Root` and source is a public IPv4/IPv6 address | CRITICAL | T1078.004 Cloud Accounts |
+| Root activity | `Root` from any other source (AWS Internal, AWS service, private IP) | HIGH | T1078.004 Cloud Accounts |
+| IAM permission or credential change | `CreateUser`, `CreateLoginProfile`, `UpdateLoginProfile`, `CreateAccessKey`, `Attach*Policy`, `Put*Policy`, `CreatePolicyVersion`, `SetDefaultPolicyVersion`, `CreateRole`, `UpdateAssumeRolePolicy`, `AddUserToGroup` | HIGH | T1098 Account Manipulation |
+| Service-linked role created | `CreateServiceLinkedRole` | MEDIUM | T1098 Account Manipulation |
+| CloudTrail logging changed | `StopLogging`, `DeleteTrail`, `UpdateTrail`, `PutEventSelectors` | HIGH | T1562.008 Disable or Modify Cloud Logs |
+| Role assumption | `AssumeRole`, `AssumeRoleWithSAML`, `AssumeRoleWithWebIdentity` | MEDIUM | T1078.004 Cloud Accounts |
 
-Related alerts are correlated into incidents to reduce noise and provide a clear investigative narrative.
+"Private" means 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, loopback, link-local and IPv6 unique-local (`fc00::/7`). Any other valid IP address counts as public.
 
-Why These Detections Matter
+ATT&CK mappings are investigation hypotheses, not proof of compromise.
 
-Root account activity is rare and high impact. Any use outside of break glass scenarios requires immediate review, especially when originating from public IP addresses.
+**Expected false positives:** approved break-glass root use, infrastructure-as-code deployments creating roles and policies, trail updates during planned logging changes, and AWS services assuming their own roles during onboarding.
 
-IAM configuration changes can indicate privilege escalation, persistence, or misconfiguration that weakens the security posture of the account.
+## Run
 
-Role assumption activity may be benign or malicious depending on context. Reviewing frequency, source, and trust relationships helps distinguish normal service behavior from abuse.
+From the repository root (the scripts work from any directory):
 
-Analyst Workflow
+```bash
+python cloudtrail-soc-pipeline/scripts/parse_cloudtrail.py
+python cloudtrail-soc-pipeline/scripts/detect_cloudtrail_risks.py
+python cloudtrail-soc-pipeline/scripts/correlate_cloudtrail_incidents.py
+python -m unittest discover -s cloudtrail-soc-pipeline/tests -v
+```
 
-A SOC analyst reviewing this output would:
+No packages need to be installed; the scripts use only the Python standard library. By default the parser reads the synthetic fixture. To analyse your own authorized export, place the JSON files in `cloudtrail-soc-pipeline/sample-logs/` (gitignored) and run `parse_cloudtrail.py --input-dir cloudtrail-soc-pipeline/sample-logs`. Each script also accepts `--input`/`--output`.
 
-Review the timeline to understand the sequence and scope of account activity.
+## Outputs
 
-Validate whether root usage aligns with approved administrative actions.
+Written to `cloudtrail-soc-pipeline/output/` (gitignored):
 
-Investigate IAM changes for unauthorized role creation or trust policy abuse.
+- `cloudtrail_timeline.txt`: one line per event, sorted by time: `Time | Event | UserType | SourceIP | Region`.
+- `cloudtrail_alerts.txt`: `[SEVERITY] CATEGORY title | MITRE technique | <timeline line> | AnalystAction: guidance`.
+- `cloudtrail_incidents.txt`: one incident per alert category, with its time window and related alerts. Its severity is that of its most severe alert.
 
-Confirm that role assumption behavior matches expected AWS services.
+The synthetic fixture produces 10 timeline events, 9 alerts and 4 incidents (root activity, IAM change, logging change, role assumption).
 
-Escalate critical findings and document response actions.
+[output/cloudtrail_analyst_notes.txt](output/cloudtrail_analyst_notes.txt) are historical analyst notes from an earlier run against a private AWS account. Those logs are not in the repository, so the notes cannot be reproduced from it.
 
-Key Takeaway
+## Tests
 
-This lab emphasizes analyst thinking over tool dependency. It demonstrates how raw cloud logs can be transformed into actionable security incidents using structured logic, context, and prioritization.
+[tests/test_pipeline.py](tests/test_pipeline.py) covers source IP classification (IPv4, IPv6, private, AWS sources), the expected alerts and incidents from the fixture, a benign event that must not alert, malformed files and records, and field values containing `|` or newlines that try to inject extra fields. CI runs the tests and the full pipeline in [cloudtrail-soc-pipeline-tests.yml](../.github/workflows/cloudtrail-soc-pipeline-tests.yml). Passing tests show the rules behave as written on synthetic data, not that they detect real attacks.
 
-How a SOC Analyst Would Use This Output
+## Security and privacy
 
-An analyst would review the incident summaries to understand the sequence and severity of account activity. Root usage and IAM changes would be validated against approved actions, while role assumptions would be checked for expected service behavior. Critical findings would be escalated immediately, with follow-up actions documented to ensure containment and audit readiness.
+The scripts run offline, use no credentials and make no network calls. Use only synthetic or authorized, sanitized logs. Never commit real CloudTrail exports: they contain account IDs, ARNs and source IPs.
 
-How to Run This Lab
+## Limitations
 
-1. Export CloudTrail logs from AWS and place the JSON files in the sample-logs directory.
-
-2. Parse CloudTrail logs into a readable timeline:
-   python scripts/parse_cloudtrail.py
-
-3. Generate detections with severity, MITRE ATT&CK mapping, and analyst actions:
-   python scripts/detect_cloudtrail_risks.py
-
-4. Correlate related alerts into incidents:
-   python scripts/correlate_cloudtrail_incidents.py
-
-5. Review output files in the output directory:
-   - cloudtrail_timeline.txt
-   - cloudtrail_alerts.txt
-   - cloudtrail_incidents.txt
+- Incidents are grouped by alert category only, not by actor, account, source or time window. See the newer lab for actor-based correlation.
+- No thresholds or baselines: every matching event alerts.
+- `ConsoleLogin` success/failure, MFA use and the `errorCode` field are not evaluated.
+- Only five event fields are kept, so the actor ARN is not shown in alerts.

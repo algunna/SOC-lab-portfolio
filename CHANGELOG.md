@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## 2026-10-14
 
+- Fixed CloudTrail SOC Pipeline detections (PR pending): private IPs were labelled public, public IPv6 root activity was not escalated, IAM privilege and credential changes and CloudTrail logging changes were not detected, and root alerts were split across two incidents. Added a synthetic fixture, tests, CI and a rewritten README. Validated on synthetic data only.
+- AI SOC Copilot cleanup (PR pending): replaced the stale AI-generated sample report with current script output, removed the unused `openai` requirement and added CI for the existing tests.
+
 - Added Splunk SOC Hunting examples with three read-only SPL searches, analyst playbooks and structural CI checks (PR pending). Search syntax has not been validated in a live Splunk instance.
 
 - Added tested Windows Threat Hunting lab (PR #10), including normalized event detections and synthetic fixtures.

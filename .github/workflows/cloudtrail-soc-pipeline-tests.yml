@@ -1,0 +1,30 @@
+name: CloudTrail SOC Pipeline tests
+on:
+  pull_request:
+    paths:
+      - 'cloudtrail-soc-pipeline/**'
+      - '.github/workflows/cloudtrail-soc-pipeline-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cloudtrail-soc-pipeline/**'
+      - '.github/workflows/cloudtrail-soc-pipeline-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run unit tests
+        run: python -m unittest discover -s cloudtrail-soc-pipeline/tests -v
+      - name: Run pipeline on synthetic fixture
+        run: |
+          python cloudtrail-soc-pipeline/scripts/parse_cloudtrail.py --output /tmp/timeline.txt
+          python cloudtrail-soc-pipeline/scripts/detect_cloudtrail_risks.py --input /tmp/timeline.txt --output /tmp/alerts.txt
+          python cloudtrail-soc-pipeline/scripts/correlate_cloudtrail_incidents.py --input /tmp/alerts.txt --output /tmp/incidents.txt
+          test "$(wc -l < /tmp/alerts.txt)" -eq 9
+          test "$(grep -c '^INC-' /tmp/incidents.txt)" -eq 4
