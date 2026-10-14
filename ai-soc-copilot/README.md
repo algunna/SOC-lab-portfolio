@@ -17,7 +17,7 @@ No packages need to be installed; the script uses only the Python standard libra
 
 ## Detection
 
-Parses common OpenSSH failed/accepted password events with valid IPv4/IPv6 addresses. Counts failed passwords *per source IP*. Demo thresholds: 3-4 = Medium, 5+ = High, fewer = Low. This is not a time-windowed detection, nor evidence of compromise. Correlate account activity, timestamps and asset context before escalating.
+Parses common OpenSSH failed/accepted password events with valid IPv4/IPv6 addresses. Counts failed passwords *per source IP*, taking the source from the end of the line so a crafted username cannot change it, and counting an rsyslog `message repeated N times` line as N events. Demo thresholds: 3-4 = Medium, 5+ = High, fewer = Low. This is not a time-windowed detection, nor evidence of compromise. Correlate account activity, timestamps and asset context before escalating.
 
 ## Security and scope
 

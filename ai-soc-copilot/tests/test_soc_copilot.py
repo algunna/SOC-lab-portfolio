@@ -29,6 +29,21 @@ class DetectionTests(unittest.TestCase):
         data = "\n".join("Failed password for root from 192.0.2.2 port 5000 ssh2" for _ in range(5))
         self.assertEqual(mod.analyze_log(data)["severity"], "High")
 
+    def test_username_cannot_spoof_source(self):
+        data = "\n".join(f"Failed password for invalid user x from 10.9.9.{i} port 1 ssh2 from 203.0.113.9 port 5123{i} ssh2" for i in range(6))
+        result = mod.analyze_log(data)
+        self.assertEqual(result["failed_by_ip"], {"203.0.113.9": 6})
+        self.assertEqual(result["severity"], "High")
+
+    def test_repeated_message_counts_each_event(self):
+        data = (
+            "May 08 10:14:21 h sshd[1]: Failed password for root from 203.0.113.9 port 51234 ssh2\n"
+            "May 08 10:14:30 h sshd[1]: message repeated 5 times: [ Failed password for root from 203.0.113.9 port 51234 ssh2]\n"
+        )
+        result = mod.analyze_log(data)
+        self.assertEqual(result["failed_by_ip"], {"203.0.113.9": 6})
+        self.assertEqual(result["severity"], "High")
+
     def test_report_omits_raw_account(self):
         data = "Failed password for secretuser from 192.0.2.2 port 5000 ssh2"
         self.assertNotIn("secretuser", mod.build_report(mod.analyze_log(data)))
