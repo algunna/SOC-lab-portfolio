@@ -36,7 +36,7 @@ def validate_endpoint(endpoint):
     return endpoint.rstrip("/") + "/services/search/jobs/export"
 
 
-def fetch_summary(endpoint, index, token, minutes=15, *, opener=None):
+def fetch_summary(endpoint, index, token, minutes=15, *, cafile=None, opener=None):
     """Return bounded source counts only. opener may be injected by unit tests."""
     url = validate_endpoint(endpoint)
     if not isinstance(index, str) or not INDEX.fullmatch(index):
@@ -55,7 +55,7 @@ def fetch_summary(endpoint, index, token, minutes=15, *, opener=None):
         method="POST",
     )
     if opener is None:
-        opener = build_opener(HTTPSHandler(context=ssl.create_default_context()), NoRedirect())
+        opener = build_opener(HTTPSHandler(context=ssl.create_default_context(cafile=str(cafile) if cafile else None)), NoRedirect())
     with opener.open(request, timeout=15) as response:
         raw = response.read(MAX_RESPONSE_BYTES + 1)
     if len(raw) > MAX_RESPONSE_BYTES:
@@ -96,6 +96,7 @@ def main():
     p.add_argument("--endpoint", required=True, help="HTTPS Splunk management origin, e.g. https://127.0.0.1:8089")
     p.add_argument("--index", required=True, help="Authorized index, e.g. soc_lab")
     p.add_argument("--minutes", type=int, default=15)
+    p.add_argument("--ca-cert", type=Path, help="Optional trusted Splunk CA certificate (never disable TLS verification)")
     p.add_argument("--out", type=Path, required=True)
     args = p.parse_args()
     if args.out.exists():
@@ -104,7 +105,7 @@ def main():
     if not token:
         p.error("Set SOC_SPLUNK_TOKEN in your environment (never commit the token)")
     try:
-        report = fetch_summary(args.endpoint, args.index, token, args.minutes)
+        report = fetch_summary(args.endpoint, args.index, token, args.minutes, cafile=args.ca_cert)
         args.out.parent.mkdir(parents=True, exist_ok=True)
         with args.out.open("x", encoding="utf-8") as output:
             json.dump(report, output, indent=2)
