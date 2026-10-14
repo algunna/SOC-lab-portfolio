@@ -4,6 +4,7 @@ This does not use the case manager's schema-initializing connect() function.
 No audit history, evidence descriptions, or notes are read.
 """
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 MAX_CASES = 200
@@ -18,7 +19,7 @@ def read_cases(db_path):
     if not path.is_file():
         raise ValueError("Cases database must be an existing regular file")
     # SQLite URI mode=ro refuses to create an absent DB or write to it.
-    with sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=5) as db:
+    with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True, timeout=5)) as db:
         db.row_factory = sqlite3.Row
         db.execute("PRAGMA query_only = ON")
         db.execute("PRAGMA busy_timeout = 5000")
