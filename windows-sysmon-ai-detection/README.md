@@ -1,27 +1,22 @@
-# Windows Sysmon AI Detection Lab
+# Windows Sysmon PowerShell Detection Lab
 
-A Windows endpoint-investigation lab focused on reviewing Sysmon activity for suspicious PowerShell behavior and documenting potential findings.
+Offline Sysmon **Event ID 1** triage using XML-exported Windows events. This version examines actual event fields for PowerShell command-line indicators rather than returning fixed findings.
 
-## Investigation goals
+## Run
 
-- Inspect Sysmon process events for command-line indicators such as encoded PowerShell commands and execution-policy bypass.
-- Identify relevant host, user, process, and timestamp context.
-- Map supported observations to MITRE ATT&CK techniques, while distinguishing suspicious behavior from confirmed malicious activity.
-- Prepare an analyst report for human review.
+From the repository root:
 
-## Lab workflow
+```bash
+python windows-sysmon-ai-detection/scripts/sysmon_ai_detector.py
+python -m unittest discover -s tests -v
+```
 
-1. Collect **authorized test-environment** Sysmon events.
-2. Inspect available Python scripts, input files and dependencies in this project directory.
-3. Review indicators and validate each finding against source events.
-4. If using an AI API, **sanitize sensitive logs before submission**, and verify generated explanations manually.
-5. Write an incident summary with indicators, confidence, limitations and recommended next steps.
+Custom input: `--input path/to/events.xml --output path/to/report.md`.
 
-## Scope and limitations
+## Limits
 
-This is a learning project, not an enterprise endpoint-detection system. Documentation of a detection scenario does not establish a tested detection rate. Do not claim an alert was confirmed without reviewing underlying events. Do not upload live credentials or confidential log data. Availability of scripts and sample outputs may vary; check the repository contents before running.
-
-## Related projects
-
-- [AI SOC Copilot](../ai-soc-copilot)
-- [CloudTrail SOC Pipeline](../cloudtrail-soc-pipeline)
+- Input must be XML exported from Sysmon, **not binary EVTX**. The original `logs/sysmon.evtx` in this repository is empty and is not usable sample evidence.
+- Supported detection: Sysmon Event ID 1 with PowerShell executable and encoded command, bypass, or hidden-window switches.
+- ATT&CK T1059.001 is a triage hypothesis. A matching command line does not prove compromise.
+- Never upload confidential telemetry to an external API; this script runs offline and needs no API key.
+- The provided XML fixture is synthetic.
