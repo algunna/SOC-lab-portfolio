@@ -32,14 +32,13 @@ def promote(db, report, candidate_id, analyst, severity="medium", approve=False)
     db.execute("CREATE TABLE IF NOT EXISTS promoted_candidates (candidate_id TEXT PRIMARY KEY, case_id INTEGER NOT NULL REFERENCES cases(id), approved_by TEXT NOT NULL)")
     try:
         with db:
-            db.execute("INSERT INTO promoted_candidates(candidate_id,case_id,approved_by) VALUES (?,0,?)", (candidate_id, analyst))
             cursor=db.execute("INSERT INTO cases(title,severity,created_at) VALUES (?,?,?)", ("Unverified SOC candidate: " + candidate_id, severity, cases.now()))
             case_id=cursor.lastrowid
             cases.record(db,case_id,"created",f"Severity: {severity}")
             for ref in refs:
                 cases.record(db,case_id,"evidence",ref)
             cases.record(db,case_id,"note",f"Manual approval by {analyst}; original classification unverified; alerts: {', '.join(candidate['alert_ids'])}")
-            db.execute("UPDATE promoted_candidates SET case_id=? WHERE candidate_id=?", (case_id,candidate_id))
+            db.execute("INSERT INTO promoted_candidates(candidate_id,case_id,approved_by) VALUES (?,?,?)", (candidate_id,case_id,analyst))
     except sqlite3.IntegrityError as exc:
         raise ValueError("Candidate already promoted") from exc
     return case_id
