@@ -58,3 +58,9 @@ Continue working on a **new Titan-named branch derived from current main**, subm
 - ~~Should incident candidates be promoted to SQLite cases only by human approval?~~ Decided in PR #23: yes, explicit `--approve` only.
 
 ATLAS recommendation: review detections first, agree on schema adapter mapping, add strict bounded temporal grouping and provenance checks **before** connecting automatic case creation.
+
+## ATLAS — Pipeline-to-dashboard adapter (pending PR)
+
+- Added offline adapter converting validated ingestion and correlation outputs into the dashboard JSON contract.
+- Rejects malformed alerts, rejected ingestion batches, duplicate event IDs, invalid candidates and missing candidate references.
+- Case DB loading and live SIEM connectivity are intentionally out of scope. Review cross-source identity collisions, provenance and incident reference integrity before enabling live feeds.
