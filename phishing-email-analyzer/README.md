@@ -1,68 +1,22 @@
-\# Phishing Email Analyzer
+# Phishing Email Analyzer
 
+Offline email triage using parsed `From` and `Subject` headers, text/plain body URLs, and simple evidence-based heuristics. No API key or URL browsing required.
 
+## Run
 
-A Python-based email security project that analyzes suspicious emails, extracts malicious URLs, identifies social engineering indicators, and generates analyst-ready phishing investigation reports using the OpenAI API.
+From the repository root:
 
+```bash
+python phishing-email-analyzer/scripts/phishing_email_analyzer.py
+python -m unittest discover -s tests -v
+```
 
+Custom input: `--input path/to/message.txt --output path/to/report.md`.
 
----
+## Checks
 
+- Unencrypted HTTP URLs.
+- Urgent or verification language.
+- Sender domain differing from URLs in the body (context needed: legitimate mail services also do this).
 
-
-\## Overview
-
-
-
-This lab simulates a common SOC workflow by analyzing suspicious emails and producing structured phishing investigation reports.
-
-
-
-The project performs the following tasks:
-
-
-
-\- Reads raw email content
-
-\- Extracts URLs
-
-\- Identifies common phishing indicators
-
-\- Assigns a risk rating
-
-\- Generates investigation-ready reports using the OpenAI API
-
-\- Exports the final report in Markdown format
-
-
-
----
-
-
-
-\## Project Structure
-
-
-
-```text
-
-phishing-email-analyzer/
-
-├── emails/
-
-│   └── sample\_phishing\_email.txt
-
-├── scripts/
-
-│   └── phishing\_email\_analyzer.py
-
-├── reports/
-
-│   └── phishing\_report.md
-
-├── screenshots/
-
-├── README.md
-
-└── requirements.txt
-
+These are **heuristics, not confirmation of phishing**. Review authentication headers, domain context, and reputation through authorized tools before escalating. The tool does not follow links or upload email content. Synthetic email samples are used for demonstration.
