@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added allowlisted offline Splunk synthetic saved-search alert normalization into SOC Event Contract v1, with adversarial tests and an integration path to the read-only Command Center (PR pending). Live Splunk feed and raw event mapping remain out of scope.
+
+
 - Added optional Splunk HTTPS event-count probe with allowlisted SPL, least-privilege credential guidance, mock-only tests and no raw-log export (PR pending).
 
 
