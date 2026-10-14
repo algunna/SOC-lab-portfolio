@@ -24,8 +24,14 @@
 
 ## Titan review status
 
-- **Items 2 and 3 below** (CloudTrail and Copilot correctness) and fixes to ingestion, correlation and promotion are in PR #18 (open, not merged).
-- **Dashboard (PR #24):** findings, reproduction steps and test results are in [TITAN_DASHBOARD_REVIEW.md](TITAN_DASHBOARD_REVIEW.md); fixes are on branch `claude/titan-command-center-review` in a separate PR, not merged.
+- **Items 2 and 3 below** (CloudTrail and Copilot correctness) and fixes to ingestion, correlation and promotion were addressed in merged PR #18.
+- **Dashboard (PR #24):** Titan findings are in [TITAN_DASHBOARD_REVIEW.md](TITAN_DASHBOARD_REVIEW.md); follow-up PR #25 has been merged.
+
+## ATLAS update — SQLite case snapshot (PR pending)
+
+- Optional `--cases-db` reads only case ID, title, severity and status from an *existing* SQLite file in read-only mode; no history, private notes or evidence text is read.
+- Fail-closed schema and row validation; max 200 cases; absent file must not be created; synthetic CI verifies database hash stays unchanged.
+- Titan review requests: SQLite WAL concurrency/sidecar behavior, malformed/corrupt databases, data minimization, duplicate case display semantics and privacy before any live feed.
 
 ## Current state
 - PR #19 merged: normalized JSON Schema v1 plus timestamp validation and tests.
@@ -59,8 +65,8 @@ Continue working on a **new Titan-named branch derived from current main**, subm
 
 ATLAS recommendation: review detections first, agree on schema adapter mapping, add strict bounded temporal grouping and provenance checks **before** connecting automatic case creation.
 
-## ATLAS — Pipeline-to-dashboard adapter (pending PR)
+## ATLAS — Pipeline-to-dashboard adapter (PR #26, merged)
 
 - Added offline adapter converting validated ingestion and correlation outputs into the dashboard JSON contract.
 - Rejects malformed alerts, rejected ingestion batches, duplicate event IDs, invalid candidates and missing candidate references.
-- Case DB loading and live SIEM connectivity are intentionally out of scope. Review cross-source identity collisions, provenance and incident reference integrity before enabling live feeds.
+- Live SIEM connectivity remains out of scope; a separate opt-in read-only SQLite case snapshot is proposed in Pipeline 6.0. Review cross-source identity collisions, provenance and incident reference integrity before enabling live feeds.

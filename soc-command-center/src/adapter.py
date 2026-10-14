@@ -9,6 +9,7 @@ def load_module(name,path):
     mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
     return mod
 contract=load_module("soc_event_contract",ROOT/"soc-event-contract"/"src"/"validate.py")
+case_snapshot=load_module("soc_case_snapshot",Path(__file__).resolve().parent/"case_snapshot.py")
 
 def build(ingestion,correlation,cases=None):
     if ingestion.get("rejected") or not isinstance(ingestion.get("accepted"),list):
@@ -36,10 +37,15 @@ def main():
     p.add_argument("--ingestion",type=Path,required=True)
     p.add_argument("--correlation",type=Path,required=True)
     p.add_argument("--out",type=Path,required=True)
+    p.add_argument("--cases-db",type=Path,help="Existing local SQLite case database (read-only); optional")
     args=p.parse_args()
     if args.out.exists():p.error("Refusing to overwrite output")
-    data=build(json.loads(args.ingestion.read_text(encoding="utf-8")),json.loads(args.correlation.read_text(encoding="utf-8")))
+    try:
+        case_rows=case_snapshot.read_cases(args.cases_db) if args.cases_db is not None else []
+        data=build(json.loads(args.ingestion.read_text(encoding="utf-8")),json.loads(args.correlation.read_text(encoding="utf-8")),cases=case_rows)
+    except (OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError, case_snapshot.sqlite3.DatabaseError) as exc:
+        p.error(f"Invalid input: {type(exc).__name__}")
     args.out.parent.mkdir(parents=True,exist_ok=True)
     with args.out.open("x",encoding="utf-8") as f:json.dump(data,f,indent=2)
-    print("Generated sanitized-input dashboard fixture (not live telemetry)")
+    print("Generated offline dashboard snapshot with {} local cases; no live telemetry".format(len(data["cases"])))
 if __name__=="__main__":main()

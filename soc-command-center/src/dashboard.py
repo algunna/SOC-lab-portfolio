@@ -80,7 +80,7 @@ tr{display:block;border-bottom:1px solid #31445b;padding:8px 0}
 td{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:8px;border:0;padding:4px 0;overflow-wrap:anywhere}
 td::before{content:attr(data-label);color:#9cb4d0;font-size:.75rem;text-transform:uppercase;padding-top:2px}.sev{justify-self:start}}
 </style><main><header><small>ATLAS / SOC LAB PORTFOLIO</small><h1>SOC Command Center</h1>
-<p>Read-only synthetic training data. No live SIEM, detector or case connections.</p></header>
+<p>Offline demo data only. No live SIEM or write operations.</p></header>
 <div class="metrics">""" + "".join(
         f"<div class='metric'><small>{name}</small><strong>{len(data[key])}</strong></div>"
         for name, key in (("Alerts", "alerts"), ("Unverified candidates", "candidates"), ("Investigation cases", "cases"))
