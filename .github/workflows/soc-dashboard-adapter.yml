@@ -27,7 +27,8 @@ jobs:
       - run: python -c "import json; x=json.load(open('/tmp/dashboard.json')); assert len(x['alerts'])==1 and len(x['candidates'])==1"
       - name: Build synthetic SQLite case and confirm read-only snapshot
         run: |
-          python soc-incident-case-lab/src/cases.py --db /tmp/soc-case-snapshot.db new "Synthetic investigation" --severity high
+          ID=$(python -c "import json; print(json.load(open('/tmp/correlate.json'))['incident_candidates'][0]['candidate_id'])")
+          python soc-case-promotion/src/promote.py /tmp/correlate.json --db /tmp/soc-case-snapshot.db --candidate-id "$ID" --analyst synthetic-ci-reviewer --approve
           python soc-incident-case-lab/src/cases.py --db /tmp/soc-case-snapshot.db status 1 investigating
           sha256sum /tmp/soc-case-snapshot.db > /tmp/soc-case-snapshot.sha256
           python soc-command-center/src/adapter.py --ingestion /tmp/ingest.json --correlation /tmp/correlate.json --cases-db /tmp/soc-case-snapshot.db --out /tmp/dashboard-with-cases.json
