@@ -17,6 +17,7 @@ Hands-on cybersecurity labs focused on SOC monitoring, detection, investigation 
 | [AWS CloudTrail Threat Hunting](./aws-cloudtrail-threat-hunting) | Cloud identity monitoring and event correlation |
 | [Sigma Detection Engineering](./sigma-detection-lab) | Portable detection rules and synthetic test fixtures |
 | [Splunk SOC Hunting](./splunk-soc-hunting) | SPL searches and practical investigation playbooks |
+| [SOC Incident Case Management](./soc-incident-case-lab) | Offline investigation cases, audit history and analyst notes |
 
 ## Engineering Documentation
 
