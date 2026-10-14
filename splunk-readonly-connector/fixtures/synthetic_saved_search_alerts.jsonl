@@ -1,0 +1,3 @@
+{"search_name":"windows_encoded_powershell","record_id":"synthetic-win-4688-001","occurred_at":"2026-10-14T12:00:00Z","actor":"LAB\\analyst","asset":"LAB-WS01"}
+{"search_name":"auth_failed_login_burst","record_id":"synthetic-auth-003","occurred_at":"2026-10-14T12:02:00Z","actor":"LAB\\analyst","asset":"LAB-WS01"}
+{"search_name":"aws_cloudtrail_logging_change","record_id":"synthetic-aws-002","occurred_at":"2026-10-14T12:04:00+00:00","actor":"arn:aws:iam::123456789012:user/lab-analyst","asset":"123456789012"}
