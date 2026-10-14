@@ -1,37 +1,24 @@
-# AI SOC Copilot
+# SSH Authentication SOC Triage (AI SOC Copilot Lab)
 
-A Python-based security automation project that analyzes SSH authentication logs, detects brute-force activity, maps findings to the MITRE ATT&CK framework, and uses the OpenAI API to generate analyst-ready incident reports.
+This project now defaults to **offline, deterministic** SSH authentication analysis rather than sending raw logs to an external AI service. It is an educational detection and reporting lab, not a production detection system.
 
----
+## Run
 
-## Overview
+From the repository root:
 
-AI SOC Copilot simulates a lightweight Security Operations Center (SOC) workflow by transforming raw SSH authentication logs into structured incident response reports.
+```bash
+python ai-soc-copilot/scripts/soc_copilot.py
+python -m unittest discover -s ai-soc-copilot/tests -v
+```
 
-The script performs the following tasks:
+Optionally provide `--input path/to/authorized.log --output path/to/report.md`.
 
-- Reads SSH authentication logs
-- Detects repeated failed login attempts
-- Counts successful logins
-- Extracts source IP addresses
-- Assigns a severity level
-- Maps findings to MITRE ATT&CK T1110 (Brute Force)
-- Uses the OpenAI API to generate executive summaries, analyst notes, and recommended response actions
-- Exports the final report in Markdown format
+## Detection
 
----
+Parses common OpenSSH failed/accepted password events with valid IPv4/IPv6 addresses. Counts failed passwords *per source IP*. Demo thresholds: 3-4 = Medium, 5+ = High, fewer = Low. This is not a time-windowed detection, nor evidence of compromise. Correlate account activity, timestamps and asset context before escalating.
 
-## Project Structure
+## Security and scope
 
-```text
-ai-soc-copilot/
-├── logs/
-│   └── sample_bruteforce.log
-├── scripts/
-│   └── soc_copilot.py
-├── reports/
-│   └── incident_report.md
-├── prompts/
-├── screenshots/
-├── README.md
-└── requirements.txt
+No API key, network connection or OpenAI dependency is required. Raw logs are not embedded in reports or transmitted outside the system by the script. Use only synthetic or authorized data. Analyst findings and ATT&CK T1110 mapping are hypotheses requiring human confirmation.
+
+The earlier prototype used AI summarization; this safe offline version emphasizes auditable rules and reproducible tests.
