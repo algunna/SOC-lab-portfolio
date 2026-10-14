@@ -1,120 +1,63 @@
-import os
+"""Offline SSH authentication triage demo. No network or API key required."""
+import argparse
+import ipaddress
+import re
+from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
-from datetime import datetime
-from openai import OpenAI
 
-LOG_FILE = Path("../logs/sample_bruteforce.log")
-REPORT_FILE = Path("../reports/incident_report.md")
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-
-def read_log(file_path):
-    if not file_path.exists():
-        raise FileNotFoundError(f"Log file not found: {file_path}")
-    return file_path.read_text(encoding="utf-8")
+BASE = Path(__file__).resolve().parents[1]
+LOG_FILE = BASE / "logs" / "sample_bruteforce.log"
+REPORT_FILE = BASE / "reports" / "incident_report.md"
+EVENT = re.compile(r"(?P<outcome>Failed|Accepted) password for (?:invalid user )?\S+ from (?P<ip>\S+) port \d+ ssh2")
 
 
 def analyze_log(log_data):
-    failed_attempts = log_data.count("Failed password")
-    successful_logins = log_data.count("Accepted password")
-
-    source_ips = []
+    failures, successes = Counter(), Counter()
     for line in log_data.splitlines():
-        if "from " in line:
-            ip = line.split("from ")[1].split(" ")[0]
-            source_ips.append(ip)
-
-    unique_ips = sorted(set(source_ips))
-
-    severity = "Low"
-    if failed_attempts >= 3:
-        severity = "Medium"
-    if failed_attempts >= 5:
-        severity = "High"
-
+        match = EVENT.search(line)
+        if not match:
+            continue
+        try:
+            ip = str(ipaddress.ip_address(match.group("ip")))
+        except ValueError:
+            continue
+        if match.group("outcome") == "Failed":
+            failures[ip] += 1
+        else:
+            successes[ip] += 1
+    maximum = max(failures.values(), default=0)
     return {
-        "failed_attempts": failed_attempts,
-        "successful_logins": successful_logins,
-        "unique_ips": unique_ips,
-        "severity": severity,
+        "failed_attempts": sum(failures.values()),
+        "successful_logins": sum(successes.values()),
+        "unique_ips": sorted(set(failures) | set(successes)),
+        "failed_by_ip": dict(sorted(failures.items())),
+        "severity": "High" if maximum >= 5 else "Medium" if maximum >= 3 else "Low",
     }
 
 
-def generate_ai_analysis(results, log_data):
-    prompt = f"""
-You are acting as a SOC analyst. Analyze the following SSH authentication log and create a concise incident response analysis.
-
-Findings:
-Failed login attempts: {results["failed_attempts"]}
-Successful logins: {results["successful_logins"]}
-Source IPs: {", ".join(results["unique_ips"])}
-Severity: {results["severity"]}
-
-Raw log:
-{log_data}
-
-Return the response in this format:
-
-Executive Summary:
-Analyst Notes:
-Recommended Response:
-"""
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a cybersecurity SOC analyst. Keep the response clear, professional, and practical.",
-            },
-            {
-                "role": "user",
-                "content": prompt,
-            },
-        ],
+def build_report(results):
+    return (
+        f'# SSH Authentication Investigation\n\nGenerated (UTC): {datetime.now(timezone.utc).isoformat(timespec="seconds")}\n\n'
+        f'## Findings\n\n- Failed attempts: {results["failed_attempts"]}\n'
+        f'- Successful logins: {results["successful_logins"]}\n'
+        f'- Severity (demo threshold): {results["severity"]}\n'
+        f'- Failed attempts by source: {results["failed_by_ip"]}\n\n'
+        '## MITRE ATT&CK\n\nT1110 Brute Force is an investigation hypothesis, not proof of compromise.\n\n'
+        '## Analyst next steps\n\nCheck source ownership, account context, timestamps, and successful logins. Escalate according to policy.\n\n'
+        '## Privacy\n\nThis script does not transmit raw logs to any external service. Only use authorized or synthetic input.\n'
     )
-
-    return response.choices[0].message.content
-
-
-def write_report(results, log_data, ai_analysis):
-    report = f"""# AI SOC Copilot Incident Report
-
-Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-
-## Key Findings
-
-- Failed login attempts: {results["failed_attempts"]}
-- Successful logins: {results["successful_logins"]}
-- Source IPs observed: {", ".join(results["unique_ips"])}
-- Severity: {results["severity"]}
-
-## MITRE ATT&CK Mapping
-
-- Tactic: Credential Access
-- Technique: Brute Force
-- Technique ID: T1110
-
-## AI-Generated SOC Analysis
-
-{ai_analysis}
-
-## Raw Log Sample
-
-{log_data}
-"""
-
-    REPORT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_FILE.write_text(report, encoding="utf-8")
-    print(f"AI-powered report created: {REPORT_FILE}")
 
 
 def main():
-    log_data = read_log(LOG_FILE)
-    results = analyze_log(log_data)
-    ai_analysis = generate_ai_analysis(results, log_data)
-    write_report(results, log_data, ai_analysis)
+    parser = argparse.ArgumentParser(description="Offline SSH authentication triage")
+    parser.add_argument("--input", type=Path, default=LOG_FILE)
+    parser.add_argument("--output", type=Path, default=REPORT_FILE)
+    args = parser.parse_args()
+    results = analyze_log(args.input.read_text(encoding="utf-8"))
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(build_report(results), encoding="utf-8")
+    print(f"Report saved to {args.output}")
 
 
 if __name__ == "__main__":
