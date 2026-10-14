@@ -1,0 +1,32 @@
+name: SOC manual case promotion tests
+on:
+  pull_request:
+    paths:
+      - 'soc-case-promotion/**'
+      - '.github/workflows/soc-case-promotion.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'soc-case-promotion/**'
+      - '.github/workflows/soc-case-promotion.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r soc-event-contract/requirements.txt
+      - run: python -m unittest discover -s soc-case-promotion/tests -v
+      - run: python soc-event-ingestion/src/ingest.py soc-event-contract/examples/windows_alert.json --out /tmp/ingested.json
+      - run: python soc-incident-correlation/src/correlate.py /tmp/ingested.json --out /tmp/candidates.json
+      - name: Explicit approval and duplicate prevention end-to-end
+        run: |
+          ID=$(python -c "import json; print(json.load(open('/tmp/candidates.json'))['incident_candidates'][0]['candidate_id'])")
+          python soc-case-promotion/src/promote.py /tmp/candidates.json --db /tmp/cases.db --candidate-id "$ID" --analyst fixture-analyst --approve
+          python -c "import sqlite3; d=sqlite3.connect('/tmp/cases.db'); assert d.execute('select count(*) from cases').fetchone()[0]==1; assert d.execute('select count(*) from history').fetchone()[0]==3"
+          if python soc-case-promotion/src/promote.py /tmp/candidates.json --db /tmp/cases.db --candidate-id "$ID" --analyst fixture-analyst --approve; then exit 1; fi
+          python -c "import sqlite3; d=sqlite3.connect('/tmp/cases.db'); assert d.execute('select count(*) from cases').fetchone()[0]==1"

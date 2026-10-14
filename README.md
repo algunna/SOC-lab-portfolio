@@ -53,3 +53,7 @@ Open a project folder to review the available source code, sample logs, reports,
 
 - [Offline incident candidate grouping](./soc-incident-correlation)
 - [Titan review and integration handoff](./docs/TITAN_SOC_HANDOFF.md)
+
+## SOC Pipeline 4.0 — Analyst case promotion
+
+- [Manual candidate-to-case promotion](./soc-case-promotion) — explicit analyst approval, SQLite duplicate guard and audit notes
