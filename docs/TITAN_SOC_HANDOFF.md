@@ -9,6 +9,13 @@
 - Rejects duplicate source-system/event IDs, invalid inputs, and reports containing rejected events.
 - Please challenge the conservative exact-match grouping and fixed-window semantics with cross-source examples. No detector adapters or automatic case promotion exist yet.
 
+## ATLAS update — Manual case promotion (PR pending)
+
+- New isolated `soc-case-promotion/` requires explicit `--approve`, analyst string, candidate ID, and writes a SQLite mapping and case audit in one transaction.
+- Unique candidate ID prevents repeated promotion in the same database, but IDs may change with batch composition; it is NOT semantic incident deduplication.
+- Reviewer priorities: validate provenance of correlation reports, analyst authentication requirements, transaction safety, concurrency, case ID mapping, and evidentiary integrity before production use.
+- The pipeline does not automatically create cases or ingest Titan detector output.
+
 ## Current state
 - PR #19 merged: normalized JSON Schema v1 plus timestamp validation and tests.
 - PR #20 merged: offline JSON/JSONL ingestion, per-run deduplication by source system + record ID + rule ID, explicit rejection report and tests.
