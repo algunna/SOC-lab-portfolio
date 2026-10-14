@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added a local read-only SOC Command Center demonstration UI using synthetic fixtures (PR pending).
+
 - Added manual, analyst-approved promotion from unverified incident candidates into SQLite cases, with duplicate safeguards and CI (PR pending).
 
 - Hardened offline incident candidate grouping with contract revalidation, UTC fixed-window correlation and additional edge-case tests (PR pending).

@@ -57,3 +57,7 @@ Open a project folder to review the available source code, sample logs, reports,
 ## SOC Pipeline 4.0 — Analyst case promotion
 
 - [Manual candidate-to-case promotion](./soc-case-promotion) — explicit analyst approval, SQLite duplicate guard and audit notes
+
+## SOC Command Center (read-only prototype)
+
+- [Local synthetic SOC dashboard](./soc-command-center) — read-only alert, incident candidate and case views
