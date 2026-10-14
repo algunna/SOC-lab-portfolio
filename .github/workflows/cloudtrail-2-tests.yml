@@ -1,0 +1,28 @@
+name: CloudTrail 2 correlation tests
+on:
+  pull_request:
+    paths:
+      - 'aws-cloudtrail-threat-hunting/**'
+      - '.github/workflows/cloudtrail-2-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'aws-cloudtrail-threat-hunting/**'
+      - '.github/workflows/cloudtrail-2-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run all CloudTrail lab tests
+        run: python -m unittest discover -s aws-cloudtrail-threat-hunting/tests -v
+      - name: Generate correlated reports
+        run: |
+          python aws-cloudtrail-threat-hunting/src/correlate.py --input aws-cloudtrail-threat-hunting/fixtures/records_export.json --output /tmp/cloudtrail2.json --markdown /tmp/cloudtrail2.md
+          python -c "import json; x=json.load(open('/tmp/cloudtrail2.json')); assert len(x['incidents'])==1, x"
+          test -s /tmp/cloudtrail2.md
