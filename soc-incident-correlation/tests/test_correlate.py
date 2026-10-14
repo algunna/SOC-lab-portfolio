@@ -34,6 +34,22 @@ class CorrelationTests(unittest.TestCase):
         self.assertEqual(a,b)
     def test_refuse_rejected(self):
         with self.assertRaises(ValueError):m.group_alerts({"accepted":[SAMPLE],"rejected":[{"errors":["bad"]}]})
+    def test_outside_window_separate(self):
+        e=copy.deepcopy(SAMPLE);e["event_id"]="win-lab-002";e["occurred_at"]="2026-10-14T12:16:00Z"
+        self.assertEqual(m.group_alerts(report(SAMPLE,e))["counts"]["candidates"],2)
+    def test_window_boundary_inclusive(self):
+        e=copy.deepcopy(SAMPLE);e["event_id"]="win-lab-002";e["occurred_at"]="2026-10-14T12:15:00Z"
+        self.assertEqual(m.group_alerts(report(SAMPLE,e))["counts"]["candidates"],1)
+    def test_timezone_equivalence(self):
+        e=copy.deepcopy(SAMPLE);e["event_id"]="win-lab-002";e["occurred_at"]="2026-10-14T08:05:00-04:00"
+        self.assertEqual(m.group_alerts(report(SAMPLE,e))["counts"]["candidates"],1)
+    def test_revalidate_untrusted_accepted_event(self):
+        e=copy.deepcopy(SAMPLE);e["occurred_at"]="yesterday"
+        with self.assertRaises(ValueError):m.group_alerts(report(e))
+    def test_invalid_window(self):
+        with self.assertRaises(ValueError):m.group_alerts(report(SAMPLE),0)
+    def test_duplicate_id_rejected(self):
+        with self.assertRaises(ValueError):m.group_alerts(report(SAMPLE,SAMPLE))
     def test_empty(self):
         self.assertEqual(m.group_alerts(report())["counts"],{"candidates":0,"alerts":0})
 if __name__=="__main__":unittest.main()

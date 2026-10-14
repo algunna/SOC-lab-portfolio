@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Hardened offline incident candidate grouping with contract revalidation, UTC fixed-window correlation and additional edge-case tests (PR pending).
+
 - Added conservative offline SOC incident-candidate grouping and documented Titan handoff for detector integration review (PR pending).
 
 - Added offline SOC Event Ingestion MVP with schema validation, in-run deduplication, synthetic tests and GitHub CI (PR pending).
