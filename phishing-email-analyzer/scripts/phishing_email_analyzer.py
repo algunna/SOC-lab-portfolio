@@ -7,13 +7,13 @@ from pathlib import Path
 import re
 from urllib.parse import urlsplit
 ROOT=Path(__file__).resolve().parents[1]
-URL=re.compile(r"https?://[^\\s<>\\\"']+",re.I)
-URGENCY=re.compile(r"\\b(urgent|immediately|within \\d+ hours|suspension|verify your (?:account|information))\\b",re.I)
+URL=re.compile(r"https?://[^\s<>'\x22]+", re.I)
+URGENCY=re.compile(r"\b(urgent|immediately|within \d+ hours|suspension|verify your (?:account|information))\b", re.I)
 def analyze_email(raw):
     msg=Parser(policy=policy.default).parsestr(raw)
     sender=parseaddr(str(msg.get("From","")))[1]
     subject=str(msg.get("Subject",""))
-    body="\\n".join(str(part.get_content()) for part in msg.walk() if part.get_content_type()=="text/plain") if msg.is_multipart() else str(msg.get_content())
+    body="\n".join(str(part.get_content()) for part in msg.walk() if part.get_content_type()=="text/plain") if msg.is_multipart() else str(msg.get_content())
     urls=list(dict.fromkeys(u.rstrip(".,);!?") for u in URL.findall(body)))
     indicators=[]
     if any(urlsplit(url).scheme.lower()=="http" for url in urls): indicators.append("Unencrypted HTTP URL")
