@@ -33,7 +33,9 @@ def promote(db, report, candidate_id, analyst, severity="medium", approve=False)
     try:
         with db:
             db.execute("INSERT INTO promoted_candidates(candidate_id,case_id,approved_by) VALUES (?,0,?)", (candidate_id, analyst))
-            case_id=cases.create_case(db, "Unverified SOC candidate: " + candidate_id, severity)
+            cursor=db.execute("INSERT INTO cases(title,severity,created_at) VALUES (?,?,?)", ("Unverified SOC candidate: " + candidate_id, severity, cases.now()))
+            case_id=cursor.lastrowid
+            cases.record(db,case_id,"created",f"Severity: {severity}")
             for ref in refs:
                 cases.record(db,case_id,"evidence",ref)
             cases.record(db,case_id,"note",f"Manual approval by {analyst}; original classification unverified; alerts: {', '.join(candidate['alert_ids'])}")
