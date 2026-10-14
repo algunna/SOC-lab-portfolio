@@ -1,0 +1,22 @@
+name: Splunk hunting documentation checks
+on:
+  pull_request:
+    paths:
+      - 'splunk-soc-hunting/**'
+      - '.github/workflows/splunk-hunting-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'splunk-soc-hunting/**'
+      - '.github/workflows/splunk-hunting-tests.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s splunk-soc-hunting/tests -v

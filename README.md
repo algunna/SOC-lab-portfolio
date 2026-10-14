@@ -16,6 +16,7 @@ Hands-on cybersecurity labs focused on SOC monitoring, detection, investigation 
 | [Windows Threat Hunting](./windows-threat-hunting-lab) | Windows event correlation and threat hunting |
 | [AWS CloudTrail Threat Hunting](./aws-cloudtrail-threat-hunting) | Cloud identity monitoring and event correlation |
 | [Sigma Detection Engineering](./sigma-detection-lab) | Portable detection rules and synthetic test fixtures |
+| [Splunk SOC Hunting](./splunk-soc-hunting) | SPL searches and practical investigation playbooks |
 
 ## Engineering Documentation
 
