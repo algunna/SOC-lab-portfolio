@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added manual, analyst-approved promotion from unverified incident candidates into SQLite cases, with duplicate safeguards and CI (PR pending).
+
 - Hardened offline incident candidate grouping with contract revalidation, UTC fixed-window correlation and additional edge-case tests (PR pending).
 
 - Added conservative offline SOC incident-candidate grouping and documented Titan handoff for detector integration review (PR pending).
