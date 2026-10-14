@@ -23,6 +23,18 @@ class CorrelationTests(unittest.TestCase):
     def test_failed_call_not_counted(self):
         denied=ev("StopLogging",5);denied["errorCode"]="AccessDenied"
         self.assertEqual(mod.analyze([ev("AttachRolePolicy"),denied])["incidents"],[])
+    def test_every_episode_reported(self):
+        later = lambda name, minute: dict(ev(name, minute), eventTime=f"2026-10-14T14:{minute:02d}:00Z")
+        r = mod.analyze([ev("StopLogging"), ev("CreateAccessKey", 5), later("AttachUserPolicy", 0), later("DeleteTrail", 5)])
+        self.assertEqual([i["start"][11:16] for i in r["incidents"]], ["12:00", "14:00"])
+    def test_window_edge_included(self):
+        self.assertEqual(len(mod.analyze([ev("AttachRolePolicy"), ev("StopLogging", 30)])["incidents"]), 1)
+    def test_unattributed_events_not_correlated(self):
+        a = ev("AttachRolePolicy"); b = ev("UpdateTrail", 5)
+        a["userIdentity"] = {"type": "AWSService"}; b["userIdentity"] = {"type": "AWSService"}
+        self.assertEqual(mod.analyze([a, b])["incidents"], [])
+    def test_policy_version_escalation_correlated(self):
+        self.assertEqual(len(mod.analyze([ev("CreatePolicyVersion"), ev("StopLogging", 5)])["incidents"]), 1)
     def test_records_export(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d)/"events.json"
