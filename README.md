@@ -64,3 +64,7 @@ Open a project folder to review the available source code, sample logs, reports,
 ## SOC Command Center (read-only prototype)
 
 - [Local synthetic SOC dashboard](./soc-command-center) — read-only alert, incident candidate and case views
+
+## Splunk SIEM Connectivity Preparation
+
+- [Opt-in, read-only Splunk probe](./splunk-readonly-connector) — fixed sourcetype event-count query, HTTPS verification, mock tests; live connection requires an authorized local setup

@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added optional Splunk HTTPS event-count probe with allowlisted SPL, least-privilege credential guidance, mock-only tests and no raw-log export (PR pending).
+
+
 - Added optional bounded, read-only SQLite case snapshot support to offline SOC dashboard adapter, with regression tests and a synthetic approval-to-dashboard CI workflow (PR pending).
 
 
