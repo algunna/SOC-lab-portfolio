@@ -1,0 +1,4 @@
+{"eventTime":"2026-10-14T12:00:00Z","eventName":"ConsoleLogin","sourceIPAddress":"192.0.2.10","userIdentity":{"type":"Root"}}
+{"eventTime":"2026-10-14T12:01:00Z","eventName":"AttachRolePolicy","sourceIPAddress":"192.0.2.11","userIdentity":{"type":"IAMUser"}}
+{"eventTime":"2026-10-14T12:02:00Z","eventName":"StopLogging","sourceIPAddress":"192.0.2.12","userIdentity":{"type":"AssumedRole"}}
+{"eventTime":"2026-10-14T12:03:00Z","eventName":"AssumeRole","sourceIPAddress":"192.0.2.13","userIdentity":{"type":"IAMUser"}}
