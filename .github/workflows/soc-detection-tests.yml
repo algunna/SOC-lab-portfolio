@@ -1,0 +1,37 @@
+name: SOC detection regression tests
+on:
+  pull_request:
+    paths:
+      - 'windows-sysmon-ai-detection/**'
+      - 'phishing-email-analyzer/**'
+      - 'tests/**'
+      - '.github/workflows/soc-detection-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'windows-sysmon-ai-detection/**'
+      - 'phishing-email-analyzer/**'
+      - 'tests/**'
+      - '.github/workflows/soc-detection-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile source
+        run: |
+          python -m py_compile windows-sysmon-ai-detection/scripts/sysmon_ai_detector.py
+          python -m py_compile phishing-email-analyzer/scripts/phishing_email_analyzer.py
+      - name: Run detection tests
+        run: python -m unittest discover -s tests -v
+      - name: Run offline sample workflows
+        run: |
+          python windows-sysmon-ai-detection/scripts/sysmon_ai_detector.py --output /tmp/sysmon_detection_report.md
+          python phishing-email-analyzer/scripts/phishing_email_analyzer.py --output /tmp/phishing_detection_report.md
+          test -s /tmp/sysmon_detection_report.md
+          test -s /tmp/phishing_detection_report.md
