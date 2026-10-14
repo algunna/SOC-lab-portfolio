@@ -48,3 +48,8 @@ Open a project folder to review the available source code, sample logs, reports,
 ## Contact
 
 [LinkedIn](https://www.linkedin.com/in/alen-guner) | [GitHub](https://github.com/algunna)
+
+## SOC Incident Correlation (experimental)
+
+- [Offline incident candidate grouping](./soc-incident-correlation)
+- [Titan review and integration handoff](./docs/TITAN_SOC_HANDOFF.md)
