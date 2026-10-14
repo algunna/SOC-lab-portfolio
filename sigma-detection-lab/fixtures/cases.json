@@ -1,0 +1,62 @@
+{
+  "windows_powershell_encoded.yml": [
+    {
+      "event": {
+        "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "CommandLine": "powershell.exe -EncodedCommand AAAA"
+      },
+      "match": true
+    },
+    {
+      "event": {
+        "Image": "C:\\Windows\\System32\\cmd.exe",
+        "CommandLine": "-EncodedCommand AAAA"
+      },
+      "match": false
+    },
+    {
+      "event": {
+        "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "CommandLine": "powershell.exe -NoProfile"
+      },
+      "match": false
+    }
+  ],
+  "windows_security_privileged_group.yml": [
+    {
+      "event": {
+        "EventID": 4732,
+        "TargetUserName": "Administrators"
+      },
+      "match": true
+    },
+    {
+      "event": {
+        "EventID": 4728,
+        "TargetUserName": "Domain Admins"
+      },
+      "match": true
+    },
+    {
+      "event": {
+        "EventID": 4732,
+        "TargetUserName": "Users"
+      },
+      "match": false
+    }
+  ],
+  "windows_scheduled_task_creation.yml": [
+    {
+      "event": {
+        "EventID": 4698
+      },
+      "match": true
+    },
+    {
+      "event": {
+        "EventID": 4624
+      },
+      "match": false
+    }
+  ]
+}
