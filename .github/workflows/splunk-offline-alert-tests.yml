@@ -1,0 +1,36 @@
+name: Splunk offline alert normalization integration
+on:
+  pull_request:
+    paths:
+      - 'splunk-readonly-connector/**'
+      - '.github/workflows/splunk-offline-alert-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'splunk-readonly-connector/**'
+      - '.github/workflows/splunk-offline-alert-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r soc-event-contract/requirements.txt
+      - run: python -m unittest discover -s splunk-readonly-connector/tests -v
+      - name: Offline synthetic detection to dashboard pipeline
+        run: |
+          set -euo pipefail
+          python splunk-readonly-connector/src/normalize.py splunk-readonly-connector/fixtures/synthetic_saved_search_alerts.jsonl --out /tmp/splunk-alerts.jsonl
+          python soc-event-ingestion/src/ingest.py /tmp/splunk-alerts.jsonl --out /tmp/splunk-ingestion.json
+          python soc-incident-correlation/src/correlate.py /tmp/splunk-ingestion.json --out /tmp/splunk-candidates.json
+          python soc-command-center/src/adapter.py --ingestion /tmp/splunk-ingestion.json --correlation /tmp/splunk-candidates.json --out /tmp/splunk-dashboard.json
+          python -c "import json; x=json.load(open('/tmp/splunk-dashboard.json')); assert len(x['alerts'])==3 and len(x['candidates'])==3 and x['cases']==[]; assert all(a['event_id'].startswith('splunk-') for a in x['alerts']); assert all(c['classification']=='unverified' for c in x['candidates'])"
+      - name: Reject raw-event fields before output
+        run: |
+          python -c "import json; p='/tmp/malicious-splunk.jsonl'; d={'search_name':'windows_encoded_powershell','record_id':'r1','occurred_at':'2026-10-14T12:00:00Z','_raw':'secret'}; open(p,'w').write(json.dumps(d)+'\\n')"
+          if python splunk-readonly-connector/src/normalize.py /tmp/malicious-splunk.jsonl --out /tmp/should-not-exist.jsonl; then exit 1; fi
+          test ! -e /tmp/should-not-exist.jsonl
