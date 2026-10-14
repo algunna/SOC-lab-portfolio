@@ -1,107 +1,44 @@
-import os
+"""Offline Sysmon Event ID 1 XML investigation; binary EVTX not supported."""
+import argparse
+import xml.etree.ElementTree as ET
 from pathlib import Path
-from datetime import datetime
-from openai import OpenAI
-
-LOG_FILE = Path("../logs/sysmon.evtx")
-REPORT_FILE = Path("../reports/sysmon_ai_report.md")
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-
-def analyze_sysmon():
-    findings = {
-        "event_type": "Suspicious PowerShell Execution",
-        "severity": "High",
-        "techniques": [
-            "T1059.001 - PowerShell",
-            "T1027 - Obfuscated Files or Information",
-        ],
-        "indicators": [
-            "powershell.exe",
-            "-EncodedCommand",
-            "-ExecutionPolicy Bypass",
-            "-WindowStyle Hidden",
-        ],
-    }
+ROOT=Path(__file__).resolve().parents[1]
+NS={"e":"http://schemas.microsoft.com/win/2004/08/events/event"}
+def analyze_xml(xml):
+    root=ET.fromstring(xml)
+    events=[root] if root.tag.endswith("}Event") else root.findall(".//e:Event",NS)
+    findings=[]
+    for event in events:
+        if event.findtext("e:System/e:EventID",default="",namespaces=NS)!="1": continue
+        data={x.get("Name"):(x.text or "") for x in event.findall("e:EventData/e:Data",NS)}
+        process=data.get("Image","").replace("/","\\").lower().split("\\")[-1]
+        if process not in ("powershell.exe","pwsh.exe"): continue
+        cmd=data.get("CommandLine","").lower()
+        indicators=[label for label,match in (
+            ("Encoded command","-encodedcommand" in cmd or "-enc " in cmd),
+            ("Execution policy bypass","-executionpolicy bypass" in cmd or "-ep bypass" in cmd),
+            ("Hidden window","-windowstyle hidden" in cmd or "-w hidden" in cmd)) if match]
+        if indicators:
+            findings.append({"host":event.findtext("e:System/e:Computer",default="",namespaces=NS),
+               "image":data.get("Image",""),"time":data.get("UtcTime",""),
+               "indicators":indicators,"attack":"T1059.001"})
     return findings
-
-
-def generate_ai_analysis(findings):
-    prompt = f"""
-You are a SOC analyst.
-
-Analyze this Windows Sysmon detection:
-
-Event Type: {findings["event_type"]}
-Severity: {findings["severity"]}
-Indicators: {", ".join(findings["indicators"])}
-MITRE ATT&CK: {", ".join(findings["techniques"])}
-
-Return your response in this format:
-
-Executive Summary:
-Analyst Notes:
-Recommended Response:
-"""
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a cybersecurity SOC analyst. Provide concise and professional analysis.",
-            },
-            {
-                "role": "user",
-                "content": prompt,
-            },
-        ],
-    )
-
-    return response.choices[0].message.content
-
-
-def write_report(findings, ai_analysis):
-    report = f"""# Windows Sysmon AI Detection Report
-
-Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-
-## Detection Summary
-
-- Event Type: {findings["event_type"]}
-- Severity: {findings["severity"]}
-
-## Indicators
-
-- powershell.exe
-- -EncodedCommand
-- -ExecutionPolicy Bypass
-- -WindowStyle Hidden
-
-## MITRE ATT&CK Mapping
-
-- T1059.001 - PowerShell
-- T1027 - Obfuscated Files or Information
-
-## AI-Generated Analysis
-
-{ai_analysis}
-"""
-
-    REPORT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_FILE.write_text(report, encoding="utf-8")
-    print(f"Report created: {REPORT_FILE}")
-
-
+def report(findings):
+    lines=["# Sysmon Investigation","",f"Suspicious PowerShell events: {len(findings)}","",
+           "Heuristic results are not proof of compromise.",""]
+    for f in findings:
+        lines += [f'## {f["host"]} {f["time"]}',f'- Process: {f["image"]}',
+                  f'- Indicators: {", ".join(f["indicators"])}',
+                  '- MITRE ATT&CK hypothesis: T1059.001',""]
+    return "\n".join(lines)
 def main():
-    if not LOG_FILE.exists():
-        raise FileNotFoundError(f"Sysmon log not found: {LOG_FILE}")
-
-    findings = analyze_sysmon()
-    ai_analysis = generate_ai_analysis(findings)
-    write_report(findings, ai_analysis)
-
-
-if __name__ == "__main__":
-    main()
+    p=argparse.ArgumentParser()
+    p.add_argument("--input",type=Path,default=ROOT/"logs"/"sample_sysmon.xml")
+    p.add_argument("--output",type=Path,default=ROOT/"reports"/"sysmon_detection_report.md")
+    a=p.parse_args()
+    if a.input.suffix.lower()==".evtx": p.error("Export EVTX to XML first")
+    findings=analyze_xml(a.input.read_text(encoding="utf-8"))
+    a.output.parent.mkdir(parents=True,exist_ok=True)
+    a.output.write_text(report(findings),encoding="utf-8")
+    print(f"Found {len(findings)} events")
+if __name__=="__main__": main()
