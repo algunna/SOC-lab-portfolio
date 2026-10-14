@@ -2,6 +2,10 @@
 
 Notable portfolio changes are documented here. Entries describe **merged features**, not production deployments.
 
+## Unreleased
+
+- Proposed SOC Event Contract v1: normalized alert JSON Schema, validator, six tests and CI (ATLAS PR pending). No live detector integrations yet.
+
 ## 2026-10-14
 
 - Added offline SOC incident case management lab with SQLite cases, evidence references, audit history and tests (PR pending).
