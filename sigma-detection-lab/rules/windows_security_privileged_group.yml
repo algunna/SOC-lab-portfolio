@@ -1,0 +1,27 @@
+title: Windows Privileged Group Member Added
+id: f60b123b-24ec-4a16-b3ba-bd19d9132104
+status: experimental
+description: Detects additions to local Administrators or domain Admins groups
+logsource:
+  product: windows
+  service: security
+detection:
+  selection_event:
+    EventID:
+      - 4728
+      - 4732
+  selection_group:
+    TargetUserName:
+      - 'Administrators'
+      - 'Domain Admins'
+  condition: selection_event and selection_group
+fields:
+  - SubjectUserName
+  - MemberName
+  - TargetUserName
+falsepositives:
+  - Approved account provisioning
+level: high
+tags:
+  - attack.persistence
+  - attack.t1098

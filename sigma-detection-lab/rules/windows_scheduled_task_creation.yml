@@ -1,0 +1,20 @@
+title: Windows Scheduled Task Created
+id: 28f80ae8-948d-4207-b388-80e765cbb6b4
+status: experimental
+description: New scheduled task registered, requiring analyst context
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4698
+  condition: selection
+fields:
+  - SubjectUserName
+  - TaskName
+falsepositives:
+  - Software installers and legitimate system management
+level: low
+tags:
+  - attack.persistence
+  - attack.t1053.005
