@@ -19,6 +19,10 @@ Hands-on cybersecurity labs focused on SOC monitoring, detection, investigation 
 | [Splunk SOC Hunting](./splunk-soc-hunting) | SPL searches and practical investigation playbooks |
 | [SOC Incident Case Management](./soc-incident-case-lab) | Offline investigation cases, audit history and analyst notes |
 
+## Planned Shared SOC Infrastructure
+
+- [SOC Event Contract v1](./soc-event-contract) — versioned normalized alert schema, synthetic example, validation and integration boundaries
+
 ## Engineering Documentation
 
 - [Documentation hub](./docs/README.md) — architecture, testing practices and standards

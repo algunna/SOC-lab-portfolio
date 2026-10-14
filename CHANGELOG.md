@@ -2,6 +2,10 @@
 
 Notable portfolio changes are documented here. Entries describe **merged features**, not production deployments.
 
+## Unreleased
+
+- Proposed SOC Event Contract v1: normalized alert JSON Schema, validator, six tests and CI (ATLAS PR pending). No live detector integrations yet.
+
 ## 2026-10-14
 
 - Fixed CloudTrail SOC Pipeline detections (PR pending): private IPs were labelled public, public IPv6 root activity was not escalated, IAM privilege and credential changes and CloudTrail logging changes were not detected, and root alerts were split across two incidents. Added a synthetic fixture, tests, CI and a rewritten README. Validated on synthetic data only.

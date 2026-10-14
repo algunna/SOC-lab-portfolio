@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "event_id": "win-lab-001",
+  "occurred_at": "2026-10-14T12:00:00Z",
+  "source": {
+    "system": "windows",
+    "record_id": "synthetic-4688-001"
+  },
+  "rule_id": "windows.powershell.encoded",
+  "severity": "medium",
+  "title": "Encoded PowerShell command observed",
+  "actor": "LAB\\analyst",
+  "asset": "LAB-WS01",
+  "attack_techniques": [
+    "T1059.001"
+  ],
+  "evidence": [
+    {
+      "reference": "fixtures/windows-event-001",
+      "description": "Synthetic Windows 4688 event, encoded command flag present"
+    }
+  ]
+}
