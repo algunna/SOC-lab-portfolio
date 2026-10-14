@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## 2026-10-14
 
+- Added Splunk SOC Hunting examples with three read-only SPL searches, analyst playbooks and structural CI checks (PR pending). Search syntax has not been validated in a live Splunk instance.
+
 - Added tested Windows Threat Hunting lab (PR #10), including normalized event detections and synthetic fixtures.
 - Added AWS CloudTrail Threat Hunting lab (PR #11), CloudTrail 2.0 correlation (PR #12), and account-aware triage scoring (PR #13), with GitHub Actions checks.
 - Added experimental Sigma Detection Engineering lab (PR #14), synthetic positive/negative test cases and a limited validation tool.
