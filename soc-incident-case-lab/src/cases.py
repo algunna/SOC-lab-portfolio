@@ -80,18 +80,21 @@ def main():
     show.add_argument("case_id", type=int)
     args = parser.parse_args()
     args.db.parent.mkdir(parents=True, exist_ok=True)
-    with connect(args.db) as db:
-        if args.command == "new":
-            print(f"Created case {create_case(db, args.title, args.severity)}")
-        elif args.command in ("note", "evidence"):
-            with db:
-                record(db, args.case_id, args.command, args.detail)
-            print("History updated")
-        elif args.command == "status":
-            transition(db, args.case_id, args.value)
-            print("Status updated")
-        else:
-            print(json.dumps(export_case(db, args.case_id), indent=2))
+    try:
+        with connect(args.db) as db:
+            if args.command == "new":
+                print(f"Created case {create_case(db, args.title, args.severity)}")
+            elif args.command in ("note", "evidence"):
+                with db:
+                    record(db, args.case_id, args.command, args.detail)
+                print("History updated")
+            elif args.command == "status":
+                transition(db, args.case_id, args.value)
+                print("Status updated")
+            else:
+                print(json.dumps(export_case(db, args.case_id), indent=2))
+    except (ValueError, sqlite3.DatabaseError) as exc:
+        parser.error(str(exc))  # unknown case, invalid transition, empty text, unreadable database
 
 if __name__ == "__main__":
     main()

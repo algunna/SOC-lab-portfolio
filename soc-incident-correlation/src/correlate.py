@@ -11,6 +11,7 @@ spec = importlib.util.spec_from_file_location("soc_contract", ROOT / "soc-event-
 contract = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(contract)
 DEFAULT_WINDOW_MINUTES = 15
+SEVERITY_ORDER = ["informational", "low", "medium", "high", "critical"]
 
 def group_alerts(report, window_minutes=DEFAULT_WINDOW_MINUTES):
     if not isinstance(window_minutes, int) or isinstance(window_minutes, bool) or not (1 <= window_minutes <= 1440):
@@ -59,9 +60,17 @@ def group_alerts(report, window_minutes=DEFAULT_WINDOW_MINUTES):
         basis = json.dumps([bucket["key"], [(e["source"]["record_id"], e["event_id"]) for e in events]],
                            separators=(",", ":"), ensure_ascii=True)
         identifier = "candidate-" + hashlib.sha256(basis.encode("utf-8")).hexdigest()[:16]
+        times = [datetime.fromisoformat(e["occurred_at"].replace("Z", "+00:00")).astimezone(timezone.utc) for e in events]
         candidates.append({
             "candidate_id": identifier, "classification": "unverified",
-            "reason": bucket["reason"], "alert_ids": [e["event_id"] for e in events],
+            "reason": bucket["reason"],
+            # What an analyst needs to triage without opening every alert
+            "source_system": events[0]["source"]["system"],
+            "actor": events[0].get("actor"), "asset": events[0].get("asset"),
+            "first_seen": min(times).isoformat(), "last_seen": max(times).isoformat(),
+            "highest_severity": max((e["severity"] for e in events), key=SEVERITY_ORDER.index),
+            "rule_ids": sorted({e["rule_id"] for e in events}),
+            "alert_ids": [e["event_id"] for e in events],
             "event_count": len(events),
             "evidence_references": sorted({item["reference"] for e in events for item in e["evidence"]})
         })
@@ -76,7 +85,10 @@ def main():
     args = parser.parse_args()
     if args.out.exists():
         parser.error("Refusing to overwrite existing output")
-    result = group_alerts(json.loads(args.input.read_text(encoding="utf-8")), args.window_minutes)
+    try:
+        result = group_alerts(json.loads(args.input.read_text(encoding="utf-8")), args.window_minutes)
+    except (OSError, UnicodeDecodeError, ValueError) as exc:  # ValueError covers bad JSON and refused reports
+        parser.error(f"{args.input}: {exc}")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("x", encoding="utf-8") as handle:
         json.dump(result, handle, indent=2)

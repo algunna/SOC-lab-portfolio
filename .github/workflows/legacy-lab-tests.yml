@@ -1,0 +1,33 @@
+name: Legacy lab tests
+on:
+  pull_request:
+    paths:
+      - 'excessive-failed-auth/**'
+      - 'ip-obfuscation-detection/**'
+      - '.github/workflows/legacy-lab-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'excessive-failed-auth/**'
+      - 'ip-obfuscation-detection/**'
+      - '.github/workflows/legacy-lab-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run unit tests
+        run: |
+          python -m unittest discover -s excessive-failed-auth/tests -v
+          python -m unittest discover -s ip-obfuscation-detection/tests -v
+      - name: Run sample workflows
+        run: |
+          python excessive-failed-auth/scripts/detect_failed_auth.py --output /tmp/failed_auth.txt
+          grep -q '^\[CRITICAL\] Successful login after 5 failures' /tmp/failed_auth.txt
+          python ip-obfuscation-detection/scripts/detect_ip_obfuscation.py --output /tmp/ip_alerts.txt
+          test "$(wc -l < /tmp/ip_alerts.txt)" -eq 2

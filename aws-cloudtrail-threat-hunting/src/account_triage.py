@@ -12,7 +12,7 @@ base = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(base)
 
 def identity_key(event):
-    identity = event.get("userIdentity") or {}
+    identity = base.identity(event)
     arn = identity.get("arn") or identity.get("principalId") or identity.get("userName")
     account = identity.get("accountId") or event.get("recipientAccountId")
     if not account and isinstance(arn, str) and arn.startswith("arn:"):
@@ -34,14 +34,15 @@ def correlate(events, minutes=30):
     cases = []
     for (account, actor), entries in grouped.items():
         entries.sort(key=base.timestamp)
-        for first in range(len(entries)):
+        first = 0
+        while first < len(entries):
             anchor = base.timestamp(entries[first])
             segment = [e for e in entries[first:] if timedelta(0) <= base.timestamp(e)-anchor <= timedelta(minutes=minutes)]
             names = {e.get("eventName") for e in segment}
             if names.intersection(base.IAM) and names.intersection(base.LOGGING):
                 score = 40
                 reasons = ["IAM and logging changes from the same account and identity (+40)"]
-                if any((e.get("userIdentity") or {}).get("type") == "Root" for e in segment):
+                if any(base.identity(e).get("type") == "Root" for e in segment):
                     score += 25
                     reasons.append("Root identity activity (+25)")
                 if names.intersection({"StopLogging", "DeleteTrail"}):
@@ -51,7 +52,9 @@ def correlate(events, minutes=30):
                               "risk_score": score, "severity": "critical" if score >= 80 else "high",
                               "reasons": reasons,
                               "timeline": [{"time": e.get("eventTime"), "action": e.get("eventName")} for e in segment]})
-                break
+                first += len(segment)  # look for later episodes after this one
+            else:
+                first += 1
     return cases
 
 def markdown(cases):

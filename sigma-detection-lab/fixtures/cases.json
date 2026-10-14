@@ -20,6 +20,34 @@
         "CommandLine": "powershell.exe -NoProfile"
       },
       "match": false
+    },
+    {
+      "event": {
+        "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "CommandLine": "powershell.exe -e SQBFAFgA"
+      },
+      "match": true
+    },
+    {
+      "event": {
+        "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "CommandLine": "powershell.exe -nop /ec SQBFAFgA"
+      },
+      "match": true
+    },
+    {
+      "event": {
+        "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "CommandLine": "powershell.exe -w hidden -enc"
+      },
+      "match": true
+    },
+    {
+      "event": {
+        "Image": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "CommandLine": "powershell.exe -ExecutionPolicy Bypass -File a.ps1"
+      },
+      "match": false
     }
   ],
   "windows_security_privileged_group.yml": [
@@ -43,6 +71,20 @@
         "TargetUserName": "Users"
       },
       "match": false
+    },
+    {
+      "event": {
+        "EventID": "4732",
+        "TargetUserName": "administrators"
+      },
+      "match": true
+    },
+    {
+      "event": {
+        "EventID": 4756,
+        "TargetUserName": "Enterprise Admins"
+      },
+      "match": true
     }
   ],
   "windows_scheduled_task_creation.yml": [
@@ -57,6 +99,12 @@
         "EventID": 4624
       },
       "match": false
+    },
+    {
+      "event": {
+        "EventID": "4698"
+      },
+      "match": true
     }
   ]
 }

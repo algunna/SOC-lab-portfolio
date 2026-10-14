@@ -6,12 +6,12 @@ An **offline, synthetic-data** blue-team lab for reviewing AWS CloudTrail-style 
 
 | Scenario | Example event | Interpretation |
 | --- | --- | --- |
-| Root usage | ConsoleLogin by Root identity | High-priority investigation lead |
-| IAM permission / identity modifications | AttachRolePolicy, CreateAccessKey | Verify authorization and scope |
-| Logging configuration changes | StopLogging, DeleteTrail | Investigate possible impairment of defenses |
+| Root usage | ConsoleLogin by Root identity, including denied calls | High-priority investigation lead |
+| IAM permission / identity modifications | Attach*/Put* policies, CreatePolicyVersion, SetDefaultPolicyVersion, CreateUser, CreateRole, CreateAccessKey, Create/UpdateLoginProfile, UpdateAssumeRolePolicy, AddUserToGroup, permissions-boundary removal, DeactivateMFADevice | Verify authorization and scope |
+| Logging configuration changes | StopLogging, DeleteTrail, UpdateTrail, PutEventSelectors, StopEventDataStoreIngestion, DeleteEventDataStore | Investigate possible impairment of defenses |
 | Role assumption | AssumeRole | Low-severity context signal, **not inherently malicious** |
 
-Failed API calls with an `errorCode` are not counted as completed changes. The MITRE ATT&CK mappings in output are hypotheses for human review and are not proof of compromise. The detector does **not** claim to establish unusual behavior through historical baselining.
+Failed API calls with an `errorCode` are not counted as completed changes, but a denied call made with root credentials is still reported as root usage. The MITRE ATT&CK mappings in output are hypotheses for human review and are not proof of compromise. The detector does **not** claim to establish unusual behavior through historical baselining.
 
 ## Run from repository root
 

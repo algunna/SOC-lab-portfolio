@@ -20,7 +20,8 @@ python -m unittest discover -s soc-event-contract/tests -v
 ## Design decisions
 
 - Events carry `schema_version: 1.0` and a unique, externally assigned `event_id`.
-- `occurred_at` is an RFC 3339-style date/time with offset; a validator rejects non-dates.
+- `occurred_at` must be an RFC 3339 date-time with a timezone (`2026-10-14T12:00:00Z` or `...+02:00`). The validator checks this itself, because jsonschema only enforces `format` when optional packages are installed.
+- No string field may contain control characters (newlines, tabs, escape codes), so alert text cannot forge extra lines in reports or IDs.
 - `source.system` and `source.record_id` identify the originating observation.
 - `rule_id` identifies the originating detection; `severity` is a triage category, **not a calibrated compromise probability**.
 - `evidence` stores references and sanitized descriptions, not raw log payloads.

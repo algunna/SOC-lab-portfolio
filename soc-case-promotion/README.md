@@ -19,11 +19,12 @@ Select a candidate ID from the report; it is intentionally not guessed. Change f
 
 - Explicit `--approve`, analyst identifier and exact candidate ID are required.
 - The candidate must be marked `unverified` and include alert IDs.
-- SQLite stores a unique candidate ID mapping to prevent repeat promotions against the same database.
+- SQLite stores unique candidate ID and alert mappings. A candidate is refused if its ID, or any of its alerts, was already promoted in the same database; this also catches a re-run that gives the same alerts a new candidate ID. The error names the overlapping alerts, and any new alerts in that candidate must be added to the existing case by hand.
+- The case severity defaults to the candidate's highest alert severity (`informational` becomes `low`); `--severity` overrides it. The case title names the actor and asset when the candidate has them.
 - Case creation, mapping, evidence references and approval note occur within one database transaction.
 - The output case stays in `open` status and is not a finding of compromise.
 - **No authentication verifies the analyst's identity**; the flag is a local human acknowledgment, not a security boundary.
-- Correlation report JSON is not cryptographically authenticated or independently tied to raw log evidence; only use trusted synthetic files. Candidate IDs can change if batch membership changes, and logically duplicate incidents with different IDs remain possible.
+- Correlation report JSON is not cryptographically authenticated or independently tied to raw log evidence; only use trusted synthetic files. Candidate IDs can change if batch membership changes; alerts already in a case are blocked, but two cases about the same activity are still possible when they share no alert.
 - No networking, automatic remediation, background operations, encryption or production-grade concurrency protection.
 
 The Titans should review input provenance, identity verification, duplicate semantics and audit integrity before integration into any real alert workflow.

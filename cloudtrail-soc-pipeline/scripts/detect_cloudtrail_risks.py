@@ -1,23 +1,44 @@
-INPUT_FILE = "output/cloudtrail_timeline.txt"
-OUTPUT_FILE = "output/cloudtrail_alerts.txt"
+"""Rule-based detections over the parsed CloudTrail timeline."""
+import argparse
+import ipaddress
+from pathlib import Path
 
-MITRE_MAP = {
-    "ROOT_ACTIVITY": {
-        "severity": "HIGH",
-        "technique": "T1078",
-        "name": "Valid Accounts"
-    },
-    "IAM_CHANGE": {
-        "severity": "HIGH",
-        "technique": "T1098",
-        "name": "Account Manipulation"
-    },
-    "ASSUME_ROLE": {
-        "severity": "MEDIUM",
-        "technique": "T1078.004",
-        "name": "Cloud Accounts"
-    }
+BASE = Path(__file__).resolve().parents[1]
+DEFAULT_INPUT_FILE = BASE / "output" / "cloudtrail_timeline.txt"
+DEFAULT_OUTPUT_FILE = BASE / "output" / "cloudtrail_alerts.txt"
+
+# rule id: (severity, incident category, title, MITRE ATT&CK hypothesis)
+RULES = {
+    "ROOT_PUBLIC_IP": ("CRITICAL", "ROOT_ACTIVITY", "Root activity from public IP", "T1078.004 Valid Accounts: Cloud Accounts"),
+    "ROOT_ACTIVITY": ("HIGH", "ROOT_ACTIVITY", "Root account activity", "T1078.004 Valid Accounts: Cloud Accounts"),
+    "IAM_CHANGE": ("HIGH", "IAM_CHANGE", "IAM permission or credential change", "T1098 Account Manipulation"),
+    "SERVICE_LINKED_ROLE": ("MEDIUM", "IAM_CHANGE", "Service-linked role created", "T1098 Account Manipulation"),
+    "LOGGING_TAMPER": ("HIGH", "LOGGING_TAMPER", "CloudTrail logging changed", "T1562.008 Impair Defenses: Disable or Modify Cloud Logs"),
+    "ASSUME_ROLE": ("MEDIUM", "ASSUME_ROLE", "Role assumption", "T1078.004 Valid Accounts: Cloud Accounts"),
 }
+
+IAM_CHANGE_EVENTS = {
+    "CreateUser", "CreateLoginProfile", "UpdateLoginProfile", "CreateAccessKey",
+    "AttachUserPolicy", "AttachRolePolicy", "AttachGroupPolicy",
+    "PutUserPolicy", "PutRolePolicy", "PutGroupPolicy",
+    "CreatePolicyVersion", "SetDefaultPolicyVersion",
+    "CreateRole", "UpdateAssumeRolePolicy", "AddUserToGroup",
+    "PutUserPermissionsBoundary", "DeleteUserPermissionsBoundary", "DeleteRolePermissionsBoundary",
+    "DeactivateMFADevice",
+}
+LOGGING_TAMPER_EVENTS = {"StopLogging", "DeleteTrail", "UpdateTrail", "PutEventSelectors",
+                         "StopEventDataStoreIngestion", "DeleteEventDataStore"}
+ROLE_ASSUMPTION_EVENTS = {"AssumeRole", "AssumeRoleWithSAML", "AssumeRoleWithWebIdentity",
+                          "AssumeRoot", "GetFederationToken"}
+
+# Addresses treated as non-public. Everything else that parses as an IP is public.
+INTERNAL_NETWORKS = [
+    ipaddress.ip_network(network)
+    for network in (
+        "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10",
+        "127.0.0.0/8", "169.254.0.0/16", "::1/128", "fc00::/7", "fe80::/10",
+    )
+]
 
 ANALYST_GUIDANCE = {
     "CRITICAL": (
@@ -33,130 +54,103 @@ ANALYST_GUIDANCE = {
     "MEDIUM": (
         "Monitor and validate. "
         "Ensure role trust policy is expected and usage aligns with known services."
-    )
+    ),
 }
 
 
-def classify_source_ip(line):
-    if "AWS Internal" in line:
+def parse_timeline_line(line):
+    """Split 'Key: value | Key: value' into a dict."""
+    fields = {}
+    for part in line.split(" | "):
+        key, sep, value = part.partition(": ")
+        if sep:
+            fields[key.strip()] = value.strip()
+    return fields
+
+
+def classify_source_ip(source):
+    if source == "AWS Internal":
         return "aws_internal"
 
-    if ".amazonaws.com" in line:
+    if source.endswith(".amazonaws.com"):
         return "aws_service"
 
-    if "SourceIP:" in line:
-        ip = line.split("SourceIP:")[1].split("|")[0].strip()
-        if ip.count(".") == 3:
-            return "public_ip"
+    try:
+        ip = ipaddress.ip_address(source)
+    except ValueError:
+        return "unknown"
+    if ip.version == 6 and ip.ipv4_mapped:
+        ip = ip.ipv4_mapped  # ::ffff:10.1.2.3 is the IPv4 address 10.1.2.3
 
-    return "unknown"
+    if any(ip in network for network in INTERNAL_NETWORKS):
+        return "internal_ip"
 
-
-def detect_cloudtrail_risks():
-    alerts = []
-
-    with open(INPUT_FILE, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-
-            if "UserType: Root" in line:
-                meta = MITRE_MAP["ROOT_ACTIVITY"]
-                alerts.append(
-                    f"[{meta['severity']}] Root account activity | "
-                    f"MITRE {meta['technique']} {meta['name']} | {line}"
-                )
-
-            if "CreateServiceLinkedRole" in line:
-                meta = MITRE_MAP["IAM_CHANGE"]
-                alerts.append(
-                    f"[{meta['severity']}] IAM configuration change | "
-                    f"MITRE {meta['technique']} {meta['name']} | {line}"
-                )
-
-            if "AssumeRole" in line:
-                meta = MITRE_MAP["ASSUME_ROLE"]
-                alerts.append(
-                    f"[{meta['severity']}] Role assumption detected | "
-                    f"MITRE {meta['technique']} {meta['name']} | {line}"
-                )
-
-    return alerts
+    return "public_ip"
 
 
-def detect_root_from_public_ip():
-    alerts = []
+def match_rules(event):
+    """Return the rule ids triggered by one parsed timeline event."""
+    rule_ids = []
+    event_name = event.get("Event", "")
 
-    with open(INPUT_FILE, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-
-            if "UserType: Root" in line:
-                source_type = classify_source_ip(line)
-
-                if source_type == "public_ip":
-                    alerts.append(
-                        "[CRITICAL] Root activity from public IP | "
-                        "MITRE T1078 Valid Accounts | "
-                        + line
-                    )
-
-    return alerts
-
-
-def suppress_duplicate_root_alerts(alerts):
-    critical_events = set()
-
-    for alert in alerts:
-        if alert.startswith("[CRITICAL]"):
-            critical_events.add(alert.split("| Time:")[1].strip())
-
-    deduped_alerts = []
-
-    for alert in alerts:
-        if alert.startswith("[HIGH] Root"):
-            event_key = alert.split("| Time:")[1].strip()
-            if event_key in critical_events:
-                continue
-        deduped_alerts.append(alert)
-
-    return deduped_alerts
-
-
-def enrich_alerts_with_guidance(alerts):
-    enriched_alerts = []
-
-    for alert in alerts:
-        if alert.startswith("[CRITICAL]"):
-            guidance = ANALYST_GUIDANCE["CRITICAL"]
-        elif alert.startswith("[HIGH]"):
-            guidance = ANALYST_GUIDANCE["HIGH"]
-        elif alert.startswith("[MEDIUM]"):
-            guidance = ANALYST_GUIDANCE["MEDIUM"]
+    if event.get("UserType") == "Root":
+        if classify_source_ip(event.get("SourceIP", "")) == "public_ip":
+            rule_ids.append("ROOT_PUBLIC_IP")
         else:
-            guidance = "Review event context."
+            rule_ids.append("ROOT_ACTIVITY")
 
-        enriched_alerts.append(f"{alert} | AnalystAction: {guidance}")
+    if event_name == "CreateServiceLinkedRole":
+        rule_ids.append("SERVICE_LINKED_ROLE")
+    elif event_name in IAM_CHANGE_EVENTS:
+        rule_ids.append("IAM_CHANGE")
 
-    return enriched_alerts
+    if event_name in LOGGING_TAMPER_EVENTS:
+        rule_ids.append("LOGGING_TAMPER")
+
+    if event_name in ROLE_ASSUMPTION_EVENTS:
+        rule_ids.append("ASSUME_ROLE")
+
+    return rule_ids
+
+
+def format_alert(rule_id, line):
+    severity, category, title, technique = RULES[rule_id]
+    return (
+        f"[{severity}] {category} {title} | MITRE {technique} | {line} | "
+        f"AnalystAction: {ANALYST_GUIDANCE[severity]}"
+    )
+
+
+def detect_cloudtrail_risks(lines):
+    alerts = []
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        for rule_id in match_rules(parse_timeline_line(line)):
+            alerts.append(format_alert(rule_id, line))
+
+    return alerts
 
 
 def main():
-    alerts = []
+    parser = argparse.ArgumentParser(description="Detect risky CloudTrail activity in a parsed timeline")
+    parser.add_argument("--input", type=Path, default=DEFAULT_INPUT_FILE)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_FILE)
+    args = parser.parse_args()
 
-    alerts.extend(detect_cloudtrail_risks())
-    alerts.extend(detect_root_from_public_ip())
+    try:
+        alerts = detect_cloudtrail_risks(args.input.read_text(encoding="utf-8").splitlines())
+    except (OSError, UnicodeDecodeError) as exc:
+        parser.error(f"{args.input}: {exc}")
 
-    alerts = suppress_duplicate_root_alerts(alerts)
-    alerts = enrich_alerts_with_guidance(alerts)
-
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        for alert in alerts:
-            f.write(alert + "\n")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text("".join(alert + "\n" for alert in alerts), encoding="utf-8")
 
     print(f"Generated {len(alerts)} alerts")
 
 
 if __name__ == "__main__":
     main()
-
-

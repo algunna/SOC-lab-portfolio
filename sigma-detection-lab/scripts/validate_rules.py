@@ -1,6 +1,7 @@
 """Small fixture validator for this lab's subset of Sigma syntax, not a SIEM converter."""
 import argparse
 import json
+import re
 from pathlib import Path
 import yaml
 
@@ -15,8 +16,11 @@ def selector_matches(selector, event):
             matched = isinstance(observed, str) and any(observed.lower().endswith(str(x).lower()) for x in values)
         elif operator == "contains":
             matched = isinstance(observed, str) and any(str(x).lower() in observed.lower() for x in values)
+        elif operator == "re":
+            matched = isinstance(observed, str) and any(re.search(str(x), observed) for x in values)
         elif not operator:
-            matched = any(observed == value for value in values)
+            # Sigma compares plain values case-insensitively, and exports may carry IDs as text
+            matched = observed is not None and any(str(observed).lower() == str(value).lower() for value in values)
         else:
             raise ValueError(f"Unsupported operator {operator}")
         if not matched:

@@ -1,4 +1,5 @@
 """Offline IOC type classification. No reputation verdicts without external evidence."""
+import argparse
 import ipaddress
 import re
 from pathlib import Path
@@ -44,10 +45,17 @@ def create_report(records):
 
 
 def main():
-    records = [classify_ioc(value) for value in load_iocs()]
-    REPORT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_FILE.write_text(create_report(records), encoding="utf-8")
-    print(f"Classified {len(records)} IOCs. Report: {REPORT_FILE}")
+    parser = argparse.ArgumentParser(description="Offline IOC format classification")
+    parser.add_argument("--input", type=Path, default=IOC_FILE)
+    parser.add_argument("--output", type=Path, default=REPORT_FILE)
+    args = parser.parse_args()
+    try:
+        records = [classify_ioc(value) for value in load_iocs(args.input)]
+    except (OSError, UnicodeDecodeError) as exc:
+        parser.error(f"{args.input}: {exc}")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(create_report(records), encoding="utf-8")
+    print(f"Classified {len(records)} IOCs. Report: {args.output}")
 
 
 if __name__ == "__main__":

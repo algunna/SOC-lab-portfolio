@@ -7,6 +7,7 @@ This upgrade extends the [offline threat hunting lab](README.md) with an analyst
 - Accepts CloudTrail-style JSONL events, JSON arrays, or AWS export-shaped `{"Records":[...]}` JSON files.
 - Correlates IAM changes followed by (or occurring near) CloudTrail logging changes from the **same actor** within a default 30-minute window.
 - Excludes events reporting an AWS `errorCode` from completed-action correlation.
+- Reports every separate episode for an actor, not just the first, and does not correlate events that carry no ARN, principal ID or username.
 - Writes both JSON findings and a Markdown analyst timeline.
 - Does not send data to AWS, APIs, or an LLM.
 

@@ -17,7 +17,7 @@ python threat-intel-enrichment-lab/scripts/threat_intel_enrichment.py
 python -m unittest discover -s threat-intel-enrichment-lab/tests -v
 ```
 
-The report is written to `threat-intel-enrichment-lab/reports/threat_intel_report.md`.
+By default the report is written to `threat-intel-enrichment-lab/reports/threat_intel_report.md`; use `--input path/to/iocs.txt --output path/to/report.md` for other files. CI runs the tests in [threat-intel-tests.yml](../.github/workflows/threat-intel-tests.yml).
 
 ## Analyst workflow
 
@@ -27,4 +27,4 @@ The report is written to `threat-intel-enrichment-lab/reports/threat_intel_repor
 4. Only assign a reputation or severity when supporting evidence is available.
 5. Record uncertainty and evidence in the final investigation.
 
-This lab does not contact threat feeds, use an LLM, or assert that the sample IOCs are malicious. Older committed example reports are historical and may reflect unverified prototype judgments.
+This lab does not contact threat feeds, use an LLM, or assert that the sample IOCs are malicious. The committed report is the output of the default command.

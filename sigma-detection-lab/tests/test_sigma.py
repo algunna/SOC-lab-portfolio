@@ -7,7 +7,7 @@ module=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 class SigmaTests(unittest.TestCase):
     def test_fixtures(self):
-        self.assertEqual(module.validate(),8)
+        self.assertEqual(module.validate(),15)
     def test_unknown_operator_rejected(self):
         with self.assertRaises(ValueError):
             module.selector_matches({"Image|startswith":"cmd"}, {"Image":"cmd.exe"})
