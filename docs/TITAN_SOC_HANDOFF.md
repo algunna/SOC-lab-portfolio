@@ -70,3 +70,10 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Added offline adapter converting validated ingestion and correlation outputs into the dashboard JSON contract.
 - Rejects malformed alerts, rejected ingestion batches, duplicate event IDs, invalid candidates and missing candidate references.
 - Live SIEM connectivity remains out of scope; a separate opt-in read-only SQLite case snapshot is proposed in Pipeline 6.0. Review cross-source identity collisions, provenance and incident reference integrity before enabling live feeds.
+
+## ATLAS — Opt-in Splunk SIEM connectivity probe (PR pending)
+
+- New `splunk-readonly-connector/` runs an explicitly invoked, fixed, read-only SPL query over validated HTTPS with a token from the `SOC_SPLUNK_TOKEN` local environment variable.
+- No live call is made in CI. Tests inject mock HTTP responses, reject insecure origins and injection attempts, and verify raw event fields are excluded from the returned summary.
+- Please review least-privilege Splunk capability requirements, HTTPS trust, redirect handling, query bounds, metadata disclosure, and required event-field mapping before any SIEM-to-alert integration.
+- Real Splunk connection and field mappings are not yet verified. No production telemetry or tokens belong in this repository.
