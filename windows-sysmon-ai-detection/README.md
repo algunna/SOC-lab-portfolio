@@ -1,68 +1,27 @@
-\# Windows Sysmon AI Detection Lab
+# Windows Sysmon AI Detection Lab
 
+A Windows endpoint-investigation lab focused on reviewing Sysmon activity for suspicious PowerShell behavior and documenting potential findings.
 
+## Investigation goals
 
-A Windows-based detection engineering project that uses Sysmon to identify suspicious PowerShell activity and generates analyst-ready incident reports using Python and the OpenAI API.
+- Inspect Sysmon process events for command-line indicators such as encoded PowerShell commands and execution-policy bypass.
+- Identify relevant host, user, process, and timestamp context.
+- Map supported observations to MITRE ATT&CK techniques, while distinguishing suspicious behavior from confirmed malicious activity.
+- Prepare an analyst report for human review.
 
+## Lab workflow
 
+1. Collect **authorized test-environment** Sysmon events.
+2. Inspect available Python scripts, input files and dependencies in this project directory.
+3. Review indicators and validate each finding against source events.
+4. If using an AI API, **sanitize sensitive logs before submission**, and verify generated explanations manually.
+5. Write an incident summary with indicators, confidence, limitations and recommended next steps.
 
----
+## Scope and limitations
 
+This is a learning project, not an enterprise endpoint-detection system. Documentation of a detection scenario does not establish a tested detection rate. Do not claim an alert was confirmed without reviewing underlying events. Do not upload live credentials or confidential log data. Availability of scripts and sample outputs may vary; check the repository contents before running.
 
+## Related projects
 
-\## Overview
-
-
-
-This lab simulates a common endpoint investigation workflow by collecting Sysmon telemetry, identifying suspicious PowerShell execution, and generating a structured incident report.
-
-
-
-The project performs the following tasks:
-
-
-
-\- Collects Windows endpoint telemetry with Sysmon
-
-\- Detects suspicious PowerShell activity
-
-\- Identifies encoded commands and execution policy bypass
-
-\- Maps findings to MITRE ATT\&CK techniques
-
-\- Generates investigation-ready incident reports using the OpenAI API
-
-\- Exports the final report in Markdown format
-
-
-
----
-
-
-
-\## Project Structure
-
-
-
-```text
-
-windows-sysmon-ai-detection/
-
-├── logs/
-
-│   └── sysmon.evtx
-
-├── scripts/
-
-│   └── sysmon\_ai\_detector.py
-
-├── reports/
-
-│   └── sysmon\_ai\_report.md
-
-├── screenshots/
-
-├── README.md
-
-└── requirements.txt
-
+- [AI SOC Copilot](../ai-soc-copilot)
+- [CloudTrail SOC Pipeline](../cloudtrail-soc-pipeline)
