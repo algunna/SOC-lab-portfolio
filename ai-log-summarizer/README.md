@@ -1,37 +1,26 @@
-AI Log Summarizer
+# AI Log Summarizer
 
-Overview  
-This project analyzes system and application logs and produces structured, human readable summaries to support security operations and incident review. The tool is designed to mirror how a SOC analyst reviews raw logs, identifies notable events, and assesses potential security concerns.
+A Python training lab for reviewing security logs and preparing analyst-friendly summaries. It is a demonstration project, not a production SOC platform.
 
-The project focuses on automation, clarity, and secure handling of log data rather than alert generation alone.
+## Purpose
 
-Features  
-The tool processes log files and generates summaries highlighting key events, suspicious activity, severity levels, and recommended actions.  
-It supports both structured and unstructured log formats.  
-It can operate using either a locally hosted language model or an external API depending on configuration.
+Practice ingesting example logs, reviewing suspicious events, and drafting investigation notes. See the nested project directory for the available Python script and sample outputs.
 
-Tools and Technologies  
-Python is used for log ingestion, preprocessing, and automation.  
-The OpenAI API or a local LLM may be used for summarization.  
-Example logs include Windows Event Logs, Sysmon output, and Apache access logs.
+## Run locally
 
-How to Use  
-Place log files in the logs directory.  
-Execute the summarization script from the project root.  
-Review the generated report in the output directory.
+1. Review the source code and dependencies before running it.
+2. Create a local environment file or set environment variables for any API credentials the script requires.
+3. Run the script against **synthetic or authorized** logs only.
+4. Validate AI-generated statements against the original events.
 
-Security Considerations  
-This project includes defensive controls designed to reduce the risk of exposing sensitive information during log analysis and external processing.
+## Important security limitations
 
-Sensitive Data Redaction  
-Log content is sanitized before analysis. IP addresses, email addresses, and user identifiers are removed using pattern based detection to prevent unintended disclosure.
+- Do not submit real credentials, patient information, employee data, or other confidential logs to an external AI provider.
+- **Automatic redaction is not verified in this lab.** Review and sanitize all input yourself before transmitting it.
+- No production-grade encryption, security controls, detection accuracy, or incident response automation is claimed.
+- Keep secrets in local environment variables, never in Git. The repository now ignores `.env` files; historically committed credentials still require revocation because they remain in Git history.
+- Outputs produced by language models may contain inaccurate or unsupported conclusions.
 
-Credential Handling  
-API credentials are stored locally using environment variables and are excluded from version control. When credential exposure occurred during development, the affected key was revoked and rotated, and repository protections were enforced.
+## Evidence
 
-External Processing Safety  
-Only redacted log data is transmitted to external services. This limits the exposure of operational or user related information outside the environment.
-
-Secure Development Practices  
-The project follows controlled Git workflows including branch isolation, clean history management, and explicit remediation of detected secrets. These practices align with standard SOC and application security procedures.
-
+The repository includes sample log files and example output. Treat these as demonstrations rather than independently validated SOC alerts.
