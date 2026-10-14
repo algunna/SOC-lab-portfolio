@@ -19,6 +19,7 @@
 | Sigma validation | [sigma-detection-tests.yml](../.github/workflows/sigma-detection-tests.yml) |
 | AI SOC Copilot (SSH triage) | [soc-copilot-tests.yml](../.github/workflows/soc-copilot-tests.yml) |
 | CloudTrail SOC Pipeline | [cloudtrail-soc-pipeline-tests.yml](../.github/workflows/cloudtrail-soc-pipeline-tests.yml) |
+| Threat intel IOC classification | [threat-intel-tests.yml](../.github/workflows/threat-intel-tests.yml) |
 
 Not all legacy labs currently have CI coverage; see their README and source tests individually.
 

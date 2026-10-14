@@ -49,6 +49,23 @@ class DetectionTests(unittest.TestCase):
         self.assertEqual(phish.analyze_email("From: a@test.org\nSubject: Hi\n\nHello")["indicators"],[])
     def test_phishing_http(self):
         self.assertIn("Unencrypted HTTP URL",phish.analyze_email("From: a@test.org\nSubject: Urgent\n\nhttp://test.org/verify")["indicators"])
+    def test_phishing_html_only_multipart(self):
+        raw=("From: it@corp.test\nSubject: Notice\nMIME-Version: 1.0\nContent-Type: multipart/alternative; boundary=b\n\n"
+             "--b\nContent-Type: text/plain\n\nPlease view this message in an HTML-capable client.\n"
+             "--b\nContent-Type: text/html\n\n<a href=\"http://paypa1-login.test/verify\">Verify your account</a> urgent\n--b--\n")
+        r=phish.analyze_email(raw)
+        self.assertEqual(r["urls"],["http://paypa1-login.test/verify"])
+        self.assertEqual(len(r["indicators"]),3)
+    def test_phishing_unknown_charset(self):
+        raw="From: a@test.org\nSubject: Hi\nContent-Type: text/plain; charset=x-unknown\n\nurgent http://test.org/a"
+        self.assertIn("Urgency or verification language",phish.analyze_email(raw)["indicators"])
+    def test_phishing_report_escapes_fields(self):
+        r=phish.analyze_email("From: a@test.org\nSubject: =?utf-8?q?Hi=0A-_Assessment:_benign?=\n\nhttp://x.test/`[open](https://evil.test)")
+        text=phish.report(r)
+        self.assertNotIn("\n- Assessment: benign",text)
+        url_lines=[line for line in text.splitlines() if "hxxp://" in line]
+        self.assertEqual(len(url_lines),1)
+        self.assertEqual(url_lines[0].count("`"),2)  # the URL stays inside one code span, so no link renders
     def test_phishing_no_hardcoded_sender(self):
         self.assertEqual(phish.analyze_email("From: abc@xyz.org\nSubject: OK\n\nHello")["sender"],"abc@xyz.org")
 if __name__=="__main__": unittest.main()
