@@ -1,1 +1,1 @@
-openai
+# No third-party packages required: the triage script uses only the Python standard library.

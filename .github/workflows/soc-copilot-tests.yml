@@ -1,0 +1,27 @@
+name: SOC Copilot SSH triage tests
+on:
+  pull_request:
+    paths:
+      - 'ai-soc-copilot/**'
+      - '.github/workflows/soc-copilot-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ai-soc-copilot/**'
+      - '.github/workflows/soc-copilot-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run unit tests
+        run: python -m unittest discover -s ai-soc-copilot/tests -v
+      - name: Run sample workflow
+        run: |
+          python ai-soc-copilot/scripts/soc_copilot.py --output /tmp/ssh_triage_report.md
+          grep -q 'Severity (demo threshold): Medium' /tmp/ssh_triage_report.md
