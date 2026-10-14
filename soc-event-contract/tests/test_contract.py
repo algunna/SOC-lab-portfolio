@@ -18,6 +18,12 @@ class ContractTests(unittest.TestCase):
     def test_invalid_time(self):
         a=copy.deepcopy(self.alert);a["occurred_at"]="yesterday"
         self.assertTrue(m.validate(a))
+    def test_missing_timezone(self):
+        a=copy.deepcopy(self.alert);a["occurred_at"]="2026-10-14T12:00:00"
+        self.assertTrue(m.validate(a))
+    def test_timezone_offset_allowed(self):
+        a=copy.deepcopy(self.alert);a["occurred_at"]="2026-10-14T12:00:00-04:00"
+        self.assertEqual(m.validate(a), [])
     def test_unknown_fields(self):
         a=copy.deepcopy(self.alert);a["api_key"]="should-not-be-accepted"
         self.assertTrue(m.validate(a))
