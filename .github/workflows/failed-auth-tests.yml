@@ -1,0 +1,24 @@
+name: Failed authentication detection tests
+on:
+  pull_request:
+    paths:
+      - 'excessive-failed-auth/**'
+      - '.github/workflows/failed-auth-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'excessive-failed-auth/**'
+      - '.github/workflows/failed-auth-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m unittest discover -s excessive-failed-auth/tests -v
+      - run: python excessive-failed-auth/scripts/detect_failed_auth.py --output /tmp/failed-auth-alerts.txt
+      - run: test -s /tmp/failed-auth-alerts.txt
