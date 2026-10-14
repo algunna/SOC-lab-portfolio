@@ -11,7 +11,15 @@ VALIDATOR = Draft202012Validator(SCHEMA, format_checker=FormatChecker())
 
 def validate(alert):
     errors = sorted(VALIDATOR.iter_errors(alert), key=lambda e: str(e.path))
-    return [f"{'.'.join(map(str, e.path)) or '<root>'}: {e.message}" for e in errors]
+    messages = [f"{'.'.join(map(str, e.path)) or '<root>'}: {e.message}" for e in errors]
+    if isinstance(alert, dict) and isinstance(alert.get("occurred_at"), str):
+        try:
+            parsed = datetime.fromisoformat(alert["occurred_at"].replace("Z", "+00:00"))
+            if parsed.tzinfo is None or parsed.utcoffset() is None:
+                messages.append("occurred_at: timezone offset required")
+        except ValueError:
+            messages.append("occurred_at: invalid ISO 8601 datetime")
+    return messages
 
 def deduplication_key(alert):
     """Stable source-event identifier scoped by source and rule."""
