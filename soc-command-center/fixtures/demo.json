@@ -1,0 +1,31 @@
+{
+  "alerts": [
+    {
+      "event_id": "demo-win-001",
+      "severity": "medium",
+      "title": "Encoded PowerShell flag",
+      "source": "windows"
+    },
+    {
+      "event_id": "demo-aws-002",
+      "severity": "high",
+      "title": "CloudTrail logging configuration change",
+      "source": "aws_cloudtrail"
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "candidate-demo-001",
+      "classification": "unverified",
+      "event_count": 1
+    }
+  ],
+  "cases": [
+    {
+      "id": 1,
+      "title": "Synthetic alert triage",
+      "severity": "medium",
+      "status": "investigating"
+    }
+  ]
+}
