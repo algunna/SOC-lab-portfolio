@@ -1,6 +1,6 @@
 """Group CloudTrail alerts into one incident per alert category."""
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[1]
@@ -13,9 +13,11 @@ SEVERITY_RANK = {"MEDIUM": 1, "HIGH": 2, "CRITICAL": 3}
 def parse_time(line):
     try:
         time_part = line.split("Time:")[1].split("|")[0].strip()
-        return datetime.fromisoformat(time_part.replace("Z", ""))
+        parsed = datetime.fromisoformat(time_part.replace("Z", "+00:00"))
     except (IndexError, ValueError):
         return None
+    # Normalize so Z, +00:00 and other offsets compare correctly
+    return parsed.astimezone(timezone.utc) if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
 def parse_alert(line):
@@ -62,8 +64,8 @@ def correlate_incidents(lines):
 def format_incidents(incidents):
     lines = []
     for incident in incidents.values():
-        start = min(incident["times"]) if incident["times"] else "N/A"
-        end = max(incident["times"]) if incident["times"] else "N/A"
+        start = min(incident["times"]).isoformat() if incident["times"] else "N/A"
+        end = max(incident["times"]).isoformat() if incident["times"] else "N/A"
 
         lines.append(f"{incident['id']} | {incident['category']} | Severity: {incident['severity']}")
         lines.append(f"Time Window: {start} -> {end}")
@@ -79,7 +81,10 @@ def main():
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_FILE)
     args = parser.parse_args()
 
-    incidents = correlate_incidents(args.input.read_text(encoding="utf-8").splitlines())
+    try:
+        incidents = correlate_incidents(args.input.read_text(encoding="utf-8").splitlines())
+    except (OSError, UnicodeDecodeError) as exc:
+        parser.error(f"{args.input}: {exc}")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(format_incidents(incidents), encoding="utf-8")

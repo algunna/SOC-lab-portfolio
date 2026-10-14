@@ -19,12 +19,12 @@ It was the first CloudTrail lab in this portfolio. [AWS CloudTrail Threat Huntin
 | --- | --- | --- | --- |
 | Root from public IP | `userIdentity.type` is `Root` and source is a public IPv4/IPv6 address | CRITICAL | T1078.004 Cloud Accounts |
 | Root activity | `Root` from any other source (AWS Internal, AWS service, private IP) | HIGH | T1078.004 Cloud Accounts |
-| IAM permission or credential change | `CreateUser`, `CreateLoginProfile`, `UpdateLoginProfile`, `CreateAccessKey`, `Attach*Policy`, `Put*Policy`, `CreatePolicyVersion`, `SetDefaultPolicyVersion`, `CreateRole`, `UpdateAssumeRolePolicy`, `AddUserToGroup` | HIGH | T1098 Account Manipulation |
+| IAM permission or credential change | `CreateUser`, `CreateLoginProfile`, `UpdateLoginProfile`, `CreateAccessKey`, `Attach*Policy`, `Put*Policy`, `CreatePolicyVersion`, `SetDefaultPolicyVersion`, `CreateRole`, `UpdateAssumeRolePolicy`, `AddUserToGroup`, permissions-boundary changes, `DeactivateMFADevice` | HIGH | T1098 Account Manipulation |
 | Service-linked role created | `CreateServiceLinkedRole` | MEDIUM | T1098 Account Manipulation |
-| CloudTrail logging changed | `StopLogging`, `DeleteTrail`, `UpdateTrail`, `PutEventSelectors` | HIGH | T1562.008 Disable or Modify Cloud Logs |
-| Role assumption | `AssumeRole`, `AssumeRoleWithSAML`, `AssumeRoleWithWebIdentity` | MEDIUM | T1078.004 Cloud Accounts |
+| CloudTrail logging changed | `StopLogging`, `DeleteTrail`, `UpdateTrail`, `PutEventSelectors`, `StopEventDataStoreIngestion`, `DeleteEventDataStore` | HIGH | T1562.008 Disable or Modify Cloud Logs |
+| Role assumption | `AssumeRole`, `AssumeRoleWithSAML`, `AssumeRoleWithWebIdentity`, `AssumeRoot`, `GetFederationToken` | MEDIUM | T1078.004 Cloud Accounts |
 
-"Private" means 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, loopback, link-local and IPv6 unique-local (`fc00::/7`). Any other valid IP address counts as public.
+"Private" means 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 100.64.0.0/10, loopback, link-local and IPv6 unique-local (`fc00::/7`). IPv4-mapped IPv6 addresses (`::ffff:10.1.2.3`) are judged by their IPv4 address. Any other valid IP address counts as public.
 
 ATT&CK mappings are investigation hypotheses, not proof of compromise.
 
@@ -47,9 +47,9 @@ No packages need to be installed; the scripts use only the Python standard libra
 
 Written to `cloudtrail-soc-pipeline/output/` (gitignored):
 
-- `cloudtrail_timeline.txt`: one line per event, sorted by time: `Time | Event | UserType | SourceIP | Region`.
+- `cloudtrail_timeline.txt`: one line per event, sorted by UTC time (offsets such as `+02:00` are converted): `Time | Event | UserType | SourceIP | Region`.
 - `cloudtrail_alerts.txt`: `[SEVERITY] CATEGORY title | MITRE technique | <timeline line> | AnalystAction: guidance`.
-- `cloudtrail_incidents.txt`: one incident per alert category, with its time window and related alerts. Its severity is that of its most severe alert.
+- `cloudtrail_incidents.txt`: one incident per alert category, with its time window in UTC and related alerts. Its severity is that of its most severe alert.
 
 The synthetic fixture produces 10 timeline events, 9 alerts and 4 incidents (root activity, IAM change, logging change, role assumption).
 

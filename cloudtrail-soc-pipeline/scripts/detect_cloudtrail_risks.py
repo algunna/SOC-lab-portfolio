@@ -23,9 +23,13 @@ IAM_CHANGE_EVENTS = {
     "PutUserPolicy", "PutRolePolicy", "PutGroupPolicy",
     "CreatePolicyVersion", "SetDefaultPolicyVersion",
     "CreateRole", "UpdateAssumeRolePolicy", "AddUserToGroup",
+    "PutUserPermissionsBoundary", "DeleteUserPermissionsBoundary", "DeleteRolePermissionsBoundary",
+    "DeactivateMFADevice",
 }
-LOGGING_TAMPER_EVENTS = {"StopLogging", "DeleteTrail", "UpdateTrail", "PutEventSelectors"}
-ROLE_ASSUMPTION_EVENTS = {"AssumeRole", "AssumeRoleWithSAML", "AssumeRoleWithWebIdentity"}
+LOGGING_TAMPER_EVENTS = {"StopLogging", "DeleteTrail", "UpdateTrail", "PutEventSelectors",
+                         "StopEventDataStoreIngestion", "DeleteEventDataStore"}
+ROLE_ASSUMPTION_EVENTS = {"AssumeRole", "AssumeRoleWithSAML", "AssumeRoleWithWebIdentity",
+                          "AssumeRoot", "GetFederationToken"}
 
 # Addresses treated as non-public. Everything else that parses as an IP is public.
 INTERNAL_NETWORKS = [
@@ -75,6 +79,8 @@ def classify_source_ip(source):
         ip = ipaddress.ip_address(source)
     except ValueError:
         return "unknown"
+    if ip.version == 6 and ip.ipv4_mapped:
+        ip = ip.ipv4_mapped  # ::ffff:10.1.2.3 is the IPv4 address 10.1.2.3
 
     if any(ip in network for network in INTERNAL_NETWORKS):
         return "internal_ip"
@@ -135,7 +141,10 @@ def main():
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_FILE)
     args = parser.parse_args()
 
-    alerts = detect_cloudtrail_risks(args.input.read_text(encoding="utf-8").splitlines())
+    try:
+        alerts = detect_cloudtrail_risks(args.input.read_text(encoding="utf-8").splitlines())
+    except (OSError, UnicodeDecodeError) as exc:
+        parser.error(f"{args.input}: {exc}")
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text("".join(alert + "\n" for alert in alerts), encoding="utf-8")

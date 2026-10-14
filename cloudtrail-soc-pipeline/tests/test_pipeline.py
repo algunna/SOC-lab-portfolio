@@ -33,6 +33,8 @@ class SourceIpTests(unittest.TestCase):
             "10.20.30.40": "internal_ip",
             "192.168.1.5": "internal_ip",
             "fd00::1": "internal_ip",
+            "::ffff:10.1.2.3": "internal_ip",
+            "::ffff:203.0.113.9": "public_ip",
             "203.0.113.50": "public_ip",
             "2001:db8::50": "public_ip",
             "not-an-ip": "unknown",
@@ -80,6 +82,33 @@ class FixtureTests(unittest.TestCase):
     def test_every_alert_has_guidance(self):
         _, alerts, _ = run_fixture()
         self.assertTrue(all("| AnalystAction: " in alert for alert in alerts))
+
+    def test_incident_time_window(self):
+        _, _, incidents = run_fixture()
+        report = correlate.format_incidents(incidents)
+        self.assertIn("Time Window: 2026-01-05T09:00:00+00:00 -> 2026-01-05T09:06:00+00:00", report)
+
+    def test_additional_event_names(self):
+        for name, category in (("StopEventDataStoreIngestion", "LOGGING_TAMPER"), ("DeleteRolePermissionsBoundary", "IAM_CHANGE"),
+                               ("DeactivateMFADevice", "IAM_CHANGE"), ("AssumeRoot", "ASSUME_ROLE")):
+            with self.subTest(name=name):
+                line = f"Time: 2026-01-05T09:00:00Z | Event: {name} | UserType: IAMUser | SourceIP: 198.51.100.7 | Region: us-east-1"
+                alerts = detect.detect_cloudtrail_risks([line])
+                self.assertEqual([correlate.parse_alert(a)[1] for a in alerts], [category])
+
+
+class TimezoneTests(unittest.TestCase):
+    def test_mixed_offsets_sort_and_correlate(self):
+        records = [
+            {"eventTime": "2026-01-05T10:05:00+02:00", "eventName": "DeleteTrail", "userIdentity": {"type": "IAMUser"}},
+            {"eventTime": "2026-01-05T09:00:00Z", "eventName": "StopLogging", "userIdentity": {"type": "IAMUser"}},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            Path(tmp, "mixed.json").write_text(json.dumps({"Records": records}), encoding="utf-8")
+            timeline = parse.extract_events(Path(tmp))
+        self.assertEqual([detect.parse_timeline_line(line)["Event"] for line in timeline], ["DeleteTrail", "StopLogging"])
+        incidents = correlate.correlate_incidents(detect.detect_cloudtrail_risks(timeline))
+        self.assertIn("Time Window: 2026-01-05T08:05:00+00:00 -> 2026-01-05T09:00:00+00:00", correlate.format_incidents(incidents))
 
 
 class MalformedInputTests(unittest.TestCase):

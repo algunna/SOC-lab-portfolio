@@ -1,13 +1,11 @@
-# Output files
+# Generated output (the historical analyst notes in output/ are tracked explicitly)
 output/
-*.txt
 
-# Sample logs
+# Real CloudTrail exports must never be committed
 sample-logs/
 
 # Environment files
 .env
-.env.example
 
 # Python cache
 __pycache__/

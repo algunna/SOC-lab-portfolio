@@ -2,6 +2,7 @@
 import argparse
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parents[1]
@@ -12,6 +13,15 @@ DEFAULT_OUTPUT_FILE = BASE / "output" / "cloudtrail_timeline.txt"
 def clean(value):
     """Keep attacker-controlled field values from breaking the ' | ' line format."""
     return str(value).replace("|", "/").replace("\r", " ").replace("\n", " ").strip() or "N/A"
+
+
+def utc_time(value):
+    """Parse an ISO 8601 time to UTC; naive times are taken as UTC, bad ones give None."""
+    try:
+        parsed = datetime.fromisoformat(str(value).strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed.astimezone(timezone.utc) if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
 def format_event(record):
@@ -45,10 +55,11 @@ def extract_events(input_dir):
         print(f"Found {len(records)} records in {file.name}")
 
         for record in records:
-            events.append((str(record.get("eventTime", "")), format_event(record)))
+            events.append((utc_time(record.get("eventTime")), format_event(record)))
 
-    # ISO 8601 UTC timestamps sort correctly as strings.
-    return [line for _, line in sorted(events, key=lambda event: event[0])]
+    # Compare parsed UTC times so different offsets sort correctly; unparseable times go last.
+    latest = datetime.max.replace(tzinfo=timezone.utc)
+    return [line for _, line in sorted(events, key=lambda event: event[0] or latest)]
 
 
 def main():
@@ -56,6 +67,8 @@ def main():
     parser.add_argument("--input-dir", type=Path, default=DEFAULT_INPUT_DIR)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_FILE)
     args = parser.parse_args()
+    if not args.input_dir.is_dir():
+        parser.error(f"{args.input_dir} is not a directory")
 
     timeline = extract_events(args.input_dir)
 
