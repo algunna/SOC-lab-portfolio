@@ -77,3 +77,10 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - No live call is made in CI. Tests inject mock HTTP responses, reject insecure origins and injection attempts, and verify raw event fields are excluded from the returned summary.
 - Please review least-privilege Splunk capability requirements, HTTPS trust, redirect handling, query bounds, metadata disclosure, and required event-field mapping before any SIEM-to-alert integration.
 - Real Splunk connection and field mappings are not yet verified. No production telemetry or tokens belong in this repository.
+
+## ATLAS — Synthetic Splunk alert normalizer (PR pending)
+
+- New offline `splunk-readonly-connector/src/normalize.py` accepts only three locally allowlisted synthetic saved-search alert categories, validates bounded JSONL and normalizes to SOC Event Contract v1. It never imports raw SIEM exports, fetches remote records or assigns incidents automatically.
+- Integration CI runs saved-search fixture → normalization → ingestion → correlation → read-only dashboard output. Data type mappings are **hypotheses for synthetic tests**, not verified deployed SPL detection outputs.
+- Review before a live connector: evidence provenance, Splunk saved-search response formats and extraction fields, true detection thresholds, permissions/least-privilege, multi-batch replay/deduplication, redaction, source identity collisions and deterministic ID stability.
+- Continue to require analyst approval for promotion and preserve no raw-log export in count-only probe.
