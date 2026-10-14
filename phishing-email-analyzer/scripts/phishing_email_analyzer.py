@@ -1,116 +1,42 @@
-import os
-import re
+"""Offline phishing triage based on parsed email; no links opened."""
+import argparse
+from email import policy
+from email.parser import Parser
+from email.utils import parseaddr
 from pathlib import Path
-from datetime import datetime
-from openai import OpenAI
-
-EMAIL_FILE = Path("../emails/sample_phishing_email.txt")
-REPORT_FILE = Path("../reports/phishing_report.md")
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-
-def load_email():
-    return EMAIL_FILE.read_text(encoding="utf-8")
-
-
-def extract_urls(email_text):
-    return re.findall(r"https?://[^\s]+", email_text)
-
-
-def analyze_email(email_text):
-    urls = extract_urls(email_text)
-
-    findings = {
-        "sender": "security-alert@paypaI-support.com",
-        "subject": "Urgent: Your account has been limited",
-        "urls": urls,
-        "risk": "High",
-        "indicators": [
-            "Urgent language",
-            "Lookalike domain",
-            "HTTP link",
-            "Account verification request",
-        ],
-    }
-
-    return findings
-
-
-def generate_ai_analysis(findings):
-    prompt = f"""
-Analyze this phishing email.
-
-Sender: {findings["sender"]}
-Subject: {findings["subject"]}
-URLs: {", ".join(findings["urls"])}
-Risk: {findings["risk"]}
-Indicators: {", ".join(findings["indicators"])}
-
-Provide:
-1. Executive Summary
-2. Analyst Notes
-3. Recommended Response
-"""
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a cybersecurity email security analyst.",
-            },
-            {
-                "role": "user",
-                "content": prompt,
-            },
-        ],
-    )
-
-    return response.choices[0].message.content
-
-
-def write_report(findings, ai_analysis):
-    report = f"""# Phishing Email Analysis Report
-
-Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-
-## Email Findings
-
-- Sender: {findings["sender"]}
-- Subject: {findings["subject"]}
-- Risk: {findings["risk"]}
-
-## Extracted URLs
-
-"""
-
-    for url in findings["urls"]:
-        report += f"- {url}\n"
-
-    report += "\n## Indicators of Phishing\n\n"
-
-    for indicator in findings["indicators"]:
-        report += f"- {indicator}\n"
-
-    report += f"""
-
-## AI-Generated Analysis
-
-{ai_analysis}
-"""
-
-    REPORT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_FILE.write_text(report, encoding="utf-8")
-    print(f"Report created: {REPORT_FILE}")
-
-
+import re
+from urllib.parse import urlsplit
+ROOT=Path(__file__).resolve().parents[1]
+URL=re.compile(r"https?://[^\\s<>\\\"']+",re.I)
+URGENCY=re.compile(r"\\b(urgent|immediately|within \\d+ hours|suspension|verify your (?:account|information))\\b",re.I)
+def analyze_email(raw):
+    msg=Parser(policy=policy.default).parsestr(raw)
+    sender=parseaddr(str(msg.get("From","")))[1]
+    subject=str(msg.get("Subject",""))
+    body="\\n".join(str(part.get_content()) for part in msg.walk() if part.get_content_type()=="text/plain") if msg.is_multipart() else str(msg.get_content())
+    urls=list(dict.fromkeys(u.rstrip(".,);!?") for u in URL.findall(body)))
+    indicators=[]
+    if any(urlsplit(url).scheme.lower()=="http" for url in urls): indicators.append("Unencrypted HTTP URL")
+    if URGENCY.search(subject+" "+body): indicators.append("Urgency or verification language")
+    domain=sender.rpartition("@")[2].lower()
+    if domain and any((urlsplit(url).hostname or "").lower()!=domain for url in urls):
+        indicators.append("Sender and link domains differ; verify context")
+    return {"sender":sender or "(missing)","subject":subject or "(missing)",
+            "urls":urls,"indicators":indicators,"risk":"Review recommended" if indicators else "No heuristic indicators"}
+def report(result):
+    lines=["# Phishing Investigation","",f'- Sender: {result["sender"]}',f'- Subject: {result["subject"]}',
+           f'- Assessment: {result["risk"]}',"","## URLs (do not click)",""]
+    lines += ["- `"+url+"`" for url in result["urls"]]
+    lines += ["","## Indicators",""]+["- "+x for x in result["indicators"]]
+    lines += ["","These heuristics are not proof of phishing. Validate using headers and organizational context.",""]
+    return "\n".join(lines)
 def main():
-    email_text = load_email()
-    findings = analyze_email(email_text)
-    ai_analysis = generate_ai_analysis(findings)
-    write_report(findings, ai_analysis)
-
-
-if __name__ == "__main__":
-    main()
+    p=argparse.ArgumentParser()
+    p.add_argument("--input",type=Path,default=ROOT/"emails"/"sample_phishing_email.txt")
+    p.add_argument("--output",type=Path,default=ROOT/"reports"/"phishing_detection_report.md")
+    a=p.parse_args()
+    result=analyze_email(a.input.read_text(encoding="utf-8"))
+    a.output.parent.mkdir(parents=True,exist_ok=True)
+    a.output.write_text(report(result),encoding="utf-8")
+    print(f'Found {len(result["indicators"])} indicators')
+if __name__=="__main__": main()
