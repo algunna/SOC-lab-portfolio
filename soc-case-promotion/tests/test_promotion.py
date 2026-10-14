@@ -24,6 +24,26 @@ class PromotionTests(unittest.TestCase):
         m.promote(self.db,report(),"candidate-abc123","analyst",approve=True)
         with self.assertRaises(ValueError):m.promote(self.db,report(),"candidate-abc123","analyst",approve=True)
         self.assertEqual(self.db.execute("SELECT count(*) FROM cases").fetchone()[0],1)
+    def test_severity_from_candidate(self):
+        r=report();r["incident_candidates"][0]["highest_severity"]="critical"
+        key=m.promote(self.db,r,"candidate-abc123","analyst",approve=True)
+        self.assertEqual(self.db.execute("SELECT severity FROM cases WHERE id=?",(key,)).fetchone()[0],"critical")
+    def test_informational_maps_to_low_and_override_wins(self):
+        r=report();r["incident_candidates"][0]["highest_severity"]="informational"
+        key=m.promote(self.db,r,"candidate-abc123","analyst",approve=True)
+        self.assertEqual(self.db.execute("SELECT severity FROM cases WHERE id=?",(key,)).fetchone()[0],"low")
+        r2=report();r2["incident_candidates"][0].update(candidate_id="candidate-other",alert_ids=["evt-9"],highest_severity="critical")
+        key2=m.promote(self.db,r2,"candidate-other","analyst",severity="medium",approve=True)
+        self.assertEqual(self.db.execute("SELECT severity FROM cases WHERE id=?",(key2,)).fetchone()[0],"medium")
+    def test_same_alerts_under_new_candidate_id_blocked(self):
+        m.promote(self.db,report(),"candidate-abc123","analyst",approve=True)
+        r=report();r["incident_candidates"][0].update(candidate_id="candidate-rerun",alert_ids=["evt-1","evt-2"])
+        with self.assertRaises(ValueError):m.promote(self.db,r,"candidate-rerun","analyst",approve=True)
+        self.assertEqual(self.db.execute("SELECT count(*) FROM cases").fetchone()[0],1)
+    def test_title_names_actor_and_asset(self):
+        r=report();r["incident_candidates"][0].update(actor="LAB\\analyst",asset="LAB-WS01")
+        key=m.promote(self.db,r,"candidate-abc123","analyst",approve=True)
+        self.assertIn("LAB\\analyst / LAB-WS01",self.db.execute("SELECT title FROM cases WHERE id=?",(key,)).fetchone()[0])
     def test_unknown_candidate(self):
         with self.assertRaises(ValueError):m.promote(self.db,report(),"missing","analyst",approve=True)
     def test_invalid_analyst(self):
