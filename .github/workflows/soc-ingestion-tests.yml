@@ -48,3 +48,21 @@ jobs:
           cp soc-event-contract/examples/windows_alert.json /tmp/soc-bad-input.json
           python soc-event-ingestion/src/batch_health.py /tmp/soc-bad-input.json --out-dir /tmp/soc-manual-recovery
           python -c "import json; assert json.load(open('/tmp/soc-manual-recovery/health.json'))['status']=='passed'; assert json.load(open('/tmp/soc-quarantined-batch/health.json'))['status']=='blocked'"
+      - name: Verify batch completion seals and reject tampered artifacts
+        run: |
+          set -euo pipefail
+          python soc-event-ingestion/src/artifact_integrity.py --batch-dir /tmp/soc-healthy-batch
+          python soc-event-ingestion/src/artifact_integrity.py --batch-dir /tmp/soc-quarantined-batch
+          python soc-event-ingestion/src/artifact_integrity.py --batch-dir /tmp/soc-manual-recovery
+          cp -a /tmp/soc-healthy-batch /tmp/soc-tampered-batch
+          printf '%s\n' 'MALICIOUS-ADDED-CONTENT' >> /tmp/soc-tampered-batch/ingestion.json
+          if python soc-event-ingestion/src/artifact_integrity.py --batch-dir /tmp/soc-tampered-batch; then
+            echo "Tampered artifact was incorrectly accepted"
+            exit 1
+          fi
+          cp -a /tmp/soc-healthy-batch /tmp/soc-incomplete-batch
+          rm /tmp/soc-incomplete-batch/integrity.json
+          if python soc-event-ingestion/src/artifact_integrity.py --batch-dir /tmp/soc-incomplete-batch; then
+            echo "Incomplete batch was incorrectly accepted"
+            exit 1
+          fi
