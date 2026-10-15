@@ -92,9 +92,16 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Replay, tampering, missing manifest, manual approval and case audit are regression-tested. Independently review synthetic-vs-live provenance claims and operational limits.
 - **Deferred home checkpoint:** [SPLUNK_HOME_CHECKPOINT.md](SPLUNK_HOME_CHECKPOINT.md). Owner is at work; do not ask for home PC operations until they return. No live SIEM connectivity verified.
 
-## ATLAS — persistent offline replay safeguard (PR pending)
+## ATLAS — persistent offline replay safeguard (PR #32, merged)
 
 - New optional `soc-event-ingestion/src/replay_guard.py` filters previously seen validated normalized alerts across invocations using SHA-256 identifiers and a local SQLite state database. Existing ingestion behavior stays unchanged unless explicitly enabled.
 - Replays are skipped; conflicting reuse of source/event ID or observation identity fails the entire batch. Transaction rollback and unmodified output checks are included in regression tests.
 - Limitations for independent review: SQLite file can be forged, hashes may be guessable, sidecar/concurrency edge cases, output/state crash window, lack of real message acknowledgement, missing queue/outbox, state durability and privacy. Do not advertise exactly-once semantics.
 - Splunk home checkpoint remains pending; verify installation/authorized REST connectivity only when user returns home, and never ask for credentials in chat.
+
+## ATLAS — Offline batch health and manual recovery (PR pending)
+
+- `soc-event-ingestion/src/batch_health.py` adds a separate, explicitly invoked offline gate with health counts/stage status. It publishes validated ingestion and correlation only on complete success; otherwise emits metadata-only `quarantine.json` + `health.json`.
+- Redaction by design: quarantine issues have source indices, line numbers and categorical reasons only; no source paths, values, validation strings or raw logs. The gate never retries automatically, never touches replay state, never promotes a case and never calls Splunk.
+- Titan security review: TOCTOU between preflight and input read, atomic multi-file publishing/crashes, symlink swaps, filesystem access controls, replay-state coordination, bounded memory/throughput and operational observability. **Not production durability or live telemetry.**
+- Splunk home-PC checkpoint is still pending until the owner returns home; see the SOC demo README.
