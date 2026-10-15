@@ -54,7 +54,7 @@ def identity(value):
     return value
 
 
-def alert_for(finding, detector, scenario_id, ordinal):
+def alert_for(finding, detector, scenario_id, ordinal, *, source_snapshot_hash=None):
     if not isinstance(finding, dict):
         raise ValueError("Detector returned nonobject finding")
     rule = finding.get("rule")
@@ -79,6 +79,14 @@ def alert_for(finding, detector, scenario_id, ordinal):
     key = json.dumps([scenario_id, system, rule_id, ordinal], separators=(",", ":"))
     digest = hashlib.sha256(key.encode("utf-8")).hexdigest()
     record_id = "fixture-" + digest[:32]
+    if source_snapshot_hash is not None and (
+            not isinstance(source_snapshot_hash, str) or
+            not re.fullmatch(r"[0-9a-f]{64}", source_snapshot_hash)):
+        raise ValueError("Invalid synthetic source snapshot hash")
+    # A content change that produces the same *rule finding* still changes the
+    # evidence reference. Keep the observation/event ID stable so the replay
+    # guard can reject a conflicting re-export instead of silently accepting it.
+    evidence_suffix = "-" + source_snapshot_hash[:32] if source_snapshot_hash else ""
     alert = {
         "schema_version": "1.0",
         "event_id": "lab-" + digest[:24],
@@ -91,7 +99,7 @@ def alert_for(finding, detector, scenario_id, ordinal):
         "asset": asset,
         "attack_techniques": [technique],
         "evidence": [{
-            "reference": "synthetic-fixture:" + digest[:32],
+            "reference": "synthetic-fixture:" + digest[:32] + evidence_suffix,
             "description": "Synthetic offline detector finding; no authenticated source event or verdict",
         }],
     }
@@ -119,12 +127,19 @@ def bridge(raw):
         if (any(not isinstance(f, dict) for f in findings) or
                 found != set(scenario["expected_rules"])):
             raise ValueError("Detector output contradicts synthetic fixture expectations")
+        # Hash the complete curated synthetic input snapshot. This is a change
+        # indicator, not event provenance, authentication, or anonymization.
+        snapshot = hashlib.sha256(json.dumps(
+            scenario["events"], sort_keys=True, separators=(",", ":"),
+            ensure_ascii=True).encode("utf-8")).hexdigest()
         per_rule = defaultdict(int)
         for finding in findings:
             rule = finding["rule"]
             ordinal = per_rule[rule]
             per_rule[rule] += 1
-            alert = alert_for(finding, detector, scenario["id"], ordinal)
+            alert = alert_for(
+                finding, detector, scenario["id"], ordinal,
+                source_snapshot_hash=snapshot)
             event_id = (alert["source"]["system"], alert["event_id"])
             if event_id in ids:
                 raise ValueError("Duplicate synthetic alert identity")
