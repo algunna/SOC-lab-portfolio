@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added a reproducible, offline SOC investigation walkthrough with explicit synthetic case approval and artifact integrity checks. Real Splunk installation and live connectivity deferred until owner returns to home PC (PR pending).
+
+
 - Added a one-command synthetic SOC pipeline demo with separate opt-in analyst approval, artifact integrity checks, repeatable CI and home Splunk setup checkpoint (PR pending). No live SIEM operations.
 
 
