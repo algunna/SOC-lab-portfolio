@@ -27,7 +27,7 @@
 - **Items 2 and 3 below** (CloudTrail and Copilot correctness) and fixes to ingestion, correlation and promotion were addressed in merged PR #18.
 - **Dashboard (PR #24):** Titan findings are in [TITAN_DASHBOARD_REVIEW.md](TITAN_DASHBOARD_REVIEW.md); follow-up PR #25 has been merged.
 
-## ATLAS update — SQLite case snapshot (PR pending)
+## ATLAS update — SQLite case snapshot (PR #27, merged)
 
 - Optional `--cases-db` reads only case ID, title, severity and status from an *existing* SQLite file in read-only mode; no history, private notes or evidence text is read.
 - Fail-closed schema and row validation; max 200 cases; absent file must not be created; synthetic CI verifies database hash stays unchanged.
@@ -71,14 +71,14 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Rejects malformed alerts, rejected ingestion batches, duplicate event IDs, invalid candidates and missing candidate references.
 - Live SIEM connectivity remains out of scope; a separate opt-in read-only SQLite case snapshot is proposed in Pipeline 6.0. Review cross-source identity collisions, provenance and incident reference integrity before enabling live feeds.
 
-## ATLAS — Opt-in Splunk SIEM connectivity probe (PR pending)
+## ATLAS — Opt-in Splunk SIEM connectivity probe (PR #28, merged)
 
 - New `splunk-readonly-connector/` runs an explicitly invoked, fixed, read-only SPL query over validated HTTPS with a token from the `SOC_SPLUNK_TOKEN` local environment variable.
 - No live call is made in CI. Tests inject mock HTTP responses, reject insecure origins and injection attempts, and verify raw event fields are excluded from the returned summary.
 - Please review least-privilege Splunk capability requirements, HTTPS trust, redirect handling, query bounds, metadata disclosure, and required event-field mapping before any SIEM-to-alert integration.
 - Real Splunk connection and field mappings are not yet verified. No production telemetry or tokens belong in this repository.
 
-## ATLAS — Synthetic Splunk alert normalizer (PR pending)
+## ATLAS — Synthetic Splunk alert normalizer (PR #29, merged)
 
 - New offline `splunk-readonly-connector/src/normalize.py` accepts only three locally allowlisted synthetic saved-search alert categories, validates bounded JSONL and normalizes to SOC Event Contract v1. It never imports raw SIEM exports, fetches remote records or assigns incidents automatically.
 - Integration CI runs saved-search fixture → normalization → ingestion → correlation → read-only dashboard output. Data type mappings are **hypotheses for synthetic tests**, not verified deployed SPL detection outputs.
@@ -91,3 +91,10 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Manifest SHA-256 checks guard against accidental local file changes, not maliciously forged provenance or user authentication. No live Splunk request, secret or production dataset is involved.
 - Replay, tampering, missing manifest, manual approval and case audit are regression-tested. Independently review synthetic-vs-live provenance claims and operational limits.
 - **Deferred home checkpoint:** [SPLUNK_HOME_CHECKPOINT.md](SPLUNK_HOME_CHECKPOINT.md). Owner is at work; do not ask for home PC operations until they return. No live SIEM connectivity verified.
+
+## ATLAS — Offline synthetic SOC walkthrough (PR pending)
+
+- `soc-demo/` provides a two-stage synthetic-only end-to-end run: `prepare` creates normalized alerts, ingestion, unverified correlation and dashboard JSON without a case; `approve` requires an explicit analyst flag and creates one synthetic SQLite case.
+- SHA-256 manifest guards against accidental changes to the prepared synthetic training artifacts before approval. It is not an adversarial cryptographic attestation; no true analyst authentication exists.
+- CI tests expected counts, disabled default approval, explicit case promotion, SQLite audit data and read-only dashboard output.
+- **Return-to-Splunk checkpoint: PENDING (October 14, 2026).** Owner is at work, Splunk installation on home PC unknown. At home check `Get-Service *Splunk*` in PowerShell, configure an authorized lab index / HTTPS trust / least-privilege token, and test the count-only connector. Never paste or commit credentials; no live connector until this is verified.
