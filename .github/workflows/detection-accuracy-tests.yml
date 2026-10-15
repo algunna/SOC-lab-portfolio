@@ -23,6 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install SOC contract validator dependency
+        run: python -m pip install -r soc-event-contract/requirements.txt
       - name: Test original offline Windows and CloudTrail detectors
         run: |
           python -m unittest discover -s windows-threat-hunting-lab/tests -v
@@ -49,7 +51,6 @@ jobs:
       - name: Offline synthetic detector findings through sealed SOC Command Center
         run: |
           set -euo pipefail
-          python -m pip install -r soc-event-contract/requirements.txt
           python detection-accuracy-lab/src/to_soc_alerts.py --out /tmp/synthetic-detector-alerts.jsonl
           python soc-event-ingestion/src/batch_health.py /tmp/synthetic-detector-alerts.jsonl --out-dir /tmp/detector-soc-sealed
           python soc-event-ingestion/src/artifact_integrity.py --batch-dir /tmp/detector-soc-sealed
