@@ -1,0 +1,45 @@
+name: Controlled synthetic telemetry source identity tests
+on:
+  pull_request:
+    paths:
+      - 'controlled-telemetry-lab/**'
+      - 'soc-event-contract/**'
+      - '.github/workflows/controlled-telemetry-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'controlled-telemetry-lab/**'
+      - 'soc-event-contract/**'
+      - '.github/workflows/controlled-telemetry-tests.yml'
+permissions:
+  contents: read
+jobs:
+  source-identity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install contract validator
+        run: python -m pip install -r soc-event-contract/requirements.txt
+      - name: Test controlled source preflight and event contract
+        run: |
+          python -m unittest discover -s controlled-telemetry-lab/tests -v
+          python -m unittest discover -s soc-event-contract/tests -v
+      - name: Verify opaque synthetic source summary
+        run: |
+          set -euo pipefail
+          python controlled-telemetry-lab/src/source_identity.py --out /tmp/scoped-source-summary.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          raw=Path('/tmp/scoped-source-summary.json').read_text()
+          report=json.loads(raw)
+          assert report['scope']=='unauthenticated_synthetic_only'
+          assert report['live_provenance_verified'] is False
+          assert len(report['records']) == 6
+          assert report['clock_counts']=={'within_lab_window':4,'delayed_arrival':1,'future_event_time':1}
+          assert len({(r['source']['system'],r['source']['record_id']) for r in report['records']})==6
+          assert not any(x in raw for x in ('LAB-WS01','123456789012','log_epoch','_raw'))
+          PY
