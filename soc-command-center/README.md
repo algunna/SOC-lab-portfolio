@@ -78,3 +78,5 @@ This mode checks the final completion marker, fixed expected files, byte lengths
 Existing `--ingestion ... --correlation ...` remains supported for **legacy trusted synthetic exercises**, but **does not verify sealed-batch provenance**. Do not use it as a substitute for the sealed mode when processing batch-health outputs. The two input styles cannot be combined.
 
 **Security caveat:** The manifest is unkeyed SHA-256 metadata, not a signature or externally authenticated chain of custody. Someone who can alter both reports and manifest may forge consistent hashes. This does not eliminate symlink-parent swaps, concurrent modification outside the open file window, or establish a durable message queue. It is not an authorization mechanism, real-time ingestion or live Splunk telemetry.
+
+For an analyst-approved **synthetic** case from the same sealed batch, `soc-case-promotion/src/promote.py --batch-dir` can independently require verification before creating SQLite case records. It still requires `--approve` and an exact candidate ID; see the [promotion README](../soc-case-promotion/README.md).
