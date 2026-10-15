@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added read-only offline SOC batch observability view with bounded, strict health-report schema; sanitized summary counters and integration tests for healthy and quarantined runs (PR pending).
+
+
 - Added opt-in offline SOC batch health reporting, metadata-only quarantine and explicit manual recovery controls, plus end-to-end regression tests (PR pending). Does not connect to live Splunk or automatically retry.
 
 
