@@ -73,3 +73,7 @@ Open a project folder to review the available source code, sample logs, reports,
 
 - [Reproducible offline investigation demo](./soc-demo/README.md) — mock Splunk alerts through validation, correlation, read-only dashboard and *explicitly approved* synthetic case
 - [Return to live Splunk when at home](./docs/SPLUNK_HOME_CHECKPOINT.md) — PC installation and authorized connectivity still pending
+
+## SOC Synthetic End-to-End Walkthrough
+
+- [Offline investigation demonstration](./soc-demo) — repeatable alert normalization, ingestion, correlation, explicit analyst case approval, SQLite audit and read-only dashboard; does not contact live Splunk.
