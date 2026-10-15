@@ -156,9 +156,16 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - CI verifies alert-contract validation and an end-to-end synthetic run through batch-health ingestion, correlation, integrity manifest, semantic recheck and read-only Command Center with no case creation. Unexpected detector decisions and malformed metadata fail closed.
 - Reviewer priorities: stable ordering for multi-event findings, provenance, actor/host privacy, source identity collision across repeated exports, canonical timestamps, verified live detector logic and replay semantics. Home Splunk live check remains pending.
 
-## ATLAS — Pipeline 14.0 replay-alias ledger (PR pending)
+## ATLAS — Pipeline 14.0 replay-alias ledger (PR #41, merged)
 
 - Replay guard now writes all observed source/event ID aliases, including alternate IDs seen on skipped observations, to an SQLite ledger. A later conflicting use of any known alias rejects the entire batch and rolls back attempted inserts.
 - Legacy `observed` database records seed `event_aliases` on first use; conflict checks detect a mismatched legacy primary ID and alias mapping.
 - The synthetic detector bridge keeps its stable fixture/rule alert IDs but includes a scenario-input SHA-256 hint in `synthetic-fixture:` evidence references. This catches source-input changes that still produce identical detector rule results. No authenticated original EventRecordID or CloudTrail eventID is represented.
 - Review: atomic DB migration behavior, alias table index growth, delayed/reordered batches, rollback under real disk failure, unhashed metadata exposure elsewhere, source-event replay namespaces, source digest privacy/dictionary attacks, and lack of durable delivery confirmation. Live Splunk remains deferred.
+
+## ATLAS — Pipeline 15.0 controlled source identity design (PR pending)
+
+- `controlled-telemetry-lab/src/source_identity.py` validates **synthetic only** source-scoped Windows host/channel/log_epoch/record number or AWS account/region/eventID and rejects ambiguous or malformed fields. `log_epoch` is lab-generated, not a real Windows field.
+- Produces stable opaque `lab-src-` record identifiers, `synthetic-source:` reference hashes and offset-normalized UTC dates. Clock-review labels distinguish delayed arrivals and future timestamps without declaring malicious behavior.
+- CI tests repeated record numbers after a Windows log reset, host/account namespace separation, duplicate collisions, invalid date/times, unknown fields, privacy and contract compatibility. No device authentication, Splunk REST queries, token exchange, real detection output or case creation.
+- Independent VORTEX/Titan review and local Splunk service check remain pending. The synthetic hashing layer is not an authenticated chain of custody.

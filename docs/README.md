@@ -28,3 +28,7 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Pipeline 13.0 integration
 
 - [Synthetic Windows/CloudTrail detector to SOC event bridge](../detection-accuracy-lab/README.md) — reviewed offline findings become contract-valid, synthetically referenced alerts for the sealed Command Center path; no live event feed or authenticated evidence.
+
+## Pipeline 15.0 source provenance design
+
+- [Controlled synthetic source identity lab](../controlled-telemetry-lab/README.md) — Windows log-epoch and CloudTrail account/region namespace mapping, offset-aware UTC normalization, collision tests and provenance limitations; no live telemetry authentication.
