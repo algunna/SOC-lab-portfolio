@@ -49,3 +49,21 @@ Synthetic fixture conformance can be perfect while performance on actual product
 Before claiming measured accuracy, create an authorized, independently labeled corpus of **realistic lab telemetry**, validate field extraction and source provenance, preserve base rates and negative examples, manually adjudicate disagreements, and report metrics with sample sizes and limitations. See [Splunk field mapping specification](../docs/SPLUNK_FIELD_MAPPING_SPEC.md) and [Pipeline 10.0 live acceptance](../docs/SOC_PIPELINE_10_ACCEPTANCE.md).
 
 **Review status:** Awaiting independent VORTEX/Titan detection-rule assessment. No reviewer sign-off or live evaluation claimed.
+
+## Pipeline 13.0 — Synthetic detector finding → SOC alert handoff
+
+The new `src/to_soc_alerts.py` executes the reviewed Windows and AWS offline hunter functions over the **fixed labeled synthetic fixtures**, then transforms positive findings into SOC Event Contract v1 alerts with code-defined rule IDs, titles, severities and ATT&CK technique tags. It rejects contradictory findings, unexpected rules, incomplete identities, invalid timestamps and any detector attempt to override a reviewed severity/technique. No source system, Splunk API, AWS account or Windows host is contacted.
+
+From repository root:
+
+```bash
+python -m pip install -r soc-event-contract/requirements.txt
+python detection-accuracy-lab/src/to_soc_alerts.py --out /tmp/synthetic-detector-alerts.jsonl
+python soc-event-ingestion/src/batch_health.py /tmp/synthetic-detector-alerts.jsonl --out-dir /tmp/synthetic-detector-batch
+python soc-command-center/src/adapter.py --batch-dir /tmp/synthetic-detector-batch --out /tmp/synthetic-detector-dashboard.json
+python soc-command-center/src/dashboard.py --data /tmp/synthetic-detector-dashboard.json
+```
+
+Use new, private output paths and a new batch directory on each run; on Windows substitute appropriate local paths. CI checks the generated alerts, sealed-batch semantic integrity and read-only Command Center view. Only **synthetic, unverified investigation candidates** are created, and the case database remains empty. The bridge writes opaque `synthetic-fixture:` evidence references and `lab-` IDs derived from fixture IDs, rule names and occurrence indices; **these are not original Windows EventRecordIDs or CloudTrail eventIDs, and are not authenticated evidence**.
+
+The source matrix contains expected outcomes curated for training. It is not a representative threat dataset, a production detector or a live-Splunk response schema. Actor/asset labels are copied from controlled synthetic findings when structurally valid, not independently authenticated or anonymized. Do **not** submit workplace logs, patient information, personal data or production events to this training bridge. Future live integrations require authenticated source-event identity and reviewed, versioned field mappings.
