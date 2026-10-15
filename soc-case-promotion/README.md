@@ -40,3 +40,7 @@ python soc-case-promotion/src/promote.py --batch-dir /tmp/soc-approved-batch --d
 ```
 
 The new `--batch-dir` option checks the completion marker, SHA-256 hashes, expected files and health/report counters, consumes the verified bytes and rejects blocked/incomplete/tampered batches **before opening or creating the SQLite case database**. It cannot be combined with the positional legacy report argument. A batch hash is still **not authenticated provenance or analyst authentication**; a user with write access to the files and manifest can forge both. The original positional correlation report input is retained solely for trusted synthetic/legacy exercises, without integrity guarantees. No automatic case creation or live Splunk connection occurs.
+
+## Pipeline 10.0 review gate
+
+Sealed case promotion additionally benefits from independently recomputed, schema-validated candidates. A case with a forged severity, evidence reference or candidate identity no longer passes just because its unsigned manifest was updated to match. The local approval flag remains necessary but is not a verified analyst identity. See the [live acceptance and residual risks](../docs/SOC_PIPELINE_10_ACCEPTANCE.md).
