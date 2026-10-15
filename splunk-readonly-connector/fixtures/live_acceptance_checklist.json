@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "scope": "live_acceptance_preparation",
+  "gates": {
+    "authorized_lab": {
+      "status": "pending",
+      "evidence": []
+    },
+    "splunk_installation": {
+      "status": "pending",
+      "evidence": []
+    },
+    "tls_and_permissions": {
+      "status": "pending",
+      "evidence": []
+    },
+    "count_only_probe": {
+      "status": "pending",
+      "evidence": []
+    },
+    "source_mapping": {
+      "status": "pending",
+      "evidence": []
+    },
+    "detector_validation": {
+      "status": "pending",
+      "evidence": []
+    },
+    "collector_authentication": {
+      "status": "pending",
+      "evidence": []
+    },
+    "independent_security_review": {
+      "status": "pending",
+      "evidence": []
+    },
+    "delivery_recovery": {
+      "status": "pending",
+      "evidence": []
+    },
+    "analyst_case": {
+      "status": "pending",
+      "evidence": []
+    },
+    "command_center": {
+      "status": "pending",
+      "evidence": []
+    }
+  }
+}
