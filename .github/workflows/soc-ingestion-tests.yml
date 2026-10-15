@@ -66,3 +66,41 @@ jobs:
             echo "Incomplete batch was incorrectly accepted"
             exit 1
           fi
+      - name: Synthetic detector output across runs, aliases and conflicting re-exports
+        run: |
+          set -euo pipefail
+          python detection-accuracy-lab/src/to_soc_alerts.py --out /tmp/synthetic-replay-alerts.jsonl
+          python soc-event-ingestion/src/ingest.py /tmp/synthetic-replay-alerts.jsonl --out /tmp/synthetic-replay-ingestion.json
+          python soc-event-ingestion/src/replay_guard.py --ingestion /tmp/synthetic-replay-ingestion.json --state-db /tmp/synthetic-replay-state.db --out /tmp/synthetic-replay-first.json
+          python soc-event-ingestion/src/replay_guard.py --ingestion /tmp/synthetic-replay-ingestion.json --state-db /tmp/synthetic-replay-state.db --out /tmp/synthetic-replay-second.json
+          python - <<'PY'
+          import json
+          a=json.load(open('/tmp/synthetic-replay-first.json'))
+          b=json.load(open('/tmp/synthetic-replay-second.json'))
+          assert a['counts']['accepted']==15 and b['counts']['accepted']==0
+          assert b['replay_guard']['skipped']==15
+          first=a['accepted'][0]
+          alias=json.loads(json.dumps(first))
+          alias['event_id']='lab-reexport-alias'
+          def wrap(alert):
+              return dict(schema_version='1.0', accepted=[alert], rejected=[], duplicates=[],
+                          counts=dict(accepted=1,rejected=0,duplicates=0))
+          json.dump(wrap(alias),open('/tmp/synthetic-replay-alias.json','w'))
+          conflict=json.loads(json.dumps(alias))
+          conflict['source']['record_id']='new-conflicting-source-id'
+          json.dump(wrap(conflict),open('/tmp/synthetic-replay-conflict.json','w'))
+          PY
+          python soc-event-ingestion/src/replay_guard.py --ingestion /tmp/synthetic-replay-alias.json --state-db /tmp/synthetic-replay-state.db --out /tmp/synthetic-replay-alias-output.json
+          if python soc-event-ingestion/src/replay_guard.py --ingestion /tmp/synthetic-replay-conflict.json --state-db /tmp/synthetic-replay-state.db --out /tmp/synthetic-replay-refused.json; then
+            echo "Previously seen alias was allowed to identify a different observation"
+            exit 1
+          fi
+          test ! -e /tmp/synthetic-replay-refused.json
+          python - <<'PY'
+          import json,sqlite3
+          a=json.load(open('/tmp/synthetic-replay-alias-output.json'))
+          assert a['replay_guard']['new']==0 and a['replay_guard']['skipped']==1
+          with sqlite3.connect('/tmp/synthetic-replay-state.db') as db:
+              assert db.execute('SELECT COUNT(*) FROM observed').fetchone()[0]==15
+              assert db.execute('SELECT COUNT(*) FROM event_aliases').fetchone()[0]==16
+          PY
