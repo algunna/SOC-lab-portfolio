@@ -61,3 +61,18 @@ Input is UTF-8 JSONL, up to 200 alerts and 1 MB in total, with these exact field
 Each result is validated against SOC Event Contract v1 and assigned a stable namespaced ID and *synthetic* opaque evidence reference. This output is an **unverified investigation lead**, not a verified intrusion. Conversion fails closed on a duplicate ID, invalid identity, unknown detector, control character, malformed JSON, bad timestamp or oversized input. A failed batch never produces a new output file. Existing outputs are not overwritten.
 
 **Data minimization:** Do not feed raw logs, personal information, real patient data, API keys or production SIEM exports into this synthetic training adapter. Actor/asset values are copied after structural validation, **not anonymized**. It intentionally has no API request, network listener, secret access, privilege escalation or automatic case promotion. Real Splunk event mapping, authorization checks, deduplication across multiple live batches and provenance validation still require additional design and live-lab tests.
+
+## Pipeline 11.0 — Synthetic live-readiness rehearsal
+
+The [Splunk field mapping specification](../docs/SPLUNK_FIELD_MAPPING_SPEC.md) records **proposed** Windows, authentication, and AWS sandbox source mappings plus the unknowns requiring real lab validation. None of these mappings are deployed or verified against live Splunk.
+
+Run the fixed, zero-network acceptance matrix from the repository root:
+
+```bash
+python -m pip install -r soc-event-contract/requirements.txt
+python splunk-readonly-connector/src/readiness_matrix.py
+```
+
+It runs 12 controlled scenarios: 4 valid workflows through allowlisted alert normalization, ingestion, correlation, sealed-batch verification, and the read-only dashboard adapter; and 8 invalid scenarios that must fail closed. A sanitized report is optional via `--out /tmp/splunk-readiness-summary.json` (must not exist yet). Temporary event files and manifests are automatically removed after each scenario; no case, live endpoint, network request or token is involved. The runner intentionally reports `live_splunk_verified: false`.
+
+**Passing CI means only that the current synthetic readiness cases pass**, not that Windows telemetry, SPL field extractions, actual Splunk saved searches, API permissions, token, real event source provenance or a live SOC deployment have been validated. Use [the home checkpoint](../docs/SPLUNK_HOME_CHECKPOINT.md) when the owner is physically at their PC.
