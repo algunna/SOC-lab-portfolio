@@ -3,11 +3,25 @@ on:
   pull_request:
     paths:
       - 'soc-demo/**'
+      - 'splunk-readonly-connector/**'
+      - 'soc-event-contract/**'
+      - 'soc-event-ingestion/**'
+      - 'soc-incident-correlation/**'
+      - 'soc-case-promotion/**'
+      - 'soc-incident-case-lab/**'
+      - 'soc-command-center/**'
       - '.github/workflows/soc-demo-tests.yml'
   push:
     branches: [main]
     paths:
       - 'soc-demo/**'
+      - 'splunk-readonly-connector/**'
+      - 'soc-event-contract/**'
+      - 'soc-event-ingestion/**'
+      - 'soc-incident-correlation/**'
+      - 'soc-case-promotion/**'
+      - 'soc-incident-case-lab/**'
+      - 'soc-command-center/**'
       - '.github/workflows/soc-demo-tests.yml'
 permissions:
   contents: read
@@ -39,6 +53,12 @@ jobs:
           (d/'candidate_id.txt').write_text(correlation['incident_candidates'][0]['candidate_id'])
           PY
           ID="$(cat "$DEMO/synthetic-investigation/candidate_id.txt")"
+          # Negative gate test: omit approval flag, ensure no database created.
+          if python soc-demo/scripts/run_demo.py approve --demo-dir "$DEMO/synthetic-investigation" --candidate-id "$ID" --analyst ci-synthetic-reviewer; then
+            echo "ERROR: Implicit case approval must not be allowed"
+            exit 1
+          fi
+          test ! -e "$DEMO/synthetic-investigation/cases.db"
           # Explicit synthetic-only approval; no production cases or auth credentials.
           python soc-demo/scripts/run_demo.py approve --demo-dir "$DEMO/synthetic-investigation" --candidate-id "$ID" --analyst ci-synthetic-reviewer --approve-demo-case
           python - "$DEMO" <<'PY'
