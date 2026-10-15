@@ -56,8 +56,14 @@ def hunt(events):
         elif eid == 4698:
             findings.append(dict(rule="scheduled_task_created", severity="low", host=host, user=user, timestamp=ts, evidence=[str(e.get("task_name", "unnamed"))], attack="T1053.005"))
         elif eid in (4625, 4624):
-            source_ip = str(e.get("source_ip", ""))
-            key = (host.lower(), user.lower(), source_ip)  # Windows account names are case-insensitive
+            # Fail closed on missing correlation identity. Otherwise unrelated
+            # unknown-user/host/source records can be merged into a false burst.
+            raw_host, raw_user, raw_ip = (e.get(k) for k in ("host", "user", "source_ip"))
+            if any(not isinstance(v, str) or not v.strip() or v.strip().lower() == "unknown"
+                   for v in (raw_host, raw_user, raw_ip)):
+                continue
+            source_ip = raw_ip.strip()
+            key = (raw_host.strip().lower(), raw_user.strip().lower(), source_ip)
             now = parse_time(ts)
             if now is None:
                 continue
