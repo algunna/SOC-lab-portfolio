@@ -28,3 +28,15 @@ Select a candidate ID from the report; it is intentionally not guessed. Change f
 - No networking, automatic remediation, background operations, encryption or production-grade concurrency protection.
 
 The Titans should review input provenance, identity verification, duplicate semantics and audit integrity before integration into any real alert workflow.
+
+## Verified sealed batch (Pipeline 9.0)
+
+For batch-health output, **verify completion and integrity before promoting a candidate**. Only an explicitly approved candidate can create a case, and the SQLite database must be outside the sealed batch:
+
+```bash
+python soc-event-ingestion/src/batch_health.py soc-event-contract/examples/windows_alert.json --out-dir /tmp/soc-approved-batch
+# Inspect the unverified candidates in /tmp/soc-approved-batch/correlation.json
+python soc-case-promotion/src/promote.py --batch-dir /tmp/soc-approved-batch --db /tmp/soc-cases.db --candidate-id YOUR_CANDIDATE_ID --analyst demo-analyst --approve
+```
+
+The new `--batch-dir` option checks the completion marker, SHA-256 hashes, expected files and health/report counters, consumes the verified bytes and rejects blocked/incomplete/tampered batches **before opening or creating the SQLite case database**. It cannot be combined with the positional legacy report argument. A batch hash is still **not authenticated provenance or analyst authentication**; a user with write access to the files and manifest can forge both. The original positional correlation report input is retained solely for trusted synthetic/legacy exercises, without integrity guarantees. No automatic case creation or live Splunk connection occurs.

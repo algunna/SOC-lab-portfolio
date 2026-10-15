@@ -3,11 +3,13 @@ on:
   pull_request:
     paths:
       - 'soc-case-promotion/**'
+      - 'soc-event-ingestion/**'
       - '.github/workflows/soc-case-promotion.yml'
   push:
     branches: [main]
     paths:
       - 'soc-case-promotion/**'
+      - 'soc-event-ingestion/**'
       - '.github/workflows/soc-case-promotion.yml'
 permissions:
   contents: read
@@ -30,3 +32,22 @@ jobs:
           python -c "import sqlite3; d=sqlite3.connect('/tmp/cases.db'); assert d.execute('select count(*) from cases').fetchone()[0]==1; assert d.execute('select count(*) from history').fetchone()[0]==3"
           if python soc-case-promotion/src/promote.py /tmp/candidates.json --db /tmp/cases.db --candidate-id "$ID" --analyst fixture-analyst --approve; then exit 1; fi
           python -c "import sqlite3; d=sqlite3.connect('/tmp/cases.db'); assert d.execute('select count(*) from cases').fetchone()[0]==1"
+      - name: Explicit sealed batch approval and tamper refusal
+        run: |
+          set -euo pipefail
+          python soc-event-ingestion/src/batch_health.py soc-event-contract/examples/windows_alert.json --out-dir /tmp/soc-sealed-case-batch
+          ID=$(python -c "import json; print(json.load(open('/tmp/soc-sealed-case-batch/correlation.json'))['incident_candidates'][0]['candidate_id'])")
+          if python soc-case-promotion/src/promote.py --batch-dir /tmp/soc-sealed-case-batch --db /tmp/refused-cases.db --candidate-id "$ID" --analyst synthetic-ci; then
+            echo "Case promotion succeeded without explicit approval"
+            exit 1
+          fi
+          test ! -e /tmp/refused-cases.db
+          python soc-case-promotion/src/promote.py --batch-dir /tmp/soc-sealed-case-batch --db /tmp/verified-cases.db --candidate-id "$ID" --analyst synthetic-ci --approve
+          python -c "import sqlite3; db=sqlite3.connect('/tmp/verified-cases.db'); assert db.execute('SELECT COUNT(*) FROM cases').fetchone()[0]==1"
+          cp -a /tmp/soc-sealed-case-batch /tmp/altered-case-batch
+          printf '%s\n' 'tampered' >> /tmp/altered-case-batch/correlation.json
+          if python soc-case-promotion/src/promote.py --batch-dir /tmp/altered-case-batch --db /tmp/unauthorized-cases.db --candidate-id "$ID" --analyst synthetic-ci --approve; then
+            echo "Tampered sealed batch accepted"
+            exit 1
+          fi
+          test ! -e /tmp/unauthorized-cases.db

@@ -3,11 +3,13 @@ on:
   pull_request:
     paths:
       - 'soc-command-center/**'
+      - 'soc-event-ingestion/**'
       - '.github/workflows/soc-dashboard-adapter.yml'
   push:
     branches: [main]
     paths:
       - 'soc-command-center/**'
+      - 'soc-event-ingestion/**'
       - '.github/workflows/soc-dashboard-adapter.yml'
 permissions:
   contents: read
@@ -34,3 +36,33 @@ jobs:
           python soc-command-center/src/adapter.py --ingestion /tmp/ingest.json --correlation /tmp/correlate.json --cases-db /tmp/soc-case-snapshot.db --out /tmp/dashboard-with-cases.json
           sha256sum -c /tmp/soc-case-snapshot.sha256
           python -c "import json; d=json.load(open('/tmp/dashboard-with-cases.json')); assert len(d['alerts'])==1; assert len(d['candidates'])==1; assert len(d['cases'])==1; assert d['cases'][0]['status']=='investigating'; assert set(d['cases'][0])=={'id','title','severity','status'}"
+      - name: Enforce sealed batch before read-only dashboard consumption
+        run: |
+          set -euo pipefail
+          python soc-event-ingestion/src/batch_health.py soc-event-contract/examples/windows_alert.json --out-dir /tmp/verified-dashboard-source
+          python soc-command-center/src/adapter.py --batch-dir /tmp/verified-dashboard-source --out /tmp/verified-dashboard.json
+          python -c "import json; d=json.load(open('/tmp/verified-dashboard.json')); assert len(d['alerts'])==1 and len(d['candidates'])==1 and d['cases']==[]"
+          cp -a /tmp/verified-dashboard-source /tmp/tampered-dashboard-source
+          printf '%s\n' 'corrupt' >> /tmp/tampered-dashboard-source/correlation.json
+          if python soc-command-center/src/adapter.py --batch-dir /tmp/tampered-dashboard-source --out /tmp/unsafe-dashboard.json; then
+            echo "Tampered batch accepted by dashboard"
+            exit 1
+          fi
+          test ! -e /tmp/unsafe-dashboard.json
+          cp -a /tmp/verified-dashboard-source /tmp/unsealed-dashboard-source
+          rm /tmp/unsealed-dashboard-source/integrity.json
+          if python soc-command-center/src/adapter.py --batch-dir /tmp/unsealed-dashboard-source --out /tmp/incomplete-dashboard.json; then
+            echo "Incomplete batch accepted by dashboard"
+            exit 1
+          fi
+          test ! -e /tmp/incomplete-dashboard.json
+          printf '%s\n' '{invalid' > /tmp/blocked-dashboard-input.jsonl
+          if python soc-event-ingestion/src/batch_health.py /tmp/blocked-dashboard-input.jsonl --out-dir /tmp/blocked-dashboard-source; then
+            echo "Invalid batch accepted by health gate"
+            exit 1
+          fi
+          if python soc-command-center/src/adapter.py --batch-dir /tmp/blocked-dashboard-source --out /tmp/blocked-dashboard.json; then
+            echo "Quarantined batch accepted by dashboard"
+            exit 1
+          fi
+          test ! -e /tmp/blocked-dashboard.json
