@@ -59,3 +59,9 @@ This path deliberately **does not** connect real detector verdicts to real sourc
 See [collector trust readiness](../docs/COLLECTOR_TRUST_READINESS.md) for the offline,
 synthetic authentication-outcome simulation, adversarial tests and future trust
 boundaries. No actual collector or source authentication is established.
+
+## Pipeline 18.0 — durable synthetic delivery
+
+[Durable delivery and recovery](../docs/DURABLE_DELIVERY_RECOVERY.md) adds a bounded
+SQLite queue, persistent replay identity reservations, verified local receipts,
+explicit retries and crash recovery tests. This does not deliver to a live service.

@@ -4,12 +4,18 @@ on:
     paths:
       - 'controlled-telemetry-lab/**'
       - 'soc-event-contract/**'
+      - 'soc-event-ingestion/**'
+      - 'soc-incident-correlation/**'
+      - 'soc-command-center/**'
       - '.github/workflows/controlled-telemetry-tests.yml'
   push:
     branches: [main]
     paths:
       - 'controlled-telemetry-lab/**'
       - 'soc-event-contract/**'
+      - 'soc-event-ingestion/**'
+      - 'soc-incident-correlation/**'
+      - 'soc-command-center/**'
       - '.github/workflows/controlled-telemetry-tests.yml'
 permissions:
   contents: read
@@ -93,3 +99,11 @@ jobs:
           else:
               raise AssertionError('Forged source evidence accepted')
           PY
+      - name: Durable queue across separate processes
+        run: |
+          set -euo pipefail
+          python controlled-telemetry-lab/src/durable_delivery.py --queue-dir /tmp/soc-delivery-queue enqueue-fixture
+          python controlled-telemetry-lab/src/durable_delivery.py --queue-dir /tmp/soc-delivery-queue deliver-one
+          python controlled-telemetry-lab/src/durable_delivery.py --queue-dir /tmp/soc-delivery-queue verify-receipt --batch-id 1
+          python controlled-telemetry-lab/src/durable_delivery.py --queue-dir /tmp/soc-delivery-queue enqueue-fixture
+          python controlled-telemetry-lab/src/durable_delivery.py --queue-dir /tmp/soc-delivery-queue deliver-one

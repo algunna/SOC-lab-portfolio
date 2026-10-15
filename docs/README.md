@@ -40,3 +40,7 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Pipeline 17.0 collector trust readiness
 
 - [Collector trust design and offline adversarial rehearsal](COLLECTOR_TRUST_READINESS.md).
+
+## Pipeline 18.0 durable delivery and recovery
+
+- [Durable synthetic queue and verified local receipt recovery](DURABLE_DELIVERY_RECOVERY.md).
