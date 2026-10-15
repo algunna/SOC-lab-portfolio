@@ -84,3 +84,10 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Integration CI runs saved-search fixture → normalization → ingestion → correlation → read-only dashboard output. Data type mappings are **hypotheses for synthetic tests**, not verified deployed SPL detection outputs.
 - Review before a live connector: evidence provenance, Splunk saved-search response formats and extraction fields, true detection thresholds, permissions/least-privilege, multi-batch replay/deduplication, redaction, source identity collisions and deterministic ID stability.
 - Continue to require analyst approval for promotion and preserve no raw-log export in count-only probe.
+
+## ATLAS — Offline end-to-end demo (PR pending)
+
+- [SOC demo](../soc-demo/README.md) prepares synthetic events → ingestion → correlation → dashboard with **zero cases** by default. Only a separate command with `--approve-demo-case` creates one training case and then snapshots the read-only case metadata.
+- Manifest SHA-256 checks guard against accidental local file changes, not maliciously forged provenance or user authentication. No live Splunk request, secret or production dataset is involved.
+- Replay, tampering, missing manifest, manual approval and case audit are regression-tested. Independently review synthetic-vs-live provenance claims and operational limits.
+- **Deferred home checkpoint:** [SPLUNK_HOME_CHECKPOINT.md](SPLUNK_HOME_CHECKPOINT.md). Owner is at work; do not ask for home PC operations until they return. No live SIEM connectivity verified.
