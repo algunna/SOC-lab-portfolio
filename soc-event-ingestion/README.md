@@ -55,3 +55,17 @@ To retry, inspect and correct the original synthetic input **manually**, then us
 Safety limits: 1–8 existing regular `.json`/`.jsonl` files, each at most 1 MB and up to 2,000 accepted alerts. Symbolic-link inputs are rejected. The source input files are still read by the existing ingestion code, and **successful ingestion reports contain all schema-permitted alert data**; protect and sanitize them. The gate is not an authenticated provenance service, exactly-once transport, live Splunk connector, immutable audit log or a durable retry queue. File input may change between preflight and read, and an interrupted write can leave a partially written output directory. Use only trusted, private training data.
 
 **Replay guard compatibility:** the optional cross-run SQLite replay guard remains separate, and this gate does **not** commit replay state. A future integrated, recoverable queue must coordinate state commits with delivery before production use.
+
+## Pipeline 8.0 — offline batch artifact completion and verification
+
+The opt-in batch-health gate now writes `integrity.json` **last**, after its other output files have been written. This manifest lists the **fixed, expected output filenames, bounded byte sizes and SHA-256 hashes**. Successful batches contain `health.json`, `ingestion.json` and `correlation.json`; blocked batches contain `health.json` and `quarantine.json`. Every complete batch also contains `integrity.json`.
+
+**Before trusting a stored synthetic offline batch for dashboard preparation or training, verify it explicitly:**
+
+```bash
+python soc-event-ingestion/src/artifact_integrity.py --batch-dir /tmp/soc-health-run-01
+```
+
+The verifier is **read-only**. It refuses missing, extra, symlinked, malformed, mismatched, oversized or modified artifacts. A missing completion manifest indicates an *incomplete or unsealed run*, which must not be published downstream. It returns a sanitized status with the number of verified artifacts, not event contents or paths. Both passed and properly quarantined batches may be verified.
+
+The completion marker is **not a digital signature, remote attestation, immutable audit record or evidence of who wrote the files**. Anyone able to rewrite the artifacts *and* integrity manifest can forge consistent hashes. A filesystem crash after writing a file or manifest may still lose directory entries, because directory fsync is not guaranteed. Always use an isolated, trusted local workspace; this does not provide transactional multi-file commits, a secure event source, background retry, exactly-once processing or production-grade durability. The manifest contains filenames and digest/size metadata, which can reveal patterns; keep outputs private. Live Splunk integration remains deferred.
