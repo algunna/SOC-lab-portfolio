@@ -34,3 +34,17 @@ jobs:
           python soc-incident-correlation/src/correlate.py /tmp/replay-first.json --out /tmp/first-candidates.json
           python soc-incident-correlation/src/correlate.py /tmp/replay-second.json --out /tmp/replay-candidates.json
           python -c "import json; a=json.load(open('/tmp/first-candidates.json')); b=json.load(open('/tmp/replay-candidates.json')); assert a['counts']['alerts']==1 and b['counts']['alerts']==0"
+      - name: Test isolated healthy batch and quarantined failure
+        run: |
+          set -euo pipefail
+          python soc-event-ingestion/src/batch_health.py soc-event-contract/examples/windows_alert.json --out-dir /tmp/soc-healthy-batch
+          python -c "import json; h=json.load(open('/tmp/soc-healthy-batch/health.json')); c=json.load(open('/tmp/soc-healthy-batch/correlation.json')); assert h['status']=='passed' and h['counts']['accepted']==1 and c['counts']['candidates']==1"
+          printf '%s\n' '{broken SECRET-SHOULD-NOT-LEAK' > /tmp/soc-bad-input.jsonl
+          if python soc-event-ingestion/src/batch_health.py /tmp/soc-bad-input.jsonl --out-dir /tmp/soc-quarantined-batch; then
+            echo "Unsafe acceptance of malformed batch"
+            exit 1
+          fi
+          python -c "import json,pathlib; p=pathlib.Path('/tmp/soc-quarantined-batch'); h=json.loads((p/'health.json').read_text()); q=(p/'quarantine.json').read_text(); assert h['status']=='blocked' and h['stage']=='ingestion'; assert not (p/'ingestion.json').exists() and not (p/'correlation.json').exists(); assert 'SECRET-SHOULD-NOT-LEAK' not in q"
+          cp soc-event-contract/examples/windows_alert.json /tmp/soc-bad-input.json
+          python soc-event-ingestion/src/batch_health.py /tmp/soc-bad-input.json --out-dir /tmp/soc-manual-recovery
+          python -c "import json; assert json.load(open('/tmp/soc-manual-recovery/health.json'))['status']=='passed'; assert json.load(open('/tmp/soc-quarantined-batch/health.json'))['status']=='blocked'"
