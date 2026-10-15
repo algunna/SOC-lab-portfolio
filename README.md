@@ -68,3 +68,8 @@ Open a project folder to review the available source code, sample logs, reports,
 ## Splunk SIEM Connectivity Preparation
 
 - [Opt-in, read-only Splunk probe](./splunk-readonly-connector) — fixed sourcetype event-count query, HTTPS verification, mock tests; live connection requires an authorized local setup
+
+## Synthetic end-to-end SOC walkthrough
+
+- [Reproducible offline investigation demo](./soc-demo/README.md) — mock Splunk alerts through validation, correlation, read-only dashboard and *explicitly approved* synthetic case
+- [Return to live Splunk when at home](./docs/SPLUNK_HOME_CHECKPOINT.md) — PC installation and authorized connectivity still pending
