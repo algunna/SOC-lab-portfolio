@@ -16,3 +16,7 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Pipeline 10.0: offline audit and live Splunk acceptance
 
 - [Security findings and live Splunk acceptance gate](SOC_PIPELINE_10_ACCEPTANCE.md) — separates verified offline lab behavior from the pending home-PC live telemetry requirements, records residual risks and independent review topics.
+
+## Splunk live-lab preparation
+
+- [Synthetic Splunk field mapping and readiness specification](SPLUNK_FIELD_MAPPING_SPEC.md) — proposed Windows/auth/CloudTrail source fields, 12-scenario offline acceptance matrix, and explicit requirements for the first authorized home-PC test.

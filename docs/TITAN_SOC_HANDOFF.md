@@ -128,9 +128,16 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Regression tests include missing manifests, tampering, symlinked inputs, blocked batches, improper output locations, counter mismatch and explicit demonstration that forged unsigned manifests can fool local hash checks.
 - Titan review: remaining file race and symlink-parent risks, local unsigned manifest authenticity, stronger cross-report consistency, limits on batch file sizes and case-promotion provenance boundary. Real Splunk setup remains deferred pending the home-PC checkpoint.
 
-## ATLAS — Pipeline 10.0 semantic audit and home Splunk acceptance (PR pending)
+## ATLAS — Pipeline 10.0 semantic audit and home Splunk acceptance (PR #37, merged)
 
 - Sealed batch consumption now validates normalized ingestion structure and exact counts, revalidates the accepted alerts, and independently recomputes correlation under the fixed batch-health policy, rejecting differences in all candidate fields even if a changed correlation file's SHA-256 manifest is refreshed.
 - Added adversarial regression tests for forged candidate severities, IDs, evidence references, grouping reasons, alert references, duplicate IDs and malformed accepted records. Dashboard and manual case-promotion paths reject a rehashed but semantically forged candidate prior to output/database modification.
 - [Pipeline 10.0 acceptance checklist](SOC_PIPELINE_10_ACCEPTANCE.md) distinguishes completed **offline** tests from pending live Splunk proof and records residual security risks. **No reviewer sign-off, production hardening or real SIEM verification is claimed.**
 - Review priorities: verify source provenance, independently recomputed correlation’s fixed-window assumptions, handling of source namespaces, file races, untrusted event-content forgery, and how a durable queue would connect to real Splunk.
+
+## ATLAS — Pipeline 11.0 synthetic Splunk live-readiness matrix (PR pending)
+
+- New fixed [field mapping spec](SPLUNK_FIELD_MAPPING_SPEC.md) differentiates hypothetical detector classes from actual Windows/Sysmon, auth and AWS CloudTrail event fields. All SPL/detectors, source event IDs, thresholds and response formats require real lab verification.
+- Offline `splunk-readonly-connector/src/readiness_matrix.py` runs 12 synthetic cases: four positive scenarios through normalized alerts → sealed batch ingestion/correlation → integrity+semantic verification → read-only Command Center adapter, and eight fail-closed negative cases. A new CI check asserts sanitized results and `live_splunk_verified: false`.
+- No API calls, no token, no unattended task, no raw event import or automatic incident promotion. The real Splunk installation and authorized probe are still pending at home.
+- Titan/VORTEX review: detector fidelity, timestamp identity namespaces, late-arriving events, relation to pre-classified saved-search results, provenance, replay behavior, and real SPL/field extraction test design.

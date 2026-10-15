@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added 12 fixed synthetic Splunk live-readiness scenarios, a no-network end-to-end rehearsal using sealed offline SOC batches, and proposed field mappings with explicit unverified prerequisites (PR pending).
+
+
 - Audited Pipeline 10.0 sealed batch semantics; reject rehashed but altered candidate identity/severity/evidence/grouping by independently recomputing correlation from validated accepted alerts. Added negative tests and a live Splunk acceptance gate document (PR pending).
 
 
