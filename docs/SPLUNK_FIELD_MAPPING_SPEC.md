@@ -58,3 +58,9 @@ The fixed scenario matrix is in [live_readiness_scenarios.json](../splunk-readon
 5. Only after controlled results are validated, design a separate **real** read-only event-to-alert adapter with explicit authentication/trust, redaction and bounded pagination. Review it before implementation or connection to downstream artifacts.
 
 **Do not claim that the synthetic field mapping is a deployed Splunk detector or that passing this rehearsal proves live SOC readiness.** See [Pipeline 10.0 acceptance](SOC_PIPELINE_10_ACCEPTANCE.md) and [Splunk at-home checkpoint](SPLUNK_HOME_CHECKPOINT.md) for additional security gates.
+
+## Pipeline 15.0 — proposed, synthetic source-scoped record identities
+
+The [controlled telemetry namespace lab](../controlled-telemetry-lab/README.md) now validates Windows tuples of `host/channel/lab-defined log_epoch/record_id` and CloudTrail tuples of `account_id/region/event_id`, producing only opaque, **unauthenticated synthetic** record identifiers and clock-review labels. The lab distinguishes equal record numbers after a synthetic Windows log reset and equal CloudTrail event UUIDs in different sandbox-account namespaces.
+
+The input `log_epoch` is a training placeholder: it is NOT a verified Windows event field or automatically assigned by Splunk. Real collection must establish a defensible log generation identity rather than assuming record numbers never recur. CloudTrail uniqueness and regional delivery semantics must also be checked on authorized lab data. The summary does not authenticate either source; no live endpoint is queried.
