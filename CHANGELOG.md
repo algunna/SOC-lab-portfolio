@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added bounded SHA-256 artifact verification and a final completion marker for successful and quarantined offline batch-health runs; rejects partial or altered output directories (PR pending). Not a digital signature or durable transaction.
+
+
 - Added read-only offline SOC batch observability view with bounded, strict health-report schema; sanitized summary counters and integration tests for healthy and quarantined runs (PR pending).
 
 

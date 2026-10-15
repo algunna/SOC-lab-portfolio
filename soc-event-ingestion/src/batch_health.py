@@ -23,6 +23,7 @@ def load(name, path):
 
 ingestion = load("health_ingestion", ROOT / "soc-event-ingestion/src/ingest.py")
 correlation = load("health_correlation", ROOT / "soc-incident-correlation/src/correlate.py")
+integrity = load("soc_batch_integrity", ROOT / "soc-event-ingestion/src/artifact_integrity.py")
 
 
 def issue(source_index, line, reason):
@@ -93,6 +94,7 @@ def process(paths, out_dir):
     if problems:
         write_new(dest / "quarantine.json", {"version": "0.1", "issues": problems})
         write_new(dest / "health.json", health)
+        integrity.seal(dest, health["status"])
         return health
 
     report = ingestion.ingest(paths)
@@ -110,6 +112,7 @@ def process(paths, out_dir):
         health["stage"] = "ingestion"
         write_new(dest / "quarantine.json", {"version": "0.1", "issues": issues})
         write_new(dest / "health.json", health)
+        integrity.seal(dest, health["status"])
         return health
 
     try:
@@ -119,6 +122,7 @@ def process(paths, out_dir):
         write_new(dest / "quarantine.json", {
             "version": "0.1", "issues": [issue(0, 0, "correlation_failed")]})
         write_new(dest / "health.json", health)
+        integrity.seal(dest, health["status"])
         return health
 
     counts["candidates"] = candidates["counts"]["candidates"]
@@ -127,6 +131,7 @@ def process(paths, out_dir):
     write_new(dest / "ingestion.json", report)
     write_new(dest / "correlation.json", candidates)
     write_new(dest / "health.json", health)
+    integrity.seal(dest, health["status"])
     return health
 
 
