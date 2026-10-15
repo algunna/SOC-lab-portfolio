@@ -99,9 +99,17 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Limitations for independent review: SQLite file can be forged, hashes may be guessable, sidecar/concurrency edge cases, output/state crash window, lack of real message acknowledgement, missing queue/outbox, state durability and privacy. Do not advertise exactly-once semantics.
 - Splunk home checkpoint remains pending; verify installation/authorized REST connectivity only when user returns home, and never ask for credentials in chat.
 
-## ATLAS — Offline batch health and manual recovery (PR pending)
+## ATLAS — Offline batch health and manual recovery (PR #33, merged)
 
 - `soc-event-ingestion/src/batch_health.py` adds a separate, explicitly invoked offline gate with health counts/stage status. It publishes validated ingestion and correlation only on complete success; otherwise emits metadata-only `quarantine.json` + `health.json`.
 - Redaction by design: quarantine issues have source indices, line numbers and categorical reasons only; no source paths, values, validation strings or raw logs. The gate never retries automatically, never touches replay state, never promotes a case and never calls Splunk.
 - Titan security review: TOCTOU between preflight and input read, atomic multi-file publishing/crashes, symlink swaps, filesystem access controls, replay-state coordination, bounded memory/throughput and operational observability. **Not production durability or live telemetry.**
 - Splunk home-PC checkpoint is still pending until the owner returns home; see the SOC demo README.
+
+## ATLAS — Offline SOC observability snapshot (PR pending)
+
+- New `soc-command-center/src/health_dashboard.py` displays only strictly validated, metadata-only batch health reports as loopback-served HTML. It reads no alert, quarantine, SQLite, evidence, token or log content.
+- Enforces 1–30 explicitly supplied health directories, 4 KiB per health file, status/stage consistency and bounded integer counts; rejects extra fields, malformed JSON, symlinks and repeated runs.
+- CI generates healthy and blocked synthetic batch output and verifies a read-only dashboard summary without raw text exposure. Existing Host validation and security headers are reused.
+- Titan review: snapshot authenticity, directory symlink parents and TOCTOU, meaningful health metrics beyond counts, monitoring/alerting semantics, cardinality bounds and anti-CSRF/read-only posture. **No live telemetry, polling, verified recovery tracking or production observability exists.**
+- **Splunk setup remains deferred** per [home checkpoint](SPLUNK_HOME_CHECKPOINT.md).
