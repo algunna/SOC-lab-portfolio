@@ -107,3 +107,17 @@ jobs:
           python controlled-telemetry-lab/src/durable_delivery.py --queue-dir /tmp/soc-delivery-queue verify-receipt --batch-id 1
           python controlled-telemetry-lab/src/durable_delivery.py --queue-dir /tmp/soc-delivery-queue enqueue-fixture
           python controlled-telemetry-lab/src/durable_delivery.py --queue-dir /tmp/soc-delivery-queue deliver-one
+      - name: Verify read-only queue health and audit
+        run: |
+          set -euo pipefail
+          python controlled-telemetry-lab/src/collector_health.py --queue-dir /tmp/soc-delivery-queue > /tmp/soc-collector-health.json
+          python - <<'PYCODE'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('/tmp/soc-collector-health.json').read_text())
+          assert report['status']=='idle'
+          assert report['acknowledged_batches']==1 and report['pending_batches']==0
+          assert report['observations']==6 and report['unresolved_attempts']==0
+          assert report['live_collector_verified'] is False
+          assert report['audit_authenticated'] is False
+          PYCODE

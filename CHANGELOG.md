@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added read-only offline collector health verification and bounded append-only operational audit with atomic migration, delivery outcome binding and crash/failure visibility. Live collector verification remains pending.
+
 - Added a bounded offline synthetic delivery queue with atomic identity reservations and verified local receipts, crash/restart recovery and adversarial concurrency tests. No live delivery or collector authentication.
 
 - Added an offline collector trust-policy rehearsal with sanitized failure codes, synthetic source validation, session-local replay rejection and adversarial sealed-pipeline tests. Real authentication and independent review remain pending.

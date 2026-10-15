@@ -65,3 +65,9 @@ boundaries. No actual collector or source authentication is established.
 [Durable delivery and recovery](../docs/DURABLE_DELIVERY_RECOVERY.md) adds a bounded
 SQLite queue, persistent replay identity reservations, verified local receipts,
 explicit retries and crash recovery tests. This does not deliver to a live service.
+
+## Pipeline 19.0 — read-only health and local audit
+
+[Collector health and audit](../docs/COLLECTOR_HEALTH_AUDIT.md) verifies the existing
+queue without changing it and records bounded delivery-attempt history. Unresolved
+attempts, historical failures and corruption remain visible; no live collector is enabled.
