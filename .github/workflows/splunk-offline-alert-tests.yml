@@ -34,3 +34,17 @@ jobs:
           python -c "import json; p='/tmp/malicious-splunk.jsonl'; d={'search_name':'windows_encoded_powershell','record_id':'r1','occurred_at':'2026-10-14T12:00:00Z','_raw':'secret'}; open(p,'w').write(json.dumps(d)+'\\n')"
           if python splunk-readonly-connector/src/normalize.py /tmp/malicious-splunk.jsonl --out /tmp/should-not-exist.jsonl; then exit 1; fi
           test ! -e /tmp/should-not-exist.jsonl
+      - name: Splunk synthetic readiness matrix acceptance
+        run: |
+          set -euo pipefail
+          python splunk-readonly-connector/src/readiness_matrix.py --out /tmp/splunk-readiness-summary.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/splunk-readiness-summary.json'))
+          assert data['mode']=='synthetic_offline_only'
+          assert data['live_splunk_verified'] is False
+          assert data['passed_scenarios']==12
+          assert sum(r['result']=='passed' for r in data['results'])==4
+          assert sum(r['result']=='expected_rejection' for r in data['results'])==8
+          assert all('raw' not in r and 'actor' not in r and 'asset' not in r for r in data['results'])
+          PY
