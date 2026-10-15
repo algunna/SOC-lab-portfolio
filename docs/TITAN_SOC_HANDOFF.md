@@ -91,3 +91,10 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Manifest SHA-256 checks guard against accidental local file changes, not maliciously forged provenance or user authentication. No live Splunk request, secret or production dataset is involved.
 - Replay, tampering, missing manifest, manual approval and case audit are regression-tested. Independently review synthetic-vs-live provenance claims and operational limits.
 - **Deferred home checkpoint:** [SPLUNK_HOME_CHECKPOINT.md](SPLUNK_HOME_CHECKPOINT.md). Owner is at work; do not ask for home PC operations until they return. No live SIEM connectivity verified.
+
+## ATLAS — persistent offline replay safeguard (PR pending)
+
+- New optional `soc-event-ingestion/src/replay_guard.py` filters previously seen validated normalized alerts across invocations using SHA-256 identifiers and a local SQLite state database. Existing ingestion behavior stays unchanged unless explicitly enabled.
+- Replays are skipped; conflicting reuse of source/event ID or observation identity fails the entire batch. Transaction rollback and unmodified output checks are included in regression tests.
+- Limitations for independent review: SQLite file can be forged, hashes may be guessable, sidecar/concurrency edge cases, output/state crash window, lack of real message acknowledgement, missing queue/outbox, state durability and privacy. Do not advertise exactly-once semantics.
+- Splunk home checkpoint remains pending; verify installation/authorized REST connectivity only when user returns home, and never ask for credentials in chat.
