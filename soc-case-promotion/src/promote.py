@@ -9,6 +9,9 @@ ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("soc_cases", ROOT/"soc-incident-case-lab"/"src"/"cases.py")
 cases = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(cases)
+seal_spec = importlib.util.spec_from_file_location("soc_promotion_integrity", ROOT/"soc-event-ingestion"/"src"/"artifact_integrity.py")
+integrity = importlib.util.module_from_spec(seal_spec)
+seal_spec.loader.exec_module(integrity)
 
 # Case severities have no "informational"; the lowest case level is used instead
 CASE_SEVERITY = {"informational": "low", "low": "low", "medium": "medium", "high": "high", "critical": "critical"}
@@ -64,7 +67,8 @@ def promote(db, report, candidate_id, analyst, severity=None, approve=False):
 
 def main():
     parser=argparse.ArgumentParser(description="Manually promote an unverified candidate")
-    parser.add_argument("report",type=Path)
+    parser.add_argument("report",type=Path,nargs="?",help="Legacy trusted synthetic candidate report")
+    parser.add_argument("--batch-dir",type=Path,help="Verify a sealed offline batch before promotion")
     parser.add_argument("--db",type=Path,required=True)
     parser.add_argument("--candidate-id",required=True)
     parser.add_argument("--analyst",required=True)
@@ -73,8 +77,15 @@ def main():
     args=parser.parse_args()
     if not args.approve:
         parser.error("Explicit --approve is required")
+    if (args.batch_dir is None) == (args.report is None):
+        parser.error("Choose exactly one: legacy report or --batch-dir")
+    if args.batch_dir is not None and args.db.resolve().is_relative_to(args.batch_dir.resolve()):
+        parser.error("Case database must not be inside the sealed batch directory")
     try:
-        report=json.loads(args.report.read_text(encoding="utf-8"))
+        if args.batch_dir is not None:
+            _, report = integrity.verified_reports(args.batch_dir)
+        else:
+            report = json.loads(args.report.read_text(encoding="utf-8"))
         args.db.parent.mkdir(parents=True,exist_ok=True)
         with cases.connect(args.db) as db:
             identifier=promote(db,report,args.candidate_id,args.analyst,args.severity,approve=args.approve)
