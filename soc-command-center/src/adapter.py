@@ -10,6 +10,7 @@ def load_module(name,path):
     return mod
 contract=load_module("soc_event_contract",ROOT/"soc-event-contract"/"src"/"validate.py")
 case_snapshot=load_module("soc_case_snapshot",Path(__file__).resolve().parent/"case_snapshot.py")
+integrity=load_module("soc_batch_integrity_verified",ROOT/"soc-event-ingestion"/"src"/"artifact_integrity.py")
 
 def build(ingestion,correlation,cases=None):
     if ingestion.get("rejected") or not isinstance(ingestion.get("accepted"),list):
@@ -34,15 +35,28 @@ def build(ingestion,correlation,cases=None):
 def main():
     import argparse
     p=argparse.ArgumentParser(description="Generate read-only dashboard fixture from trusted offline SOC reports")
-    p.add_argument("--ingestion",type=Path,required=True)
-    p.add_argument("--correlation",type=Path,required=True)
+    p.add_argument("--ingestion",type=Path,help="Legacy trusted synthetic report; use with --correlation")
+    p.add_argument("--correlation",type=Path,help="Legacy trusted synthetic report; use with --ingestion")
+    p.add_argument("--batch-dir",type=Path,help="Verify sealed offline batch before loading report bytes")
     p.add_argument("--out",type=Path,required=True)
     p.add_argument("--cases-db",type=Path,help="Existing local SQLite case database (read-only); optional")
     args=p.parse_args()
     if args.out.exists():p.error("Refusing to overwrite output")
+    if args.batch_dir is not None:
+        if args.ingestion is not None or args.correlation is not None:
+            p.error("--batch-dir cannot be combined with legacy report options")
+    elif args.ingestion is None or args.correlation is None:
+        p.error("Choose --batch-dir or both --ingestion and --correlation")
     try:
+        if args.batch_dir is not None:
+            ingestion,correlation=integrity.verified_reports(args.batch_dir)
+            if args.out.resolve().is_relative_to(args.batch_dir.resolve()):
+                p.error("Output must not be written into sealed batch directory")
+        else:
+            ingestion=json.loads(args.ingestion.read_text(encoding="utf-8"))
+            correlation=json.loads(args.correlation.read_text(encoding="utf-8"))
         case_rows=case_snapshot.read_cases(args.cases_db) if args.cases_db is not None else []
-        data=build(json.loads(args.ingestion.read_text(encoding="utf-8")),json.loads(args.correlation.read_text(encoding="utf-8")),cases=case_rows)
+        data=build(ingestion,correlation,cases=case_rows)
     except (OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError, case_snapshot.sqlite3.DatabaseError) as exc:
         p.error(f"Invalid input: {type(exc).__name__}")
     args.out.parent.mkdir(parents=True,exist_ok=True)
