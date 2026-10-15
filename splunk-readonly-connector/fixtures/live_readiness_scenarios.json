@@ -1,0 +1,196 @@
+{
+  "version": "0.1",
+  "dataset": "synthetic_offline_only",
+  "scenarios": [
+    {
+      "id": "baseline-three-allowlisted-detections",
+      "expect": "pass",
+      "alerts": 3,
+      "candidates": 3,
+      "rows": [
+        {
+          "search_name": "windows_encoded_powershell",
+          "record_id": "lab-win-0001",
+          "occurred_at": "2026-10-14T10:00:00Z",
+          "actor": "LAB\\analyst",
+          "asset": "LAB-WS01"
+        },
+        {
+          "search_name": "auth_failed_login_burst",
+          "record_id": "lab-auth-0002",
+          "occurred_at": "2026-10-14T10:02:00Z",
+          "actor": "LAB\\analyst",
+          "asset": "LAB-WS01"
+        },
+        {
+          "search_name": "aws_cloudtrail_logging_change",
+          "record_id": "lab-cloud-0003",
+          "occurred_at": "2026-10-14T10:04:00+00:00",
+          "actor": "arn:aws:iam::123456789012:user/lab",
+          "asset": "123456789012"
+        }
+      ]
+    },
+    {
+      "id": "same-host-two-windows-alerts-group",
+      "expect": "pass",
+      "alerts": 2,
+      "candidates": 1,
+      "rows": [
+        {
+          "search_name": "windows_encoded_powershell",
+          "record_id": "lab-win-a",
+          "occurred_at": "2026-10-14T10:00:00Z",
+          "actor": "LAB\\analyst",
+          "asset": "LAB-WS01"
+        },
+        {
+          "search_name": "windows_encoded_powershell",
+          "record_id": "lab-win-b",
+          "occurred_at": "2026-10-14T10:05:00+00:00",
+          "actor": "LAB\\analyst",
+          "asset": "LAB-WS01"
+        }
+      ]
+    },
+    {
+      "id": "events-beyond-fixed-window-separate",
+      "expect": "pass",
+      "alerts": 2,
+      "candidates": 2,
+      "rows": [
+        {
+          "search_name": "windows_encoded_powershell",
+          "record_id": "lab-win-c",
+          "occurred_at": "2026-10-14T10:00:00Z",
+          "actor": "LAB\\analyst",
+          "asset": "LAB-WS01"
+        },
+        {
+          "search_name": "windows_encoded_powershell",
+          "record_id": "lab-win-d",
+          "occurred_at": "2026-10-14T10:16:00Z",
+          "actor": "LAB\\analyst",
+          "asset": "LAB-WS01"
+        }
+      ]
+    },
+    {
+      "id": "absent-actor-never-grouped",
+      "expect": "pass",
+      "alerts": 2,
+      "candidates": 2,
+      "rows": [
+        {
+          "search_name": "auth_failed_login_burst",
+          "record_id": "lab-auth-e",
+          "occurred_at": "2026-10-14T10:00:00Z",
+          "asset": "LAB-WS01"
+        },
+        {
+          "search_name": "auth_failed_login_burst",
+          "record_id": "lab-auth-f",
+          "occurred_at": "2026-10-14T10:01:00Z",
+          "asset": "LAB-WS01"
+        }
+      ]
+    },
+    {
+      "id": "unknown-search-rejected",
+      "expect": "reject",
+      "rows": [
+        {
+          "search_name": "unreviewed_search",
+          "record_id": "lab-unknown-01",
+          "occurred_at": "2026-10-14T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "raw-log-column-rejected",
+      "expect": "reject",
+      "rows": [
+        {
+          "search_name": "windows_encoded_powershell",
+          "record_id": "lab-win-g",
+          "occurred_at": "2026-10-14T10:00:00Z",
+          "_raw": "SYNTHETIC_UNTRUSTED"
+        }
+      ]
+    },
+    {
+      "id": "source-overrides-severity-rejected",
+      "expect": "reject",
+      "rows": [
+        {
+          "search_name": "auth_failed_login_burst",
+          "record_id": "lab-auth-h",
+          "occurred_at": "2026-10-14T10:00:00Z",
+          "severity": "critical"
+        }
+      ]
+    },
+    {
+      "id": "duplicate-alert-identity-rejected",
+      "expect": "reject",
+      "rows": [
+        {
+          "search_name": "windows_encoded_powershell",
+          "record_id": "lab-win-i",
+          "occurred_at": "2026-10-14T10:00:00Z"
+        },
+        {
+          "search_name": "windows_encoded_powershell",
+          "record_id": "lab-win-i",
+          "occurred_at": "2026-10-14T10:01:00Z"
+        }
+      ]
+    },
+    {
+      "id": "invalid-clock-time-rejected",
+      "expect": "reject",
+      "rows": [
+        {
+          "search_name": "windows_encoded_powershell",
+          "record_id": "lab-win-j",
+          "occurred_at": "2026-10-14T25:61:00Z"
+        }
+      ]
+    },
+    {
+      "id": "control-character-in-actor-rejected",
+      "expect": "reject",
+      "rows": [
+        {
+          "search_name": "auth_failed_login_burst",
+          "record_id": "lab-auth-k",
+          "occurred_at": "2026-10-14T10:00:00Z",
+          "actor": "bad\nactor"
+        }
+      ]
+    },
+    {
+      "id": "unexpected-password-field-rejected",
+      "expect": "reject",
+      "rows": [
+        {
+          "search_name": "auth_failed_login_burst",
+          "record_id": "lab-auth-l",
+          "occurred_at": "2026-10-14T10:00:00Z",
+          "password": "SYNTHETIC_DONT_EXPORT"
+        }
+      ]
+    },
+    {
+      "id": "record-id-format-rejected",
+      "expect": "reject",
+      "rows": [
+        {
+          "search_name": "aws_cloudtrail_logging_change",
+          "record_id": "../../unsafe",
+          "occurred_at": "2026-10-14T10:00:00Z"
+        }
+      ]
+    }
+  ]
+}
