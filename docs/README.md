@@ -48,3 +48,7 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Pipeline 19.0 collector health and reliability
 
 - [Read-only collector queue health and local operational audit](COLLECTOR_HEALTH_AUDIT.md).
+
+## Pipeline 20.0 live acceptance preparation
+
+- [Live Splunk acceptance runbook and pending evidence checkpoints](LIVE_SPLUNK_ACCEPTANCE.md).

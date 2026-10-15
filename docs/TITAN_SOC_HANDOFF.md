@@ -195,3 +195,9 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Added read-only queue/receipt/audit verification and transactional schema-19 operational audit. Start/outcome records expose unresolved process crashes; successful acknowledgment and audit commit together.
 - Review [health and audit boundaries](COLLECTOR_HEALTH_AUDIT.md): migration rollback, failed audit writes, historical gaps, local clock trust, cap exhaustion, and lack of tamper-proof storage.
 - Independent VORTEX/Titan review and home-PC Splunk verification remain pending. No real collector, remote monitoring or automatic recovery enabled.
+
+## ATLAS — Pipeline 20.0 live acceptance preparation
+
+- Added [live acceptance requirements](LIVE_SPLUNK_ACCEPTANCE.md), an all-pending evidence checklist and a bounded offline structure validator. Synthetic evidence kinds and skipped prerequisites are rejected.
+- Even complete evidence claims remain unverified, require manual inspection and never authorize collector enablement. Hashes do not establish authenticity.
+- Home-PC Splunk, real adapter/authentication implementation, independent security review and the real event-to-case demonstration remain pending.

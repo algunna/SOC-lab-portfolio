@@ -48,3 +48,17 @@ jobs:
           assert sum(r['result']=='expected_rejection' for r in data['results'])==8
           assert all('raw' not in r and 'actor' not in r and 'asset' not in r for r in data['results'])
           PY
+      - name: Live acceptance preparation remains unverified
+        run: |
+          set -euo pipefail
+          python splunk-readonly-connector/src/acceptance_plan.py > /tmp/live-acceptance-preparation.json
+          python - <<'PYCODE'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('/tmp/live-acceptance-preparation.json').read_text())
+          assert report['status']=='incomplete'
+          assert len(report['pending_gates'])==11 and report['recorded_gates']==[]
+          assert report['live_splunk_verified'] is False
+          assert report['evidence_contents_verified'] is False
+          assert report['collector_enablement_authorized'] is False
+          PYCODE

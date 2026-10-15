@@ -25,3 +25,9 @@ Only after successful local authenticated connectivity should live field mapping
 - [Pipeline 11.0 proposed Splunk field mapping and synthetic acceptance matrix](SPLUNK_FIELD_MAPPING_SPEC.md) describes test-event categories, strict mock saved-search result columns, positive/negative local scenarios, and gaps in actual source provenance and detector semantics.
 - Before connecting any live feed, rerun the matrix and inspect its sanitized summary. A green rehearsal does not confirm Splunk is installed or that any SPL detector works.
 - Owner is expected to resume the **installation/service and authorized count-only probe** at home; nothing requires a workplace computer or access to hospital telemetry.
+
+## Pipeline 20.0 acceptance preparation
+
+The [live acceptance runbook](LIVE_SPLUNK_ACCEPTANCE.md) defines eleven pending
+checkpoints and private evidence requirements. Start with the service check above.
+The checklist validator cannot certify live readiness or enable a collector.

@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added live Splunk acceptance preparation: eleven pending evidence checkpoints, an offline checklist validator that never certifies readiness, and a home-PC runbook identifying the missing real collector and review gates.
+
 - Added read-only offline collector health verification and bounded append-only operational audit with atomic migration, delivery outcome binding and crash/failure visibility. Live collector verification remains pending.
 
 - Added a bounded offline synthetic delivery queue with atomic identity reservations and verified local receipts, crash/restart recovery and adversarial concurrency tests. No live delivery or collector authentication.

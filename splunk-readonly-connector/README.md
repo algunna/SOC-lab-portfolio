@@ -76,3 +76,11 @@ python splunk-readonly-connector/src/readiness_matrix.py
 It runs 12 controlled scenarios: 4 valid workflows through allowlisted alert normalization, ingestion, correlation, sealed-batch verification, and the read-only dashboard adapter; and 8 invalid scenarios that must fail closed. A sanitized report is optional via `--out /tmp/splunk-readiness-summary.json` (must not exist yet). Temporary event files and manifests are automatically removed after each scenario; no case, live endpoint, network request or token is involved. The runner intentionally reports `live_splunk_verified: false`.
 
 **Passing CI means only that the current synthetic readiness cases pass**, not that Windows telemetry, SPL field extractions, actual Splunk saved searches, API permissions, token, real event source provenance or a live SOC deployment have been validated. Use [the home checkpoint](../docs/SPLUNK_HOME_CHECKPOINT.md) when the owner is physically at their PC.
+
+## Pipeline 20.0 — live acceptance preparation
+
+[The live acceptance runbook](../docs/LIVE_SPLUNK_ACCEPTANCE.md) separates the
+home-PC service/count-only probe checkpoint from the still-missing real collector
+and independent review. `python splunk-readonly-connector/src/acceptance_plan.py`
+validates the all-pending checklist without network access. Even a filled checklist
+cannot certify evidence or authorize live operation.
