@@ -114,9 +114,16 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Titan review: snapshot authenticity, directory symlink parents and TOCTOU, meaningful health metrics beyond counts, monitoring/alerting semantics, cardinality bounds and anti-CSRF/read-only posture. **No live telemetry, polling, verified recovery tracking or production observability exists.**
 - **Splunk setup remains deferred** per [home checkpoint](SPLUNK_HOME_CHECKPOINT.md).
 
-## ATLAS — Offline batch artifact completeness (PR pending)
+## ATLAS — Offline batch artifact completeness (PR #35, merged)
 
 - `soc-event-ingestion/src/artifact_integrity.py` creates a final `integrity.json` marker only after a batch has written its other files, pinning expected names, bounded sizes and SHA-256 digests.
 - Read-only verification catches missing, unexpected, malformed, symlinked or changed outputs. Health status/stage and counters are validated. This covers both passed and quarantined offline runs.
 - Integrity proof is only local change detection: an adversary who can edit both artifacts and the manifest can forge a consistent set. A crash between writes or before filesystem directory durability can leave unsealed or lost files; **no atomic multi-file commit, authenticated provenance, production guarantee or live SIEM connection**.
 - Titan to review TOCTOU/symlink parent races, platform-specific durability semantics, privacy of diagnostic artifacts, manifest spoofing and integration with a future durable queue. Splunk at-home checkpoint is still pending.
+
+## ATLAS — sealed batch consumption at dashboard boundary (PR pending)
+
+- The Command Center adapter now supports `--batch-dir` to enforce local hash/completeness checks, keep the verified report bytes in memory and refuse blocked/incomplete/tampered batches before creating a dashboard artifact.
+- Cross-checks sealed health counts against ingestion and correlation counts; never writes output inside the sealed directory. The legacy trusted synthetic `--ingestion/--correlation` mode remains but **does not** attest integrity.
+- Regression tests include missing manifests, tampering, symlinked inputs, blocked batches, improper output locations, counter mismatch and explicit demonstration that forged unsigned manifests can fool local hash checks.
+- Titan review: remaining file race and symlink-parent risks, local unsigned manifest authenticity, stronger cross-report consistency, limits on batch file sizes and case-promotion provenance boundary. Real Splunk setup remains deferred pending the home-PC checkpoint.
