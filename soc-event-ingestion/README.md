@@ -75,3 +75,11 @@ The completion marker is **not a digital signature, remote attestation, immutabl
 The [Command Center adapter](../soc-command-center/README.md) now accepts `--batch-dir` and **requires** a valid completion marker before it creates the dashboard snapshot. It loads the already-verified bytes, avoids reopening the report paths after verification, rejects blocked/incomplete batches and cross-checks basic health counts with the ingestion/correlation reports. The separate `artifact_integrity.py --batch-dir` CLI remains useful for read-only diagnostics, but the new adapter path enforces verification at consumption time.
 
 Legacy ingestion/correlation file arguments remain available only for trusted synthetic workflows and do not establish report integrity. This is a local hash check, not cryptographically authenticated source provenance.
+
+## Pipeline 10.0 — semantic correlation verification
+
+For sealed batches, `artifact_integrity.verified_reports(...)` now goes beyond matching SHA-256 checksums: it independently **revalidates the accepted alerts and recomputes the complete conservative correlation report** using the fixed batch-health correlation policy. Any mismatch in candidate IDs, classification, severity, evidence references, grouping, alert identities, time window, or counts is rejected before downstream dashboard or case workflows.
+
+It also requires exact normalized ingestion report fields, coherent counts, no rejected records, at most 2,000 accepted alerts, and rejects duplicate identities and schema-invalid alerts. The validated JSON is parsed from the **same file bytes** used for digest verification.
+
+**Limits:** this detects a dishonest or stale *correlation result* relative to the received normalized alert inputs. It does **not authenticate those source alerts**. An attacker able to alter events and refresh the unsigned manifest may still produce an internally coherent batch. Production needs external provenance, trusted identities, a stronger durability strategy and reviewed Splunk mappings. See the [integration audit and acceptance criteria](../docs/SOC_PIPELINE_10_ACCEPTANCE.md).

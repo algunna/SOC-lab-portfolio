@@ -34,6 +34,21 @@ class SealedPromotionTests(unittest.TestCase):
                 "--candidate-id", self.candidate, "--analyst", "synthetic-reviewer", *extra]
         return subprocess.run(args, cwd=ROOT, text=True, capture_output=True, timeout=15)
 
+    def test_forged_correlator_severity_and_updated_manifest_refused(self):
+        import hashlib
+        corr = self.folder / "correlation.json"
+        doc = json.loads(corr.read_text())
+        doc["incident_candidates"][0]["highest_severity"] = "critical"
+        corr.write_text(json.dumps(doc))
+        marker_path = self.folder / "integrity.json"
+        manifest = json.loads(marker_path.read_text())
+        raw = corr.read_bytes()
+        manifest["files"]["correlation.json"] = {"bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}
+        marker_path.write_text(json.dumps(manifest))
+        result = self.promote("--approve")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(self.db.exists())
+
     def test_requires_explicit_approval_and_keeps_db_absent(self):
         result = self.promote()
         self.assertNotEqual(result.returncode, 0)

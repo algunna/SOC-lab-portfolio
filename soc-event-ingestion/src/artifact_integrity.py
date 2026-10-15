@@ -5,6 +5,7 @@ hashes. Completeness marker is written LAST; incomplete/crashed runs fail closed
 """
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -178,12 +179,39 @@ def verified_reports(directory):
         raise ValueError("Malformed batch reports")
     if not isinstance(ingestion.get("counts"), dict) or not isinstance(correlation.get("counts"), dict):
         raise ValueError("Invalid batch report counters")
-    if (ingestion["counts"].get("accepted") != health["counts"]["accepted"] or
-        ingestion.get("counts", {}).get("rejected") != 0 or
-        ingestion.get("counts", {}).get("duplicates") != health["counts"]["duplicates"] or
-        correlation.get("counts", {}).get("candidates") != health["counts"]["candidates"] or
-        correlation.get("counts", {}).get("alerts") != health["counts"]["accepted"]):
-        raise ValueError("Batch counters do not match sealed reports")
+    counts = ingestion["counts"]
+    if (set(ingestion) != {"schema_version", "accepted", "rejected", "duplicates", "counts"} or
+        ingestion["schema_version"] != "1.0" or
+        set(counts) != {"accepted", "rejected", "duplicates"} or
+        any(type(counts[k]) is not int or not 0 <= counts[k] <= COUNTER_MAX for k in counts) or
+        not isinstance(ingestion.get("accepted"), list) or
+        not isinstance(ingestion.get("rejected"), list) or
+        not isinstance(ingestion.get("duplicates"), list)):
+        raise ValueError("Malformed normalized ingestion report")
+    if (len(ingestion["accepted"]) > 2000 or
+        ingestion["rejected"] or
+        len(ingestion["accepted"]) != counts["accepted"] or
+        len(ingestion["duplicates"]) != counts["duplicates"] or
+        counts["rejected"] != len(ingestion["rejected"]) or
+        counts["accepted"] != health["counts"]["accepted"] or
+        counts["duplicates"] != health["counts"]["duplicates"]):
+        raise ValueError("Sealed ingestion contents do not match health counts")
+    # This is a semantic check, not just a digest check. Group again from the
+    # already-verified alert bytes with the batch-health default correlation
+    # policy, then demand exact agreement, including every candidate field.
+    spec = importlib.util.spec_from_file_location(
+        "integrity_correlation_recheck",
+        Path(__file__).resolve().parents[2] / "soc-incident-correlation/src/correlate.py")
+    correlator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(correlator)
+    try:
+        expected = correlator.group_alerts(ingestion)
+    except (ValueError, TypeError, KeyError, IndexError, AttributeError) as exc:
+        raise ValueError("Sealed alerts cannot be correlated safely") from exc
+    if (correlation != expected or
+        expected["counts"]["candidates"] != health["counts"]["candidates"] or
+        expected["counts"]["alerts"] != health["counts"]["accepted"]):
+        raise ValueError("Sealed correlation differs from independently recomputed results")
     return ingestion, correlation
 
 

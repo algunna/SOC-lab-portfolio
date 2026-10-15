@@ -12,3 +12,7 @@ This directory holds shared engineering documentation for the training portfolio
 - [Changelog](../CHANGELOG.md) — merged developments.
 
 Existing projects retain their own README files. Standards apply to new or modified projects; legacy documentation can be upgraded incrementally.
+
+## Pipeline 10.0: offline audit and live Splunk acceptance
+
+- [Security findings and live Splunk acceptance gate](SOC_PIPELINE_10_ACCEPTANCE.md) — separates verified offline lab behavior from the pending home-PC live telemetry requirements, records residual risks and independent review topics.

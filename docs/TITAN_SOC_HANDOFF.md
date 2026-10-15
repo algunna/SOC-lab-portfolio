@@ -121,9 +121,16 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Integrity proof is only local change detection: an adversary who can edit both artifacts and the manifest can forge a consistent set. A crash between writes or before filesystem directory durability can leave unsealed or lost files; **no atomic multi-file commit, authenticated provenance, production guarantee or live SIEM connection**.
 - Titan to review TOCTOU/symlink parent races, platform-specific durability semantics, privacy of diagnostic artifacts, manifest spoofing and integration with a future durable queue. Splunk at-home checkpoint is still pending.
 
-## ATLAS — sealed batch consumption at dashboard boundary (PR pending)
+## ATLAS — sealed batch consumption at dashboard boundary (PR #36, merged)
 
 - Both the Command Center adapter and manual case-promotion CLI now support `--batch-dir` to enforce local hash/completeness checks, keep the verified report bytes in memory and refuse blocked/incomplete/tampered batches before creating a dashboard artifact or opening a case database. Case creation still requires an explicit `--approve` flag.
 - Cross-checks sealed health counts against ingestion and correlation counts; never writes output inside the sealed directory. The legacy trusted synthetic `--ingestion/--correlation` mode remains but **does not** attest integrity.
 - Regression tests include missing manifests, tampering, symlinked inputs, blocked batches, improper output locations, counter mismatch and explicit demonstration that forged unsigned manifests can fool local hash checks.
 - Titan review: remaining file race and symlink-parent risks, local unsigned manifest authenticity, stronger cross-report consistency, limits on batch file sizes and case-promotion provenance boundary. Real Splunk setup remains deferred pending the home-PC checkpoint.
+
+## ATLAS — Pipeline 10.0 semantic audit and home Splunk acceptance (PR pending)
+
+- Sealed batch consumption now validates normalized ingestion structure and exact counts, revalidates the accepted alerts, and independently recomputes correlation under the fixed batch-health policy, rejecting differences in all candidate fields even if a changed correlation file's SHA-256 manifest is refreshed.
+- Added adversarial regression tests for forged candidate severities, IDs, evidence references, grouping reasons, alert references, duplicate IDs and malformed accepted records. Dashboard and manual case-promotion paths reject a rehashed but semantically forged candidate prior to output/database modification.
+- [Pipeline 10.0 acceptance checklist](SOC_PIPELINE_10_ACCEPTANCE.md) distinguishes completed **offline** tests from pending live Splunk proof and records residual security risks. **No reviewer sign-off, production hardening or real SIEM verification is claimed.**
+- Review priorities: verify source provenance, independently recomputed correlation’s fixed-window assumptions, handling of source namespaces, file races, untrusted event-content forgery, and how a durable queue would connect to real Splunk.

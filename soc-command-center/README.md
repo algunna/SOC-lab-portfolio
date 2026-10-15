@@ -80,3 +80,7 @@ Existing `--ingestion ... --correlation ...` remains supported for **legacy trus
 **Security caveat:** The manifest is unkeyed SHA-256 metadata, not a signature or externally authenticated chain of custody. Someone who can alter both reports and manifest may forge consistent hashes. This does not eliminate symlink-parent swaps, concurrent modification outside the open file window, or establish a durable message queue. It is not an authorization mechanism, real-time ingestion or live Splunk telemetry.
 
 For an analyst-approved **synthetic** case from the same sealed batch, `soc-case-promotion/src/promote.py --batch-dir` can independently require verification before creating SQLite case records. It still requires `--approve` and an exact candidate ID; see the [promotion README](../soc-case-promotion/README.md).
+
+## Pipeline 10.0 semantic verification
+
+The sealed `--batch-dir` path now also independently recomputes the complete incident-candidate grouping from its normalized alerts, ensuring the candidate display matches the accepted events rather than simply trusting a self-consistent file hash. The legacy unsealed synthetic mode remains available and does not provide these guarantees. See [Pipeline 10.0 acceptance](../docs/SOC_PIPELINE_10_ACCEPTANCE.md) for the remaining provenance/production limitations.
