@@ -106,10 +106,17 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Titan security review: TOCTOU between preflight and input read, atomic multi-file publishing/crashes, symlink swaps, filesystem access controls, replay-state coordination, bounded memory/throughput and operational observability. **Not production durability or live telemetry.**
 - Splunk home-PC checkpoint is still pending until the owner returns home; see the SOC demo README.
 
-## ATLAS — Offline SOC observability snapshot (PR pending)
+## ATLAS — Offline SOC observability snapshot (PR #34, merged)
 
 - New `soc-command-center/src/health_dashboard.py` displays only strictly validated, metadata-only batch health reports as loopback-served HTML. It reads no alert, quarantine, SQLite, evidence, token or log content.
 - Enforces 1–30 explicitly supplied health directories, 4 KiB per health file, status/stage consistency and bounded integer counts; rejects extra fields, malformed JSON, symlinks and repeated runs.
 - CI generates healthy and blocked synthetic batch output and verifies a read-only dashboard summary without raw text exposure. Existing Host validation and security headers are reused.
 - Titan review: snapshot authenticity, directory symlink parents and TOCTOU, meaningful health metrics beyond counts, monitoring/alerting semantics, cardinality bounds and anti-CSRF/read-only posture. **No live telemetry, polling, verified recovery tracking or production observability exists.**
 - **Splunk setup remains deferred** per [home checkpoint](SPLUNK_HOME_CHECKPOINT.md).
+
+## ATLAS — Offline batch artifact completeness (PR pending)
+
+- `soc-event-ingestion/src/artifact_integrity.py` creates a final `integrity.json` marker only after a batch has written its other files, pinning expected names, bounded sizes and SHA-256 digests.
+- Read-only verification catches missing, unexpected, malformed, symlinked or changed outputs. Health status/stage and counters are validated. This covers both passed and quarantined offline runs.
+- Integrity proof is only local change detection: an adversary who can edit both artifacts and the manifest can forge a consistent set. A crash between writes or before filesystem directory durability can leave unsealed or lost files; **no atomic multi-file commit, authenticated provenance, production guarantee or live SIEM connection**.
+- Titan to review TOCTOU/symlink parent races, platform-specific durability semantics, privacy of diagnostic artifacts, manifest spoofing and integration with a future durable queue. Splunk at-home checkpoint is still pending.
