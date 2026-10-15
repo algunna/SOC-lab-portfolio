@@ -20,3 +20,7 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Splunk live-lab preparation
 
 - [Synthetic Splunk field mapping and readiness specification](SPLUNK_FIELD_MAPPING_SPEC.md) — proposed Windows/auth/CloudTrail source fields, 12-scenario offline acceptance matrix, and explicit requirements for the first authorized home-PC test.
+
+## Synthetic detection accuracy review
+
+- [Detection-policy confusion matrix lab](../detection-accuracy-lab/README.md) — 32 labeled synthetic Windows/CloudTrail scenarios, including benign administrative controls; no live accuracy claims.
