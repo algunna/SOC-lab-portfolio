@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added an offline collector trust-policy rehearsal with sanitized failure codes, synthetic source validation, session-local replay rejection and adversarial sealed-pipeline tests. Real authentication and independent review remain pending.
+
 - Added an offline synthetic-only source-identity-to-informational-alert bridge with evidence-reference matching, deterministic lab event IDs, fail-closed validation and sealed Command Center CI integration (PR pending).
 
 

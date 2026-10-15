@@ -53,3 +53,9 @@ Every generated alert contains the source-scoped `lab-src-` record identifier, a
 The entire fixture is rejected before any file output if any source row is missing required context, duplicates an observation, contains unexpected fields, or has malformed event times. Direct projections are also checked for evidence-reference consistency; a caller cannot independently supply a reference to another synthetic source. CI tests the six informational records through ingestion, correlation, the sealed batch, and the read-only Command Center. Correlation still produces six **unverified informational candidates**; no analyst case is automatically created.
 
 This path deliberately **does not** connect real detector verdicts to real source-event identities. That is future work after the exact Splunk collector format and trusted source fields have been validated at the owner's home PC. Never use source preflight alone to assert a finding, and do not supply personal, workplace, patient or production log contents.
+
+## Pipeline 17.0 — collector trust policy rehearsal
+
+See [collector trust readiness](../docs/COLLECTOR_TRUST_READINESS.md) for the offline,
+synthetic authentication-outcome simulation, adversarial tests and future trust
+boundaries. No actual collector or source authentication is established.

@@ -36,3 +36,7 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Pipeline 16.0 source-to-alert compatibility
 
 - [Synthetic identity-to-informational-alert handoff](../controlled-telemetry-lab/README.md) — validates source identity, creates contract-compatible informational observations, and verifies sealed ingestion/Command Center delivery without live source claims.
+
+## Pipeline 17.0 collector trust readiness
+
+- [Collector trust design and offline adversarial rehearsal](COLLECTOR_TRUST_READINESS.md).

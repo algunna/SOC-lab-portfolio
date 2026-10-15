@@ -176,3 +176,10 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - The bridge fails closed on ambiguous source IDs, incomplete log generations, malformed times, unexpected source fields or conflicting evidence references; it never accepts client-supplied severity, detector rule, actor, asset or provenance claims.
 - CI exercises six synthetic observations through the existing sealed batch-health and read-only Command Center pipeline, producing only six unverified informational candidates and no case creation. Timestamp changes retain stable source IDs for future replay conflict analysis.
 - Reviewer warning: event identity remains entirely synthetic/unauthenticated; fixed informational rule is **not a security detection**. Real source-to-detector linkage, attested Splunk event IDs and collector authentication must be designed and tested after the owner's home-PC checkpoint.
+
+## ATLAS — Pipeline 17.0 collector trust readiness
+
+- Added a strictly offline trust-policy simulation and 18 adversarial tests, including sealed source-to-Command-Center integration. Credential and transport outcomes are test doubles, not verified authentication facts.
+- Simulates fail-closed identity, credential status, transport, source validation and session-local replay checks. No network, real credentials, live telemetry or automatic incident cases.
+- Review [trust boundaries and limitations](COLLECTOR_TRUST_READINESS.md), especially client-supplied assertion misuse, restart/concurrent replay, real issuer/revocation checks and collector identity versus source authenticity.
+- Home-PC `Get-Service *Splunk*`, live connectivity/field mapping, and independent VORTEX/Titan review remain pending.
