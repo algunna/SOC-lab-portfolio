@@ -1,0 +1,54 @@
+name: Synthetic SOC end-to-end demo tests
+on:
+  pull_request:
+    paths:
+      - 'soc-demo/**'
+      - '.github/workflows/soc-demo-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'soc-demo/**'
+      - '.github/workflows/soc-demo-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r soc-event-contract/requirements.txt
+      - run: python -m unittest discover -s soc-demo/tests -v
+      - name: End-to-end simulated CLI approval in isolated temporary workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEMO="$(mktemp -d)"
+          python soc-demo/scripts/run_demo.py prepare --out-dir "$DEMO/synthetic-investigation"
+          test ! -e "$DEMO/synthetic-investigation/cases.db"
+          python - "$DEMO" <<'PY'
+          import json, sys
+          from pathlib import Path
+          d=Path(sys.argv[1])/'synthetic-investigation'
+          initial=json.loads((d/'dashboard.json').read_text())
+          correlation=json.loads((d/'correlation.json').read_text())
+          assert (len(initial['alerts']),len(initial['candidates']),len(initial['cases']))==(3,3,0)
+          assert correlation['counts']['candidates']==3
+          (d/'candidate_id.txt').write_text(correlation['incident_candidates'][0]['candidate_id'])
+          PY
+          ID="$(cat "$DEMO/synthetic-investigation/candidate_id.txt")"
+          # Explicit synthetic-only approval; no production cases or auth credentials.
+          python soc-demo/scripts/run_demo.py approve --demo-dir "$DEMO/synthetic-investigation" --candidate-id "$ID" --analyst ci-synthetic-reviewer --approve-demo-case
+          python - "$DEMO" <<'PY'
+          import json, sqlite3, sys
+          from pathlib import Path
+          d=Path(sys.argv[1])/'synthetic-investigation'
+          data=json.loads((d/'approved-dashboard.json').read_text())
+          assert (len(data['alerts']),len(data['candidates']),len(data['cases']))==(3,3,1)
+          assert data['cases'][0]['status']=='open'
+          with sqlite3.connect(d/'cases.db') as db:
+            assert db.execute('SELECT COUNT(*) FROM promoted_candidates').fetchone()[0]==1
+            assert db.execute('SELECT COUNT(*) FROM history').fetchone()[0]>=2
+          PY
