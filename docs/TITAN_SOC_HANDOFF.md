@@ -123,7 +123,7 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 
 ## ATLAS — sealed batch consumption at dashboard boundary (PR pending)
 
-- The Command Center adapter now supports `--batch-dir` to enforce local hash/completeness checks, keep the verified report bytes in memory and refuse blocked/incomplete/tampered batches before creating a dashboard artifact.
+- Both the Command Center adapter and manual case-promotion CLI now support `--batch-dir` to enforce local hash/completeness checks, keep the verified report bytes in memory and refuse blocked/incomplete/tampered batches before creating a dashboard artifact or opening a case database. Case creation still requires an explicit `--approve` flag.
 - Cross-checks sealed health counts against ingestion and correlation counts; never writes output inside the sealed directory. The legacy trusted synthetic `--ingestion/--correlation` mode remains but **does not** attest integrity.
 - Regression tests include missing manifests, tampering, symlinked inputs, blocked batches, improper output locations, counter mismatch and explicit demonstration that forged unsigned manifests can fool local hash checks.
 - Titan review: remaining file race and symlink-parent risks, local unsigned manifest authenticity, stronger cross-report consistency, limits on batch file sizes and case-promotion provenance boundary. Real Splunk setup remains deferred pending the home-PC checkpoint.
