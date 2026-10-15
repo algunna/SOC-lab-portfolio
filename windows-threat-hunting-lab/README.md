@@ -27,3 +27,10 @@ Optional `--input path/to/events.jsonl` and `--output path/to/findings.json`. Ea
 ## Authentication identity guard (Pipeline 12.0)
 
 `success_after_failures` now refuses missing, empty or literal `unknown` host, account or source IP fields rather than correlating unrelated unidentifiable records. The rest of the offline rules remain unchanged. This is a false-positive safeguard, not evidence of real-world detector accuracy. See [synthetic policy evaluation](../detection-accuracy-lab/README.md).
+
+## Host-flag parsing update
+
+The [PowerShell tuning notes](../docs/POWERSHELL_DETECTION_TUNING.md) explain quoted
+arguments, explicit Command/File boundaries and the shared repository helper.
+Findings remain heuristic investigation leads; command/script bodies require
+separate analysis and are not declared safe when this rule is quiet.

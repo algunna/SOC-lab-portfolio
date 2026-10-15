@@ -1,0 +1,16 @@
+[
+ {"id":"quoted-bypass","command":"powershell.exe -ExecutionPolicy \"Bypass\"","expected":["execution policy bypass"]},
+ {"id":"quoted-hidden","command":"powershell.exe -WindowStyle \"Hidden\"","expected":["hidden window"]},
+ {"id":"quoted-encoded-switch","command":"powershell.exe \"-EncodedCommand\" AAAA","expected":["encoded command"]},
+ {"id":"joined-quoted-switch","command":"powershell.exe -En\"coded\"Command AAAA","expected":["encoded command"]},
+ {"id":"quoted-executable","command":"\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -ep Bypass -w Hidden","expected":["execution policy bypass","hidden window"]},
+ {"id":"flags-before-command","command":"powershell.exe -ep Bypass -Command Write-Output -enc","expected":["execution policy bypass"]},
+ {"id":"script-parameter","command":"powershell.exe -File report.ps1 -enc sample","expected":[]},
+ {"id":"script-short-file","command":"powershell.exe -f report.ps1 -WindowStyle Hidden","expected":[]},
+ {"id":"command-literal","command":"powershell.exe -Command Write-Output -EncodedCommand","expected":[]},
+ {"id":"short-command-literal","command":"powershell.exe -c Write-Output -ep Bypass","expected":[]},
+ {"id":"quoted-command-body","command":"powershell.exe -Command \"Write-Output -w Hidden\"","expected":[]},
+ {"id":"quoted-safe-policy","command":"powershell.exe -ExecutionPolicy \"RemoteSigned\"","expected":[]},
+ {"id":"ordinary-admin","command":"powershell.exe -NoProfile -Command Get-Date","expected":[]},
+ {"id":"encoded-still-review-only","command":"powershell.exe -enc RwBlAHQALQBEAGEAdABlAA==","expected":["encoded command"]}
+]

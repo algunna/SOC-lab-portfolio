@@ -22,3 +22,10 @@ Custom input: `--input path/to/events.xml --output path/to/report.md`.
 - ATT&CK T1059.001 is a triage hypothesis. A matching command line does not prove compromise.
 - Never upload confidential telemetry to an external API; this script runs offline and needs no API key.
 - The provided XML fixture is synthetic.
+
+## Host-flag parsing update
+
+The [PowerShell tuning notes](../docs/POWERSHELL_DETECTION_TUNING.md) explain quoted
+arguments, explicit Command/File boundaries and the shared repository helper.
+Findings remain heuristic investigation leads; command/script bodies require
+separate analysis and are not declared safe when this rule is quiet.

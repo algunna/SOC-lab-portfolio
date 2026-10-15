@@ -2,11 +2,17 @@ name: Windows Threat Hunting Lab
 on:
   pull_request:
     paths:
+      - 'scripts/powershell_flags.py'
+      - 'tests/test_powershell_flags.py'
+      - 'tests/fixtures/powershell_host_flags.json'
       - 'windows-threat-hunting-lab/**'
       - '.github/workflows/windows-threat-hunting.yml'
   push:
     branches: [main]
     paths:
+      - 'scripts/powershell_flags.py'
+      - 'tests/test_powershell_flags.py'
+      - 'tests/fixtures/powershell_host_flags.json'
       - 'windows-threat-hunting-lab/**'
       - '.github/workflows/windows-threat-hunting.yml'
 permissions:
@@ -25,3 +31,5 @@ jobs:
         run: |
           python windows-threat-hunting-lab/src/hunt.py --output /tmp/windows-hunt.json
           python -c "import json; d=json.load(open('/tmp/windows-hunt.json')); assert d['count']==4, d"
+      - name: Compare both PowerShell detectors on quoted flags and command boundaries
+        run: python -m unittest discover -s tests -p test_powershell_flags.py -v
