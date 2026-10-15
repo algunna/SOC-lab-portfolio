@@ -52,3 +52,7 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Pipeline 20.0 live acceptance preparation
 
 - [Live Splunk acceptance runbook and pending evidence checkpoints](LIVE_SPLUNK_ACCEPTANCE.md).
+
+## Detection tuning
+
+- [PowerShell quoted host flags and command/script boundary regression](POWERSHELL_DETECTION_TUNING.md).

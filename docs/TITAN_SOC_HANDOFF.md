@@ -201,3 +201,9 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Added [live acceptance requirements](LIVE_SPLUNK_ACCEPTANCE.md), an all-pending evidence checklist and a bounded offline structure validator. Synthetic evidence kinds and skipped prerequisites are rejected.
 - Even complete evidence claims remain unverified, require manual inspection and never authorize collector enablement. Hashes do not establish authenticity.
 - Home-PC Splunk, real adapter/authentication implementation, independent security review and the real event-to-case demonstration remain pending.
+
+## ATLAS — PowerShell detector tuning
+
+- Both Windows 4688 and Sysmon Event 1 hunters share quote-aware host-flag parsing and stop at explicit Command/File boundaries. Curated 14-case disagreements reduced from 9 to 0 per detector.
+- Review [scope and limitations](POWERSHELL_DETECTION_TUNING.md), particularly command-body/nested execution coverage, native argv assumptions and version differences. No maliciousness or production accuracy claim.
+- Home-PC Splunk and independent review remain pending.

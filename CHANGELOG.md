@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Fixed quote-related misses and command/script-argument false indicators in both PowerShell hunters using a shared host-flag heuristic and a 14-case regression matrix.
+
 - Added live Splunk acceptance preparation: eleven pending evidence checkpoints, an offline checklist validator that never certifies readiness, and a home-PC runbook identifying the missing real collector and review gates.
 
 - Added read-only offline collector health verification and bounded append-only operational audit with atomic migration, delivery outcome binding and crash/failure visibility. Live collector verification remains pending.

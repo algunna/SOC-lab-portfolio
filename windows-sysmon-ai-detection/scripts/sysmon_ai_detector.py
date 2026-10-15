@@ -1,27 +1,21 @@
 """Offline Sysmon Event ID 1 XML investigation; binary EVTX not supported."""
 import argparse
+import importlib.util
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 NS={"e":"http://schemas.microsoft.com/win/2004/08/events/event"}
 POWERSHELL={"powershell.exe","pwsh.exe","pwsh.dll"}
-SWITCH_PREFIXES="-/–—―"  # PowerShell also accepts / and en/em dashes
+_flags_spec = importlib.util.spec_from_file_location(
+    'sysmon_host_flags', ROOT.parent / 'scripts/powershell_flags.py')
+_flags = importlib.util.module_from_spec(_flags_spec)
+_flags_spec.loader.exec_module(_flags)
+
 def powershell_indicators(cmd):
-    """Suspicious switches, allowing the abbreviations PowerShell accepts (-e, -ec, -ep, -w)."""
-    tokens=cmd.lower().split()
-    found=set()
-    for i,token in enumerate(tokens):
-        if token[0] not in SWITCH_PREFIXES: continue
-        name=token[1:]
-        following=tokens[i+1] if i+1<len(tokens) else ""
-        if name in ("e","ec") or (len(name)>=2 and "encodedcommand".startswith(name)):
-            found.add("Encoded command")
-        elif (name=="ep" or (len(name)>=2 and "executionpolicy".startswith(name))) and following=="bypass":
-            found.add("Execution policy bypass")
-        elif name and "windowstyle".startswith(name) and following in ("hidden","1"):
-            found.add("Hidden window")
-    return [label for label in ("Encoded command","Execution policy bypass","Hidden window") if label in found]
+    found = set(_flags.indicators(cmd))
+    return [label for label in ('Encoded command', 'Execution policy bypass', 'Hidden window')
+            if label.lower() in found]
 def parse_events(xml):
     xml=xml.strip()
     if not xml.startswith("<Events"):

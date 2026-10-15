@@ -2,6 +2,9 @@ name: Offline detection accuracy policy regression
 on:
   pull_request:
     paths:
+      - 'scripts/powershell_flags.py'
+      - 'tests/test_powershell_flags.py'
+      - 'tests/fixtures/powershell_host_flags.json'
       - 'detection-accuracy-lab/**'
       - 'windows-threat-hunting-lab/**'
       - 'aws-cloudtrail-threat-hunting/**'
@@ -9,6 +12,9 @@ on:
   push:
     branches: [main]
     paths:
+      - 'scripts/powershell_flags.py'
+      - 'tests/test_powershell_flags.py'
+      - 'tests/fixtures/powershell_host_flags.json'
       - 'detection-accuracy-lab/**'
       - 'windows-threat-hunting-lab/**'
       - 'aws-cloudtrail-threat-hunting/**'

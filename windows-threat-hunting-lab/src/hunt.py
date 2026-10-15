@@ -1,30 +1,22 @@
 """Offline Windows threat hunting with normalized JSONL events."""
 import argparse
+import importlib.util
 import json
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SWITCH_PREFIXES = "-/\u2013\u2014\u2015"  # PowerShell also accepts / and en/em dashes
 PRIVILEGED_GROUPS = ("administrators", "domain admins", "enterprise admins", "schema admins")
 
+_flags_spec = importlib.util.spec_from_file_location(
+    'windows_host_flags', ROOT.parent / 'scripts/powershell_flags.py')
+_flags = importlib.util.module_from_spec(_flags_spec)
+_flags_spec.loader.exec_module(_flags)
+
+
 def powershell_indicators(command_line):
-    """Suspicious switches, allowing the abbreviations PowerShell accepts (-e, -ec, -ep, -w)."""
-    tokens = str(command_line).lower().split()
-    hits = []
-    for index, token in enumerate(tokens):
-        if token[0] not in SWITCH_PREFIXES:
-            continue
-        name = token[1:]
-        following = tokens[index + 1] if index + 1 < len(tokens) else ""
-        if name in ("e", "ec") or (len(name) >= 2 and "encodedcommand".startswith(name)):
-            hits.append("encoded command")
-        elif (name == "ep" or (len(name) >= 2 and "executionpolicy".startswith(name))) and following == "bypass":
-            hits.append("execution policy bypass")
-        elif name and "windowstyle".startswith(name) and following in ("hidden", "1"):
-            hits.append("hidden window")
-    return sorted(set(hits))
+    return _flags.indicators(command_line)
 
 def parse_time(value):
     try:
