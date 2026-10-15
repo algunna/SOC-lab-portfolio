@@ -37,3 +37,19 @@ Run only on isolated fixtures. Do not use this mapping as an explanation for imp
 ## Reviewer handoff
 
 VORTEX/Titan should independently challenge: whether Windows log generation IDs can be verified at collection time, event record reuse and host renaming, regional/account CloudTrail scope, duplicate eventIDs, source-time parsing, clock skew, opaque hash collision/guessability, untrusted namespace forgery, and semantics of delayed delivery. Independent reviewer sign-off has not been recorded.
+
+## Pipeline 16.0 — source identity to informational SOC alerts
+
+The new `src/to_soc_alerts.py` consumes the **strictly validated synthetic source preflight** and creates SOC Event Contract v1 JSONL observations. These are tagged with a fixed `lab.synthetic.source_observation` rule and `informational` severity. They **are not detection results**, proof of compromise, or externally verified source events.
+
+```bash
+python controlled-telemetry-lab/src/to_soc_alerts.py --out /tmp/synthetic-source-alerts.jsonl
+python soc-event-ingestion/src/batch_health.py /tmp/synthetic-source-alerts.jsonl --out-dir /tmp/synthetic-source-batch
+python soc-command-center/src/adapter.py --batch-dir /tmp/synthetic-source-batch --out /tmp/synthetic-source-dashboard.json
+```
+
+Every generated alert contains the source-scoped `lab-src-` record identifier, a stable derived `labobs-` event identifier, normalized UTC timestamp, code-owned informational title/rule/severity, and a matching `synthetic-source:` evidence reference. No actor, asset, original source IDs, attack techniques, source clock classifications or claim of authenticated provenance are transferred. A change to the event time does **not** change its scoped event identifier, so the existing opt-in replay guard can flag a later payload conflict.
+
+The entire fixture is rejected before any file output if any source row is missing required context, duplicates an observation, contains unexpected fields, or has malformed event times. Direct projections are also checked for evidence-reference consistency; a caller cannot independently supply a reference to another synthetic source. CI tests the six informational records through ingestion, correlation, the sealed batch, and the read-only Command Center. Correlation still produces six **unverified informational candidates**; no analyst case is automatically created.
+
+This path deliberately **does not** connect real detector verdicts to real source-event identities. That is future work after the exact Splunk collector format and trusted source fields have been validated at the owner's home PC. Never use source preflight alone to assert a finding, and do not supply personal, workplace, patient or production log contents.
