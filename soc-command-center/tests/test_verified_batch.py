@@ -142,7 +142,7 @@ class SealedDashboardTests(unittest.TestCase):
         marker = json.loads(manifest.read_text())
         marker["files"] = integrity.fingerprints(self.batch, integrity.FILE_SETS["passed"])
         manifest.write_text(json.dumps(marker), encoding="utf-8")
-        with self.assertRaisesRegex(ValueError, "counters"):
+        with self.assertRaisesRegex(ValueError, "counts"):
             integrity.verified_reports(self.batch)
 
     def test_local_manifest_forgery_not_claimed_as_provenance(self):
