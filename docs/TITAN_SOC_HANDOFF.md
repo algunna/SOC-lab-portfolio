@@ -183,3 +183,9 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Simulates fail-closed identity, credential status, transport, source validation and session-local replay checks. No network, real credentials, live telemetry or automatic incident cases.
 - Review [trust boundaries and limitations](COLLECTOR_TRUST_READINESS.md), especially client-supplied assertion misuse, restart/concurrent replay, real issuer/revocation checks and collector identity versus source authenticity.
 - Home-PC `Get-Service *Splunk*`, live connectivity/field mapping, and independent VORTEX/Titan review remain pending.
+
+## ATLAS — Pipeline 18.0 durable offline delivery
+
+- Added an atomic SQLite synthetic queue with persistent replay identities and verified local sealed receipts. Reuses replay key semantics without the separate replay DB/file commit boundary.
+- Tests cover process death before/after acknowledgment, concurrent workers/imports, partial write rollback, corruption, unavailable processing and duplicate imports. No external exactly-once delivery claim.
+- Review [durable delivery limits](DURABLE_DELIVERY_RECOVERY.md). Independent VORTEX/Titan review and home-PC Splunk checkpoint remain pending; no real collector enabled.
