@@ -149,9 +149,16 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Review questions: alert vs compromise labeling, realistic administrator/service-account baselines, duplicated/missing log IDs, NAT/proxy source ambiguity, hidden/obfuscated commands, detection threshold choices, CloudTrail delays and missing events. **No independent VORTEX/Titan sign-off yet.**
 - Home Splunk installation and live telemetry evaluation are still pending.
 
-## ATLAS — Pipeline 13.0 synthetic detector-to-alert handoff (PR pending)
+## ATLAS — Pipeline 13.0 synthetic detector-to-alert handoff (PR #40, merged)
 
 - Added `detection-accuracy-lab/src/to_soc_alerts.py`, which runs the actual Windows and AWS offline hunters against fixed labeled **synthetic** scenarios and creates schema-validated SOC alerts using code-owned metadata.
 - No attempt to match raw records to outputs by guessing: stable alert and evidence IDs are derived from source fixture scenario, rule and repeated-finding index, explicitly labeled `lab-` / `synthetic-fixture:`. Real Windows EventRecordID, CloudTrail eventID and externally authenticated provenance are **not present**.
 - CI verifies alert-contract validation and an end-to-end synthetic run through batch-health ingestion, correlation, integrity manifest, semantic recheck and read-only Command Center with no case creation. Unexpected detector decisions and malformed metadata fail closed.
 - Reviewer priorities: stable ordering for multi-event findings, provenance, actor/host privacy, source identity collision across repeated exports, canonical timestamps, verified live detector logic and replay semantics. Home Splunk live check remains pending.
+
+## ATLAS — Pipeline 14.0 replay-alias ledger (PR pending)
+
+- Replay guard now writes all observed source/event ID aliases, including alternate IDs seen on skipped observations, to an SQLite ledger. A later conflicting use of any known alias rejects the entire batch and rolls back attempted inserts.
+- Legacy `observed` database records seed `event_aliases` on first use; conflict checks detect a mismatched legacy primary ID and alias mapping.
+- The synthetic detector bridge keeps its stable fixture/rule alert IDs but includes a scenario-input SHA-256 hint in `synthetic-fixture:` evidence references. This catches source-input changes that still produce identical detector rule results. No authenticated original EventRecordID or CloudTrail eventID is represented.
+- Review: atomic DB migration behavior, alias table index growth, delayed/reordered batches, rollback under real disk failure, unhashed metadata exposure elsewhere, source-event replay namespaces, source digest privacy/dictionary attacks, and lack of durable delivery confirmation. Live Splunk remains deferred.
