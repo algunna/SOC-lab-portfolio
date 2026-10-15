@@ -44,3 +44,7 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Pipeline 18.0 durable delivery and recovery
 
 - [Durable synthetic queue and verified local receipt recovery](DURABLE_DELIVERY_RECOVERY.md).
+
+## Pipeline 19.0 collector health and reliability
+
+- [Read-only collector queue health and local operational audit](COLLECTOR_HEALTH_AUDIT.md).

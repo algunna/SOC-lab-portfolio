@@ -189,3 +189,9 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Added an atomic SQLite synthetic queue with persistent replay identities and verified local sealed receipts. Reuses replay key semantics without the separate replay DB/file commit boundary.
 - Tests cover process death before/after acknowledgment, concurrent workers/imports, partial write rollback, corruption, unavailable processing and duplicate imports. No external exactly-once delivery claim.
 - Review [durable delivery limits](DURABLE_DELIVERY_RECOVERY.md). Independent VORTEX/Titan review and home-PC Splunk checkpoint remain pending; no real collector enabled.
+
+## ATLAS — Pipeline 19.0 offline health and audit
+
+- Added read-only queue/receipt/audit verification and transactional schema-19 operational audit. Start/outcome records expose unresolved process crashes; successful acknowledgment and audit commit together.
+- Review [health and audit boundaries](COLLECTOR_HEALTH_AUDIT.md): migration rollback, failed audit writes, historical gaps, local clock trust, cap exhaustion, and lack of tamper-proof storage.
+- Independent VORTEX/Titan review and home-PC Splunk verification remain pending. No real collector, remote monitoring or automatic recovery enabled.
