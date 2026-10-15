@@ -78,6 +78,7 @@ class ReplayGuardTests(unittest.TestCase):
     def test_same_record_changed_evidence_is_conflict(self):
         self.stage(report(SAMPLE))
         changed = copy.deepcopy(SAMPLE)
+        changed["event_id"] = "win-lab-new-version"
         changed["evidence"][0]["description"] = "Different evidence supplied"
         with self.assertRaisesRegex(ValueError, "Conflicting previously"):
             guard.run(report(changed), self.db, self.root / "failed.json")
