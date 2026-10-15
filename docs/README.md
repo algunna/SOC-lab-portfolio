@@ -56,3 +56,5 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Detection tuning
 
 - [PowerShell quoted host flags and command/script boundary regression](POWERSHELL_DETECTION_TUNING.md).
+
+- [Authentication burst time windows, account scope and success reset](AUTHENTICATION_DETECTION_TUNING.md).

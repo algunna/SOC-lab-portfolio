@@ -3,12 +3,16 @@ on:
   pull_request:
     paths:
       - 'excessive-failed-auth/**'
+      - 'windows-threat-hunting-lab/**'
+      - 'scripts/powershell_flags.py'
       - 'ip-obfuscation-detection/**'
       - '.github/workflows/legacy-lab-tests.yml'
   push:
     branches: [main]
     paths:
       - 'excessive-failed-auth/**'
+      - 'windows-threat-hunting-lab/**'
+      - 'scripts/powershell_flags.py'
       - 'ip-obfuscation-detection/**'
       - '.github/workflows/legacy-lab-tests.yml'
 permissions:
