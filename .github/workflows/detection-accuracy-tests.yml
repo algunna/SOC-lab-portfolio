@@ -1,0 +1,48 @@
+name: Offline detection accuracy policy regression
+on:
+  pull_request:
+    paths:
+      - 'detection-accuracy-lab/**'
+      - 'windows-threat-hunting-lab/**'
+      - 'aws-cloudtrail-threat-hunting/**'
+      - '.github/workflows/detection-accuracy-tests.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'detection-accuracy-lab/**'
+      - 'windows-threat-hunting-lab/**'
+      - 'aws-cloudtrail-threat-hunting/**'
+      - '.github/workflows/detection-accuracy-tests.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test original offline Windows and CloudTrail detectors
+        run: |
+          python -m unittest discover -s windows-threat-hunting-lab/tests -v
+          python -m unittest discover -s aws-cloudtrail-threat-hunting/tests -v
+      - name: Test synthetic detection policy evaluation and negative controls
+        run: python -m unittest discover -s detection-accuracy-lab/tests -v
+      - name: Produce sanitized confusion matrix with NO live detection claims
+        run: |
+          set -euo pipefail
+          python detection-accuracy-lab/src/evaluate.py --out /tmp/synthetic-detector-accuracy.json
+          python - <<'PY'
+          import json
+          data=json.load(open('/tmp/synthetic-detector-accuracy.json'))
+          assert data['scope']=='synthetic_policy_only'
+          assert data['scenario_count']==32
+          assert data['matching_scenarios']==32
+          assert data['mismatches']==[]
+          assert data['live_detection_accuracy_measured'] is False
+          assert data['production_false_positive_rate_measured'] is False
+          assert all(x['fp']==0 and x['fn']==0 and x['tp']>0 and x['tn']>0
+                     for detector in data['confusion_by_rule'].values() for x in detector.values())
+          assert 'command_line' not in json.dumps(data)
+          PY

@@ -135,9 +135,16 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - [Pipeline 10.0 acceptance checklist](SOC_PIPELINE_10_ACCEPTANCE.md) distinguishes completed **offline** tests from pending live Splunk proof and records residual security risks. **No reviewer sign-off, production hardening or real SIEM verification is claimed.**
 - Review priorities: verify source provenance, independently recomputed correlation’s fixed-window assumptions, handling of source namespaces, file races, untrusted event-content forgery, and how a durable queue would connect to real Splunk.
 
-## ATLAS — Pipeline 11.0 synthetic Splunk live-readiness matrix (PR pending)
+## ATLAS — Pipeline 11.0 synthetic Splunk live-readiness matrix (PR #38, merged)
 
 - New fixed [field mapping spec](SPLUNK_FIELD_MAPPING_SPEC.md) differentiates hypothetical detector classes from actual Windows/Sysmon, auth and AWS CloudTrail event fields. All SPL/detectors, source event IDs, thresholds and response formats require real lab verification.
 - Offline `splunk-readonly-connector/src/readiness_matrix.py` runs 12 synthetic cases: four positive scenarios through normalized alerts → sealed batch ingestion/correlation → integrity+semantic verification → read-only Command Center adapter, and eight fail-closed negative cases. A new CI check asserts sanitized results and `live_splunk_verified: false`.
 - No API calls, no token, no unattended task, no raw event import or automatic incident promotion. The real Splunk installation and authorized probe are still pending at home.
 - Titan/VORTEX review: detector fidelity, timestamp identity namespaces, late-arriving events, relation to pre-classified saved-search results, provenance, replay behavior, and real SPL/field extraction test design.
+
+## ATLAS — Pipeline 12.0 synthetic detection policy assessment (PR pending)
+
+- `detection-accuracy-lab/` runs 32 curated policy scenarios directly against the existing Windows and AWS CloudTrail offline hunters and emits confusion counts for eight rule classes; these are NOT production detector accuracy estimates.
+- Windows authentication correlation now skips records with missing/empty/unknown host, account or source IP to avoid joining unrelated audit gaps into a false positive success-after-failures finding. Dedicated detector and matrix regression tests added.
+- Review questions: alert vs compromise labeling, realistic administrator/service-account baselines, duplicated/missing log IDs, NAT/proxy source ambiguity, hidden/obfuscated commands, detection threshold choices, CloudTrail delays and missing events. **No independent VORTEX/Titan sign-off yet.**
+- Home Splunk installation and live telemetry evaluation are still pending.

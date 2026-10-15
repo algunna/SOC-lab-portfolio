@@ -23,3 +23,7 @@ python -m unittest discover -s windows-threat-hunting-lab/tests -v
 Optional `--input path/to/events.jsonl` and `--output path/to/findings.json`. Each input line must be a JSON object containing a numeric `event_id` and relevant event fields (e.g. `timestamp`, `host`, `user`, `image`, `command_line`, `group`, `source_ip`). The sample data is entirely synthetic.
 
 **Important:** This is not a raw EVTX ingestion engine. Export and normalize authorized logs before use. Process-command flags, group changes and scheduled task creation can be legitimate. ATT&CK labels are analyst hypotheses requiring event context. This lab never executes commands from event data, makes network requests, or changes endpoint settings.
+
+## Authentication identity guard (Pipeline 12.0)
+
+`success_after_failures` now refuses missing, empty or literal `unknown` host, account or source IP fields rather than correlating unrelated unidentifiable records. The rest of the offline rules remain unchanged. This is a false-positive safeguard, not evidence of real-world detector accuracy. See [synthetic policy evaluation](../detection-accuracy-lab/README.md).
