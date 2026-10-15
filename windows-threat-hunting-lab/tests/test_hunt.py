@@ -54,6 +54,25 @@ class HuntTests(unittest.TestCase):
         rows = [dict(event_id=4625, timestamp=f"2026-10-14T12:00:0{i}Z", host="test", user="x", source_ip="192.0.2.1") for i in range(5)]
         rows.append(dict(rows[0], event_id=4624, timestamp="2026-10-14T12:06:00Z"))
         self.assertEqual(mod.hunt(rows), [])
+    def test_unknown_auth_correlation_identity_is_not_joined(self):
+        base = [dict(event_id=4625, timestamp=f"2026-10-14T12:00:0{i}Z",
+                     host="LAB-WS01", user="labuser", source_ip="192.0.2.10")
+                for i in range(5)]
+        for missing in ("host", "user", "source_ip"):
+            with self.subTest(missing=missing):
+                events = [dict(e) for e in base]
+                for event in events:
+                    event.pop(missing, None)
+                success = dict(base[-1], event_id=4624, timestamp="2026-10-14T12:00:10Z")
+                success.pop(missing, None)
+                self.assertEqual(mod.hunt(events + [success]), [])
+        for key in ("host", "user", "source_ip"):
+            with self.subTest(unknown_key=key):
+                events = [dict(e, **{key: "unknown"}) for e in base]
+                success = dict(base[-1], event_id=4624,
+                               timestamp="2026-10-14T12:00:10Z", **{key: "unknown"})
+                self.assertEqual(mod.hunt(events + [success]), [])
+
     def test_bad_timestamp_and_event_id_types(self):
         self.assertEqual(mod.hunt([{"event_id": 4688, "timestamp": 1}, {"event_id": "x"}, {"timestamp": None}]), [])
     def test_reject_nonobject(self):
