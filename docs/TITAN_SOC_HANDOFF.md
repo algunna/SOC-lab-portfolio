@@ -207,3 +207,9 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - Both Windows 4688 and Sysmon Event 1 hunters share quote-aware host-flag parsing and stop at explicit Command/File boundaries. Curated 14-case disagreements reduced from 9 to 0 per detector.
 - Review [scope and limitations](POWERSHELL_DETECTION_TUNING.md), particularly command-body/nested execution coverage, native argv assumptions and version differences. No maliciousness or production accuracy claim.
 - Home-PC Splunk and independent review remain pending.
+
+## ATLAS — Authentication detector tuning
+
+- Generic text detection now uses an inclusive five-minute window and source/account/event scope; both text and Windows detectors reset on every matching success. Four reproduced false-alert cases are fixed.
+- Review [policy and remaining limitations](AUTHENTICATION_DETECTION_TUNING.md), especially duplicate source records, equal-time ordering, tenant namespaces and lost cross-account spray coverage.
+- Live Splunk and independent security review remain pending.

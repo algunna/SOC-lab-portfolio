@@ -4,6 +4,8 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Fixed authentication burst false leads from stale failures, unrelated accounts, repeated successes and below-threshold intervening successes; added scoped five-minute text-log correlation and adversarial sequence tests.
+
 - Fixed quote-related misses and command/script-argument false indicators in both PowerShell hunters using a shared host-flag heuristic and a 14-case regression matrix.
 
 - Added live Splunk acceptance preparation: eleven pending evidence checkpoints, an offline checklist validator that never certifies readiness, and a home-PC runbook identifying the missing real collector and review gates.

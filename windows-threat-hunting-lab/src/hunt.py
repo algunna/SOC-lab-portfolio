@@ -62,8 +62,10 @@ def hunt(events):
             failures[key] = [t for t in failures[key] if timedelta(0) <= now - t <= timedelta(minutes=5)]
             if eid == 4625:
                 failures[key].append(now)
-            elif len(failures[key]) >= 5:
-                findings.append(dict(rule="success_after_failures", severity="high", host=host, user=user, source_ip=source_ip, timestamp=ts, evidence=[f"{len(failures[key])} failures in 5 minutes"], attack="T1110"))
+            else:
+                if len(failures[key]) >= 5:
+                    findings.append(dict(rule="success_after_failures", severity="high", host=host, user=user, source_ip=source_ip, timestamp=ts, evidence=[f"{len(failures[key])} failures in 5 minutes"], attack="T1110"))
+                # A success below threshold also ends this consecutive sequence.
                 failures[key].clear()
     return findings
 
