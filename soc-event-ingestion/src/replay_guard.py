@@ -9,6 +9,7 @@ import importlib.util
 import json
 import os
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -81,7 +82,6 @@ def process(report, db, *, write_output):
     db.execute("BEGIN IMMEDIATE")
     cleanup = None
     try:
-        db.executescript(SCHEMA) if False else None  # schema created by caller
         added, replayed = [], []
         staged = []
         for alert in alerts:
@@ -139,7 +139,7 @@ def run(report, state_path, output_path):
             os.fsync(handle.fileno())
         return lambda: output_path.unlink(missing_ok=True)
     try:
-        with sqlite3.connect(state_path, timeout=5, isolation_level=None) as db:
+        with closing(sqlite3.connect(state_path, timeout=5, isolation_level=None)) as db:
             db.execute("BEGIN IMMEDIATE")
             db.executescript(SCHEMA)
             db.commit()
