@@ -176,7 +176,9 @@ def verified_reports(directory):
     health = read_json(payloads["health.json"])
     if not isinstance(ingestion, dict) or not isinstance(correlation, dict):
         raise ValueError("Malformed batch reports")
-    if (ingestion.get("counts", {}).get("accepted") != health["counts"]["accepted"] or
+    if not isinstance(ingestion.get("counts"), dict) or not isinstance(correlation.get("counts"), dict):
+        raise ValueError("Invalid batch report counters")
+    if (ingestion["counts"].get("accepted") != health["counts"]["accepted"] or
         ingestion.get("counts", {}).get("rejected") != 0 or
         ingestion.get("counts", {}).get("duplicates") != health["counts"]["duplicates"] or
         correlation.get("counts", {}).get("candidates") != health["counts"]["candidates"] or
