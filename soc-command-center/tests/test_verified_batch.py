@@ -44,6 +44,20 @@ class SealedDashboardTests(unittest.TestCase):
         self.assertEqual(adapter.build(a, c)["alerts"][0]["event_id"], SAMPLE["event_id"])
         self.assertEqual(len(c["incident_candidates"]), 1)
 
+    def test_forged_correlator_severity_and_refreshed_hash_refused(self):
+        corr = self.batch / "correlation.json"
+        doc = json.loads(corr.read_text())
+        doc["incident_candidates"][0]["highest_severity"] = "critical"
+        corr.write_text(json.dumps(doc))
+        manifest = self.batch / "integrity.json"
+        marker = json.loads(manifest.read_text())
+        marker["files"] = integrity.fingerprints(self.batch, integrity.FILE_SETS["passed"])
+        manifest.write_text(json.dumps(marker))
+        dest = self.folder / "forged.json"
+        result = self.run_adapter("--batch-dir", self.batch, "--out", dest)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse(dest.exists())
+
     def test_cli_sealed_pipeline_success(self):
         output = self.folder / "dashboard.json"
         result = self.run_adapter("--batch-dir", self.batch, "--out", output)
