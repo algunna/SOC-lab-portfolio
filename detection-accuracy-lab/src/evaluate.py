@@ -67,7 +67,8 @@ def load_matrix(raw):
         if (not isinstance(case, dict) or
             set(case) != {"id", "detector", "events", "expected_rules", "reason"} or
             not isinstance(case["id"], str) or not SAFE_ID.fullmatch(case["id"]) or
-            case["id"] in ids or case["detector"] not in RULES or
+            case["id"] in ids or not isinstance(case["detector"], str) or
+            case["detector"] not in RULES or
             not isinstance(case["reason"], str) or not 1 <= len(case["reason"]) <= 250 or
             not isinstance(case["events"], list) or
             not 1 <= len(case["events"]) <= MAX_EVENTS_PER_SCENARIO or
