@@ -24,3 +24,7 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Synthetic detection accuracy review
 
 - [Detection-policy confusion matrix lab](../detection-accuracy-lab/README.md) — 32 labeled synthetic Windows/CloudTrail scenarios, including benign administrative controls; no live accuracy claims.
+
+## Pipeline 13.0 integration
+
+- [Synthetic Windows/CloudTrail detector to SOC event bridge](../detection-accuracy-lab/README.md) — reviewed offline findings become contract-valid, synthetically referenced alerts for the sealed Command Center path; no live event feed or authenticated evidence.
