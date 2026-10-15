@@ -44,3 +44,21 @@ The adapter revalidates normalized alerts and verifies candidate alert reference
 
 
 For a fully synthetic demonstration, run ingestion, correlation, explicit test-only case approval (`soc-case-promotion/src/promote.py --approve`), then run this adapter with the resulting database. The CI workflow verifies that sequence and checks that reading leaves the SQLite file unchanged.
+
+## Offline batch-health observability (Reliability 3.0)
+
+The optional `health_dashboard.py` is a **separate read-only local view** of the sanitized `health.json` produced by the [offline batch-health gate](../soc-event-ingestion/README.md). Create at least two synthetic batch outputs (one healthy, one intentionally quarantined), then start the dashboard from the repository root:
+
+```bash
+python soc-command-center/src/health_dashboard.py --runs /tmp/soc-healthy-batch /tmp/soc-quarantined-batch --port 8766
+```
+
+Open `http://127.0.0.1:8766/` on the same PC; Ctrl+C stops the server. On Windows, substitute your own local temporary batch directories. Order of `--runs` arguments controls the displayed `Run 1`, `Run 2`, etc.
+
+The static snapshot shows counts for runs, passed, blocked, accepted, rejected, duplicates and unverified candidates plus a table of each run's status, stage and counts. It does **not** automatically monitor directories, refresh, retry, diagnose causes, correlate recovery runs, or access live Splunk.
+
+**Privacy and access boundaries:** Only explicitly supplied `health.json` files are opened. Source paths and batch directory names are never displayed or included in the HTML. No `quarantine.json`, `ingestion.json`, case data, raw logs or credential files are read. Exactly the known version, mode, status, stage and nonnegative bounded integer count keys are permitted. Unknown keys, inconsistent status/counts, overly large files, symlinked input directories or health files, duplicate runs and malformed JSON fail closed. Each health report is limited to 4 KiB and at most 30 reports may be compared.
+
+The HTTP server reuses the original loopback/Host-validation and restrictive security-header implementation; it has **no write routes**. File reads are a one-time snapshot at launch. The health data and counts are supplied by local synthetic batch runs, not independently authenticated evidence. Filesystem aliasing and time-of-check/time-of-use races remain out of production scope. Never expose the service to the Internet, or include protected/real workplace data in the test files.
+
+A later passed run is **not** shown as recovery of a previous blocked run unless a future trusted run-linkage model is designed. Blocked batch `accepted` counts can represent validated input that was **not published** to the correlation output; interpret accordingly.
