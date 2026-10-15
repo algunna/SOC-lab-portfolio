@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added opt-in offline SOC batch health reporting, metadata-only quarantine and explicit manual recovery controls, plus end-to-end regression tests (PR pending). Does not connect to live Splunk or automatically retry.
+
+
 - Added opt-in SQLite replay guard for synthetic normalized SOC ingestion reports, fail-closed conflict detection, transactional state updates and regression tests (PR pending). Not a live SIEM or exactly-once transport.
 
 
