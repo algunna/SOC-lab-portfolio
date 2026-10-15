@@ -121,8 +121,12 @@ def seal(directory, status):
     return payload
 
 
-def verify(directory):
-    """Read-only verification; returns metadata counts, never raw event contents."""
+def verified_payloads(directory):
+    """Verify a sealed batch and return the exact verified bytes.
+
+    Caller must consume these returned bytes, NOT reopen the report paths;
+    a separate verification then file read would introduce a TOCTOU window.
+    """
     directory = Path(directory)
     names = files_present(directory)
     if "integrity.json" not in names:
@@ -144,16 +148,48 @@ def verify(directory):
             type(value["bytes"]) is not int or not 0 <= value["bytes"] <= MAX_SIZE[name] or
             type(value["sha256"]) is not str or HEX_SHA.fullmatch(value["sha256"]) is None):
             raise ValueError("Invalid file digest metadata")
-    actual = fingerprints(directory, expected)
-    if actual != files:
-        raise ValueError("Batch artifact contents or sizes changed")
-    health = read_json(read_regular(directory / "health.json", MAX_SIZE["health.json"]))
+    payloads = {}
+    for name in sorted(expected):
+        raw = read_regular(directory / name, MAX_SIZE[name])
+        actual = {"bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}
+        if actual != files[name]:
+            raise ValueError("Batch artifact contents or sizes changed")
+        payloads[name] = raw
+    health = read_json(payloads["health.json"])
     status = validate_health(health)
     if status != marker["status"]:
         raise ValueError("Health status does not match integrity marker")
-    return {"integrity": "verified_local_hashes", "status": status,
-            "artifact_count": len(expected), "mode": "offline_training"}
+    return status, payloads
 
+
+def verified_reports(directory):
+    """Load the exact verified JSON objects for a successful offline batch.
+
+    A blocked batch can have an authenticated-looking local hash marker but is
+    deliberately not allowed to feed downstream SOC investigations.
+    """
+    status, payloads = verified_payloads(directory)
+    if status != "passed":
+        raise ValueError("Blocked batches are not approved for downstream use")
+    ingestion = read_json(payloads["ingestion.json"])
+    correlation = read_json(payloads["correlation.json"])
+    health = read_json(payloads["health.json"])
+    if not isinstance(ingestion, dict) or not isinstance(correlation, dict):
+        raise ValueError("Malformed batch reports")
+    if (ingestion.get("counts", {}).get("accepted") != health["counts"]["accepted"] or
+        ingestion.get("counts", {}).get("rejected") != 0 or
+        ingestion.get("counts", {}).get("duplicates") != health["counts"]["duplicates"] or
+        correlation.get("counts", {}).get("candidates") != health["counts"]["candidates"] or
+        correlation.get("counts", {}).get("alerts") != health["counts"]["accepted"]):
+        raise ValueError("Batch counters do not match sealed reports")
+    return ingestion, correlation
+
+
+def verify(directory):
+    """Read-only verification; returns metadata counts, never raw event contents."""
+    status, payloads = verified_payloads(directory)
+    return {"integrity": "verified_local_hashes", "status": status,
+            "artifact_count": len(payloads), "mode": "offline_training"}
 
 def main():
     parser = argparse.ArgumentParser(description="Read-only verification of offline SOC batch completeness and hashes")
