@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added 32 labeled synthetic Windows/CloudTrail detection-policy scenarios, per-rule scenario confusion matrices, and missing-identity Windows authentication correlation safeguards (PR pending). No real-world accuracy claimed.
+
+
 - Added 12 fixed synthetic Splunk live-readiness scenarios, a no-network end-to-end rehearsal using sealed offline SOC batches, and proposed field mappings with explicit unverified prerequisites (PR pending).
 
 
