@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added offline synthetic source namespace and clock-preflight design for Windows and CloudTrail fixtures, with collision, UTC offset, delayed/future clock, privacy, and event-contract compatibility tests (PR pending).
+
+
 - Hardened optional offline SQLite replay tracking to permanently bind alternate event IDs to existing observation identities, migrate legacy databases, and reject conflicting alias reuse. Synthetic detector evidence references now include a fixture-content change fingerprint; negative and end-to-end tests added (PR pending).
 
 
