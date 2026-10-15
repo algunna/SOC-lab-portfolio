@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added optional sealed batch consumption in the offline SOC Command Center adapter, validating completion and using exactly the verified report bytes; rejects altered/blocked/incomplete batch inputs (PR pending).
+
+
 - Added bounded SHA-256 artifact verification and a final completion marker for successful and quarantined offline batch-health runs; rejects partial or altered output directories (PR pending). Not a digital signature or durable transaction.
 
 
