@@ -21,3 +21,19 @@ Deduplication uses the tuple (`source.system`, `source.record_id`, `rule_id`) wi
 ## Boundaries
 
 The Titans are reviewing current detectors; **this lab does not import or modify CloudTrail, Windows, authentication, or AI SOC Copilot detection modules**. No claims are made about live ingestion, reliable production deduplication, accurate detections, or correlation.
+
+## Optional cross-run replay protection (offline lab)
+
+The default `ingest.py` still performs **in-run** deduplication only. For a trusted, sanitized offline batch, explicitly run the new opt-in SQLite replay guard *after ingestion and before correlation*:
+
+```bash
+python soc-event-ingestion/src/ingest.py soc-event-contract/examples/windows_alert.json --out /tmp/ingested.json
+python soc-event-ingestion/src/replay_guard.py --ingestion /tmp/ingested.json --state-db /tmp/soc-replay-state.db --out /tmp/filtered-run1.json
+python soc-incident-correlation/src/correlate.py /tmp/filtered-run1.json --out /tmp/candidates1.json
+```
+
+For a later import, supply a newly generated ingestion report to the same `--state-db` and a **new** output filename. Repeated observations are omitted from `accepted` and counted as `persistent_replay` duplicates. Reuse of a source/event ID for different content, or a changed payload for an already seen record and rule, fails the whole batch without adding the conflicting observations to SQLite. No file is overwritten.
+
+The state contains hashed observation identifiers, hashed event identifiers and canonical alert payload hashes, **not raw log bodies or notes**. Hashes are not anonymization; protect the database and derived reports. The new report retains the existing ingestion report shape so correlation can consume its `accepted` observations, and includes a `replay_guard` count.
+
+**Limits:** This is an *offline, opt-in training safeguard*, not live streaming, durable queueing, alert attestation, exactly-once delivery, cryptographic authentication or production persistence. A process crash between the output file and database commit, manual removal of an output file, or a maliciously altered SQLite state can still cause loss, replay or inconsistency. Use trusted directories, keep files private, and do not attach live or sensitive telemetry. It does not approve incidents, modify the detector modules, or contact Splunk.

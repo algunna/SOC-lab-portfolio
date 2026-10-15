@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added opt-in SQLite replay guard for synthetic normalized SOC ingestion reports, fail-closed conflict detection, transactional state updates and regression tests (PR pending). Not a live SIEM or exactly-once transport.
+
+
 - Added a one-command synthetic SOC pipeline demo with separate opt-in analyst approval, artifact integrity checks, repeatable CI and home Splunk setup checkpoint (PR pending). No live SIEM operations.
 
 
