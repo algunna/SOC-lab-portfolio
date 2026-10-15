@@ -62,3 +62,19 @@ The static snapshot shows counts for runs, passed, blocked, accepted, rejected, 
 The HTTP server reuses the original loopback/Host-validation and restrictive security-header implementation; it has **no write routes**. File reads are a one-time snapshot at launch. The health data and counts are supplied by local synthetic batch runs, not independently authenticated evidence. Filesystem aliasing and time-of-check/time-of-use races remain out of production scope. Never expose the service to the Internet, or include protected/real workplace data in the test files.
 
 A later passed run is **not** shown as recovery of a previous blocked run unless a future trusted run-linkage model is designed. Blocked batch `accepted` counts can represent validated input that was **not published** to the correlation output; interpret accordingly.
+
+## Pipeline 9.0 — verified sealed-batch consumption
+
+For an offline batch produced by the [batch-health gate](../soc-event-ingestion/README.md), use `--batch-dir` to **require verification** before preparing the Command Center snapshot:
+
+```bash
+python soc-event-ingestion/src/batch_health.py soc-event-contract/examples/windows_alert.json --out-dir /tmp/verified-soc-batch
+python soc-command-center/src/adapter.py --batch-dir /tmp/verified-soc-batch --out /tmp/verified-soc-dashboard.json
+python soc-command-center/src/dashboard.py --data /tmp/verified-soc-dashboard.json
+```
+
+This mode checks the final completion marker, fixed expected files, byte lengths, SHA-256 digests and health/correlation/ingestion counts. It reads the **exact report bytes that passed verification**, rather than checking a path and subsequently reopening it. Blocked batches, incomplete or altered reports, malformed counters and output paths inside the sealed batch directory are refused. The dashboard output is always an explicitly separate, new file; no automatic case promotion occurs. Optional `--cases-db` still reads only existing SQLite case metadata.
+
+Existing `--ingestion ... --correlation ...` remains supported for **legacy trusted synthetic exercises**, but **does not verify sealed-batch provenance**. Do not use it as a substitute for the sealed mode when processing batch-health outputs. The two input styles cannot be combined.
+
+**Security caveat:** The manifest is unkeyed SHA-256 metadata, not a signature or externally authenticated chain of custody. Someone who can alter both reports and manifest may forge consistent hashes. This does not eliminate symlink-parent swaps, concurrent modification outside the open file window, or establish a durable message queue. It is not an authorization mechanism, real-time ingestion or live Splunk telemetry.
