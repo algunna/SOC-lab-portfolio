@@ -19,3 +19,9 @@ After confirmation, configure an authorized test index, least-privileged read-on
 Only after successful local authenticated connectivity should live field mapping, provenance checks, replay protection, refresh behavior and end-to-end validation begin. The synthetic demonstration can continue without the owner's PC: [SOC demo](../soc-demo/README.md).
 
 **To resume:** In ChatGPT say "I'm home, let's resume Splunk." Check installation first; do not claim a successful connection from offline CI.
+
+## Offline readiness work completed since checkpoint
+
+- [Pipeline 11.0 proposed Splunk field mapping and synthetic acceptance matrix](SPLUNK_FIELD_MAPPING_SPEC.md) describes test-event categories, strict mock saved-search result columns, positive/negative local scenarios, and gaps in actual source provenance and detector semantics.
+- Before connecting any live feed, rerun the matrix and inspect its sanitized summary. A green rehearsal does not confirm Splunk is installed or that any SPL detector works.
+- Owner is expected to resume the **installation/service and authorized count-only probe** at home; nothing requires a workplace computer or access to hospital telemetry.
