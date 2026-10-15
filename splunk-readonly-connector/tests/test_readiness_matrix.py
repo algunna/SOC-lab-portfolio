@@ -46,8 +46,9 @@ class ReadinessTests(unittest.TestCase):
 
     def test_rejection_does_not_leak_raw_secret(self):
         report = json.dumps(m.rehearse(FIXTURE.read_bytes()))
-        for leaked in ("SYNTHETIC_UNTRUSTED", "SYNTHETIC_DONT_EXPORT", "_raw", "password",
-                       "LAB-WS01", "123456789012"):
+        for leaked in ("SYNTHETIC_UNTRUSTED", "SYNTHETIC_DONT_EXPORT",
+                       "LAB-WS01", "123456789012", '"_raw":', '"password":',
+                       '"actor":', '"asset":'):
             self.assertNotIn(leaked, report)
 
     def test_wrong_expected_positive_count_fails_rehearsal(self):
