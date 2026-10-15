@@ -24,6 +24,11 @@ CREATE TABLE IF NOT EXISTS observed (
     event_key TEXT NOT NULL UNIQUE,
     payload_hash TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS event_aliases (
+    event_key TEXT PRIMARY KEY,
+    observation_key TEXT NOT NULL,
+    payload_hash TEXT NOT NULL
+);
 """
 MAX_ALERTS = 10000
 
@@ -87,7 +92,7 @@ def process(report, db, *, write_output):
         for alert in alerts:
             obs, event, fingerprint = keys(alert)
             previous_event = db.execute(
-                "SELECT observation_key, payload_hash FROM observed WHERE event_key=?", (event,)
+                "SELECT observation_key, payload_hash FROM event_aliases WHERE event_key=?", (event,)
             ).fetchone()
             previous_obs = db.execute(
                 "SELECT event_key, payload_hash FROM observed WHERE observation_key=?", (obs,)
@@ -96,13 +101,23 @@ def process(report, db, *, write_output):
                 raise ValueError("Conflicting reused source/event identity")
             if previous_obs and previous_obs[1] != fingerprint:
                 raise ValueError("Conflicting previously observed record and rule")
+            # Remember EVERY accepted alias, even when it is a replay. Otherwise
+            # a re-exported event ID could later be attached to a new record.
+            staged.append((obs, event, fingerprint))
             if previous_event or previous_obs:
                 replayed.append({"event_id": alert["event_id"], "reason": "persistent_replay"})
                 continue
-            staged.append((obs, event, fingerprint))
             added.append(alert)
-        for entry in staged:
-            db.execute("INSERT INTO observed(observation_key,event_key,payload_hash) VALUES (?,?,?)", entry)
+        for obs, event, fingerprint in staged:
+            if not db.execute(
+                "SELECT 1 FROM observed WHERE observation_key=?", (obs,)
+            ).fetchone():
+                db.execute(
+                    "INSERT INTO observed(observation_key,event_key,payload_hash) VALUES (?,?,?)",
+                    (obs, event, fingerprint))
+            db.execute(
+                "INSERT OR IGNORE INTO event_aliases(event_key,observation_key,payload_hash) VALUES (?,?,?)",
+                (event, obs, fingerprint))
         out = {
             "schema_version": "1.0", "accepted": added, "rejected": [],
             "duplicates": prev_duplicates + replayed,
@@ -146,6 +161,21 @@ def run(report, state_path, output_path):
         with closing(sqlite3.connect(state_path, timeout=5, isolation_level=None)) as db:
             db.execute("BEGIN IMMEDIATE")
             db.executescript(SCHEMA)
+            # Seed the alias ledger from pre-upgrade state. Legacy primary event
+            # keys remain permanently bound to their original observation.
+            db.execute("BEGIN IMMEDIATE")
+            db.execute(
+                "INSERT OR IGNORE INTO event_aliases(event_key,observation_key,payload_hash) "
+                "SELECT event_key,observation_key,payload_hash FROM observed"
+            )
+            conflicts = db.execute(
+                "SELECT COUNT(*) FROM observed AS o JOIN event_aliases AS a "
+                "ON o.event_key = a.event_key "
+                "WHERE o.observation_key != a.observation_key OR o.payload_hash != a.payload_hash"
+            ).fetchone()[0]
+            if conflicts:
+                db.rollback()
+                raise ValueError("Replay alias database conflicts with original observations")
             db.commit()
             return process(report, db, write_output=write_output)
     except Exception:
