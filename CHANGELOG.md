@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added an offline synthetic-only source-identity-to-informational-alert bridge with evidence-reference matching, deterministic lab event IDs, fail-closed validation and sealed Command Center CI integration (PR pending).
+
+
 - Added offline synthetic source namespace and clock-preflight design for Windows and CloudTrail fixtures, with collision, UTC offset, delayed/future clock, privacy, and event-contract compatibility tests (PR pending).
 
 

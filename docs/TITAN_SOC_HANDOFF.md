@@ -163,9 +163,16 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - The synthetic detector bridge keeps its stable fixture/rule alert IDs but includes a scenario-input SHA-256 hint in `synthetic-fixture:` evidence references. This catches source-input changes that still produce identical detector rule results. No authenticated original EventRecordID or CloudTrail eventID is represented.
 - Review: atomic DB migration behavior, alias table index growth, delayed/reordered batches, rollback under real disk failure, unhashed metadata exposure elsewhere, source-event replay namespaces, source digest privacy/dictionary attacks, and lack of durable delivery confirmation. Live Splunk remains deferred.
 
-## ATLAS — Pipeline 15.0 controlled source identity design (PR pending)
+## ATLAS — Pipeline 15.0 controlled source identity design (PR #42, merged)
 
 - `controlled-telemetry-lab/src/source_identity.py` validates **synthetic only** source-scoped Windows host/channel/log_epoch/record number or AWS account/region/eventID and rejects ambiguous or malformed fields. `log_epoch` is lab-generated, not a real Windows field.
 - Produces stable opaque `lab-src-` record identifiers, `synthetic-source:` reference hashes and offset-normalized UTC dates. Clock-review labels distinguish delayed arrivals and future timestamps without declaring malicious behavior.
 - CI tests repeated record numbers after a Windows log reset, host/account namespace separation, duplicate collisions, invalid date/times, unknown fields, privacy and contract compatibility. No device authentication, Splunk REST queries, token exchange, real detection output or case creation.
 - Independent VORTEX/Titan review and local Splunk service check remain pending. The synthetic hashing layer is not an authenticated chain of custody.
+
+## ATLAS — Pipeline 16.0 synthetic source-to-alert handoff (PR pending)
+
+- Added `controlled-telemetry-lab/src/to_soc_alerts.py` to turn strictly scoped synthetic source preflight outputs into **informational observation alerts**, using a code-owned fixed lab rule, `labobs-` event IDs and matching `synthetic-source:` references.
+- The bridge fails closed on ambiguous source IDs, incomplete log generations, malformed times, unexpected source fields or conflicting evidence references; it never accepts client-supplied severity, detector rule, actor, asset or provenance claims.
+- CI exercises six synthetic observations through the existing sealed batch-health and read-only Command Center pipeline, producing only six unverified informational candidates and no case creation. Timestamp changes retain stable source IDs for future replay conflict analysis.
+- Reviewer warning: event identity remains entirely synthetic/unauthenticated; fixed informational rule is **not a security detection**. Real source-to-detector linkage, attested Splunk event IDs and collector authentication must be designed and tested after the owner's home-PC checkpoint.
