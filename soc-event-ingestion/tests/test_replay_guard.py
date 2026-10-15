@@ -127,6 +127,20 @@ class ReplayGuardTests(unittest.TestCase):
         self.assertEqual(output.read_text(encoding="utf-8"), "keep")
         self.assertFalse(self.db.exists())
 
+    def test_state_output_same_path_refused(self):
+        with self.assertRaisesRegex(ValueError, "distinct"):
+            guard.run(report(SAMPLE), self.db, self.db)
+        self.assertFalse(self.db.exists())
+
+    def test_symlink_state_refused(self):
+        target = self.root / "target.db"
+        target.write_bytes(b"do not touch")
+        state_link = self.root / "linked.db"
+        state_link.symlink_to(target)
+        with self.assertRaisesRegex(ValueError, "symbolic link"):
+            guard.run(report(SAMPLE), state_link, self.root / "output.json")
+        self.assertEqual(target.read_bytes(), b"do not touch")
+
     def test_output_failure_rolls_back_database_insert(self):
         with sqlite3.connect(":memory:", isolation_level=None) as db:
             db.executescript(guard.SCHEMA)
