@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Audited Pipeline 10.0 sealed batch semantics; reject rehashed but altered candidate identity/severity/evidence/grouping by independently recomputing correlation from validated accepted alerts. Added negative tests and a live Splunk acceptance gate document (PR pending).
+
+
 - Added optional sealed batch consumption in the offline SOC Command Center adapter, validating completion and using exactly the verified report bytes; rejects altered/blocked/incomplete batch inputs (PR pending).
 
 
