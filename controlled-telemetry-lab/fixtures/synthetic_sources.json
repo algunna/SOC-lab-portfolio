@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "scope": "synthetic_only",
+  "records": [
+    {
+      "kind": "windows",
+      "namespace": {
+        "host": "LAB-WS01",
+        "channel": "Security",
+        "log_epoch": "11111111-1111-4111-8111-111111111111",
+        "record_id": "1007"
+      },
+      "occurred_at": "2026-10-14T12:00:00Z",
+      "received_at": "2026-10-14T08:01:00-04:00"
+    },
+    {
+      "kind": "windows",
+      "namespace": {
+        "host": "LAB-WS01",
+        "channel": "Security",
+        "log_epoch": "22222222-2222-4222-8222-222222222222",
+        "record_id": "1007"
+      },
+      "occurred_at": "2026-10-14T12:00:01Z",
+      "received_at": "2026-10-14T12:00:31Z"
+    },
+    {
+      "kind": "windows",
+      "namespace": {
+        "host": "LAB-WS02",
+        "channel": "Security",
+        "log_epoch": "11111111-1111-4111-8111-111111111111",
+        "record_id": "1007"
+      },
+      "occurred_at": "2026-10-14T12:00:00Z",
+      "received_at": "2026-10-14T12:00:30Z"
+    },
+    {
+      "kind": "cloudtrail",
+      "namespace": {
+        "account_id": "123456789012",
+        "region": "us-east-1",
+        "event_id": "33333333-3333-4333-8333-333333333333"
+      },
+      "occurred_at": "2026-10-14T12:00:00Z",
+      "received_at": "2026-10-14T12:50:00Z"
+    },
+    {
+      "kind": "cloudtrail",
+      "namespace": {
+        "account_id": "210987654321",
+        "region": "us-east-1",
+        "event_id": "33333333-3333-4333-8333-333333333333"
+      },
+      "occurred_at": "2026-10-14T12:00:00+00:00",
+      "received_at": "2026-10-14T12:02:00Z"
+    },
+    {
+      "kind": "windows",
+      "namespace": {
+        "host": "LAB-WS03",
+        "channel": "Sysmon",
+        "log_epoch": "44444444-4444-4444-8444-444444444444",
+        "record_id": "37"
+      },
+      "occurred_at": "2026-10-14T13:00:00+01:00",
+      "received_at": "2026-10-14T11:50:00Z"
+    }
+  ]
+}
