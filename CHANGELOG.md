@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added a one-command synthetic SOC pipeline demo with separate opt-in analyst approval, artifact integrity checks, repeatable CI and home Splunk setup checkpoint (PR pending). No live SIEM operations.
+
+
 - Added allowlisted offline Splunk synthetic saved-search alert normalization into SOC Event Contract v1, with adversarial tests and an integration path to the read-only Command Center (PR pending). Live Splunk feed and raw event mapping remain out of scope.
 
 
