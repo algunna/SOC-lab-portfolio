@@ -4,6 +4,9 @@ Notable portfolio changes are documented here. Entries describe **merged feature
 
 ## Unreleased
 
+- Added a synthetic-only Windows/CloudTrail finding-to-SOC alert bridge with deterministic lab IDs, fixed detection metadata, contract validation, sealed batch and read-only dashboard CI integration (PR pending).
+
+
 - Added 32 labeled synthetic Windows/CloudTrail detection-policy scenarios, per-rule scenario confusion matrices, and missing-identity Windows authentication correlation safeguards (PR pending). No real-world accuracy claimed.
 
 

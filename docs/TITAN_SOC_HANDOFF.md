@@ -142,9 +142,16 @@ ATLAS recommendation: review detections first, agree on schema adapter mapping, 
 - No API calls, no token, no unattended task, no raw event import or automatic incident promotion. The real Splunk installation and authorized probe are still pending at home.
 - Titan/VORTEX review: detector fidelity, timestamp identity namespaces, late-arriving events, relation to pre-classified saved-search results, provenance, replay behavior, and real SPL/field extraction test design.
 
-## ATLAS — Pipeline 12.0 synthetic detection policy assessment (PR pending)
+## ATLAS — Pipeline 12.0 synthetic detection policy assessment (PR #39, merged)
 
 - `detection-accuracy-lab/` runs 32 curated policy scenarios directly against the existing Windows and AWS CloudTrail offline hunters and emits confusion counts for eight rule classes; these are NOT production detector accuracy estimates.
 - Windows authentication correlation now skips records with missing/empty/unknown host, account or source IP to avoid joining unrelated audit gaps into a false positive success-after-failures finding. Dedicated detector and matrix regression tests added.
 - Review questions: alert vs compromise labeling, realistic administrator/service-account baselines, duplicated/missing log IDs, NAT/proxy source ambiguity, hidden/obfuscated commands, detection threshold choices, CloudTrail delays and missing events. **No independent VORTEX/Titan sign-off yet.**
 - Home Splunk installation and live telemetry evaluation are still pending.
+
+## ATLAS — Pipeline 13.0 synthetic detector-to-alert handoff (PR pending)
+
+- Added `detection-accuracy-lab/src/to_soc_alerts.py`, which runs the actual Windows and AWS offline hunters against fixed labeled **synthetic** scenarios and creates schema-validated SOC alerts using code-owned metadata.
+- No attempt to match raw records to outputs by guessing: stable alert and evidence IDs are derived from source fixture scenario, rule and repeated-finding index, explicitly labeled `lab-` / `synthetic-fixture:`. Real Windows EventRecordID, CloudTrail eventID and externally authenticated provenance are **not present**.
+- CI verifies alert-contract validation and an end-to-end synthetic run through batch-health ingestion, correlation, integrity manifest, semantic recheck and read-only Command Center with no case creation. Unexpected detector decisions and malformed metadata fail closed.
+- Reviewer priorities: stable ordering for multi-event findings, provenance, actor/host privacy, source identity collision across repeated exports, canonical timestamps, verified live detector logic and replay semantics. Home Splunk live check remains pending.
