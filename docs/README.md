@@ -32,3 +32,7 @@ Existing projects retain their own README files. Standards apply to new or modif
 ## Pipeline 15.0 source provenance design
 
 - [Controlled synthetic source identity lab](../controlled-telemetry-lab/README.md) — Windows log-epoch and CloudTrail account/region namespace mapping, offset-aware UTC normalization, collision tests and provenance limitations; no live telemetry authentication.
+
+## Pipeline 16.0 source-to-alert compatibility
+
+- [Synthetic identity-to-informational-alert handoff](../controlled-telemetry-lab/README.md) — validates source identity, creates contract-compatible informational observations, and verifies sealed ingestion/Command Center delivery without live source claims.
