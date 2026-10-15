@@ -124,6 +124,10 @@ def run(report, state_path, output_path):
     validate_report(report)
     state_path = Path(state_path)
     output_path = Path(output_path)
+    if state_path.resolve() == output_path.resolve():
+        raise ValueError("Replay state and output paths must be distinct")
+    if state_path.is_symlink():
+        raise ValueError("Replay database must not be a symbolic link")
     if output_path.exists() or output_path.is_symlink():
         raise FileExistsError("Refusing to overwrite output")
     state_path.parent.mkdir(parents=True, exist_ok=True)
